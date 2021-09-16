@@ -44,7 +44,7 @@ class ProfileFragment : Fragment() {
 
     private fun setupClickListeners(loginButton: View, signupButton: View) {
         loginButton.setOnClickListener {
-            findNavController().navigate(R.id.action_profile_to_login)
+            findNavController().navigate(R.id.action_profile_to_signin)
         }
 
         signupButton.setOnClickListener {

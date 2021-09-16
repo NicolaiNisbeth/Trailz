@@ -53,7 +53,6 @@ import com.example.trailz.ui.common.compose.invalidInput
 @Composable
 fun Login(
     onLoginSuccess: () -> Unit,
-    onSignUp: () -> Unit
 ) {
 
     var hasError by remember { mutableStateOf(false) }
@@ -62,7 +61,6 @@ fun Login(
     Login(
         hasError = hasError,
         loading = loading,
-        onSignUp = onSignUp,
         onLogin = { email, password ->
             if (invalidInput(email, password)) {
                 hasError = true
@@ -81,7 +79,6 @@ internal fun Login(
     hasError: Boolean,
     loading: Boolean,
     onLogin: (String, String) -> Unit,
-    onSignUp: () -> Unit
 ){
     val focusManager = LocalFocusManager.current
     var email by remember { mutableStateOf(TextFieldValue("")) }
@@ -181,22 +178,6 @@ internal fun Login(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-            }
-
-            item {
-                val primaryColor = MaterialTheme.colors.primary
-                val annotatedString = remember { AnnotatedString.Builder("Don't have an account? Register")
-                    .apply {
-                        addStyle(SpanStyle(color = primaryColor), 23, 31)
-                    }
-                }
-                Text(
-                    text = annotatedString.toAnnotatedString(),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(onClick = onSignUp)
-                )
             }
         }
     }
