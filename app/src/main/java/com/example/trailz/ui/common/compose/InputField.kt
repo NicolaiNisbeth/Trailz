@@ -17,8 +17,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 
 @Composable
 fun InputFiled(
-    value: TextFieldValue,
-    onValueChange: (TextFieldValue) -> Unit,
+    value: String,
+    onValueChange: (String) -> Unit,
     label: String,
     placeholder: String,
     contentDescription: String,

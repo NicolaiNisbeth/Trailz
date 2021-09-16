@@ -31,89 +31,95 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.trailz.ui.common.compose.InputFiled
-import com.example.trailz.ui.common.compose.invalidInput
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import android.annotation.SuppressLint
 import com.google.android.material.animation.AnimationUtils
 import androidx.compose.material.icons.filled.FlutterDash
-import androidx.compose.material.icons.filled.Paid
-import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.google.accompanist.pager.PagerState
 import kotlin.math.absoluteValue
 import com.google.accompanist.pager.calculateCurrentOffsetForPage
-
-data class UserCredential(
-    val username: String,
-    val email: String,
-    val password: String,
-    val studyPath: String,
-)
+import kotlinx.coroutines.flow.collect
 
 @ExperimentalPagerApi
 @Composable
 fun Signup(
+    viewModel: SignupViewModel,
     onSignupSuccess: () -> Unit,
 ) {
 
-    var hasError by remember { mutableStateOf(false) }
-    var loading by remember { mutableStateOf(false) }
-    val studyPaths = listOf(
-        "Softwareteknologi" to rememberVectorPainter(image = Icons.Default.FlutterDash),
-        "Produktion" to rememberVectorPainter(image = Icons.Default.Psychology),
-        "Elektroteknologi" to rememberVectorPainter(image = Icons.Default.Paid),
+    val hasError by viewModel.error.observeAsState(initial = false)
+    val isLoading by viewModel.loading.observeAsState(initial = false)
+    val isSignupSuccess by viewModel.signupSuccess.observeAsState(initial = false)
+    val username by viewModel.username.observeAsState(initial = "")
+    val email by viewModel.email.observeAsState(initial = "")
+    val password by viewModel.password.observeAsState(initial = "")
+    val studyPath by viewModel.studyPath.observeAsState(initial = "Softwareteknologi")
+    val studyPaths by viewModel.studyPaths.observeAsState(initial = emptyList())
+
+    val pagerState = rememberPagerState(
+        pageCount = studyPaths.count(),
+        initialOffscreenLimit = 2,
+        infiniteLoop = true,
+        initialPage = studyPaths
+            .indexOfFirst { it == studyPath }
+            .takeUnless { it == -1 } ?: 0
     )
 
+    SideEffect { if (isSignupSuccess) onSignupSuccess() }
+
     Signup(
+        username = username,
+        email = email,
+        password = password,
         studyPaths = studyPaths,
+        pagerState = pagerState,
+        onUsernameChange = viewModel::changeUsername,
+        onEmailChange = viewModel::changeEmail,
+        onPasswordChange = viewModel::changePassword,
+        onStudyPathChange = viewModel::changeStudyPath,
         hasError = hasError,
-        loading = loading,
-        onSignup = { (_, email, password, _) ->
-            if (invalidInput(email, password)) {
-                hasError = true
-                loading = false
-            } else {
-                hasError = false
-                loading = true
-                onSignupSuccess()
-            }
-        }
+        isLoading = isLoading,
+        onSignup = viewModel::signup,
     )
 }
 
 @ExperimentalPagerApi
 @Composable
 internal fun Signup(
-    studyPaths: List<Pair<String, Painter>>,
+    username: String,
+    email: String,
+    password: String,
+    onUsernameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onStudyPathChange: (String) -> Unit,
+    pagerState: PagerState,
+    studyPaths: List<String>,
     hasError: Boolean,
-    loading: Boolean,
-    onSignup: (UserCredential) -> Unit,
+    isLoading: Boolean,
+    onSignup: () -> Unit,
 ){
     val focusManager = LocalFocusManager.current
-    var username by remember { mutableStateOf(TextFieldValue("")) }
-    var email by remember { mutableStateOf(TextFieldValue("")) }
-    var password by remember { mutableStateOf(TextFieldValue("")) }
     var passwordVisibility by remember { mutableStateOf(false) }
-    val pagerState = rememberPagerState(
-        pageCount = studyPaths.count(),
-        initialOffscreenLimit = 2,
-        infiniteLoop = true
-    )
 
     val (passwordIcon, passwordTransformation) = if (passwordVisibility){
         Icons.Filled.Visibility to VisualTransformation.None
@@ -124,7 +130,7 @@ internal fun Signup(
     Scaffold {
         LazyColumn(
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
@@ -141,23 +147,9 @@ internal fun Signup(
             }
 
             item {
-                HorizontalPager(
-                    modifier = Modifier.fillMaxWidth(),
-                    state = pagerState,
-                ) { page ->
-                    PagerItem(
-                        modifier = Modifier.height(150.dp).fillMaxWidth(0.5f),
-                        item = studyPaths[page],
-                        pageOffset = calculateCurrentOffsetForPage(page).absoluteValue
-
-                    )
-                }
-            }
-
-            item {
                 InputFiled(
                     value = username,
-                    onValueChange = { username = it},
+                    onValueChange = onUsernameChange,
                     label = "Username",
                     placeholder = "abc",
                     contentDescription = "Username",
@@ -172,7 +164,7 @@ internal fun Signup(
 
                 InputFiled(
                     value = email,
-                    onValueChange = { email = it},
+                    onValueChange = onEmailChange,
                     label = "Email address",
                     placeholder = "abc@gmail.com",
                     contentDescription = "Email address",
@@ -187,7 +179,7 @@ internal fun Signup(
 
                 InputFiled(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = onPasswordChange,
                     label = "password",
                     placeholder = "qwert12345",
                     contentDescription = "password",
@@ -200,16 +192,32 @@ internal fun Signup(
                     onTrailingIconClicked = { passwordVisibility = !passwordVisibility },
                     keyboardActions = KeyboardActions(onDone = {
                         focusManager.clearFocus()
-                        onSignup(
-                            UserCredential(
-                                username = username.text,
-                                email = username.text,
-                                password = username.text,
-                                studyPath = ""
-                            )
-                        )
+                        onSignup()
                     })
                 )
+            }
+
+            item {
+                HorizontalPager(
+                    modifier = Modifier.fillMaxWidth(),
+                    state = pagerState.apply {
+                        // listen on page changes
+                        LaunchedEffect(this) {
+                            snapshotFlow { currentPage }.collect { index ->
+                                onStudyPathChange(studyPaths[index])
+                            }
+                        }
+                    },
+                ) { page ->
+                    PagerItem(
+                        modifier = Modifier
+                            .height(150.dp)
+                            .fillMaxWidth(0.5f),
+                        item = studyPaths[page],
+                        pageOffset = calculateCurrentOffsetForPage(page).absoluteValue
+
+                    )
+                }
             }
 
             item {
@@ -219,18 +227,9 @@ internal fun Signup(
                         .animateContentSize(tween())
                         .height(50.dp)
                         .clip(CircleShape),
-                    onClick = {
-                        onSignup(
-                            UserCredential(
-                                username = username.text,
-                                email = username.text,
-                                password = username.text,
-                                studyPath = ""
-                            )
-                        )
-                    },
+                    onClick = onSignup
                 ) {
-                    Text(text = if (loading) "Loading..." else "Sign up")
+                    Text(text = if (isLoading) "Loading..." else "Sign up")
                 }
             }
         }
@@ -241,10 +240,9 @@ internal fun Signup(
 @Composable
 internal fun PagerItem(
     modifier: Modifier,
-    item: Pair<String, Painter>,
+    item: String,
     pageOffset: Float
 ) {
-    val (title, icon) = item
     Card(
         elevation = 0.dp,
         modifier = modifier
@@ -259,7 +257,6 @@ internal fun PagerItem(
                         scaleY = scale
                     }
 
-                // We animate the alpha, between 50% and 100%
                 alpha = AnimationUtils.lerp(
                     0.5f,
                     1f,
@@ -274,12 +271,12 @@ internal fun PagerItem(
         ) {
             Icon(
                 modifier = Modifier.fillMaxSize(0.8f),
-                painter = icon,
+                painter = rememberVectorPainter(image = Icons.Default.FlutterDash),
                 contentDescription = "study path image"
             )
             Text(
                 modifier = Modifier,
-                text = title,
+                text = item,
                 style = MaterialTheme.typography.subtitle1.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.Center,
             )

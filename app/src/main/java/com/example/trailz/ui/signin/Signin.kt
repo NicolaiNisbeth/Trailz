@@ -112,8 +112,8 @@ internal fun Login(
 
             item {
                 InputFiled(
-                    value = email,
-                    onValueChange = { email = it},
+                    value = email.text,
+                    onValueChange = { email = TextFieldValue(it)},
                     label = "Email address",
                     placeholder = "abc@gmail.com",
                     contentDescription = "Email address",
@@ -127,8 +127,8 @@ internal fun Login(
                 )
 
                 InputFiled(
-                    value = password,
-                    onValueChange = { password = it },
+                    value = password.text,
+                    onValueChange = { password = TextFieldValue(it) },
                     label = "password",
                     placeholder = "qwert12345",
                     contentDescription = "password",
