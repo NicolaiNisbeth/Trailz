@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/signin_navigation"
+    app:startDestination="@id/signinFragment"
+    >
+
+    <include app:graph="@navigation/signup_navigation" />
+
+    <fragment
+        android:id="@+id/signinFragment"
+        android:name="com.example.trailz.ui.signin.SignInFragment">
+        <action
+            android:id="@+id/action_signin_to_signup"
+            app:destination="@id/signup_navigation" />
+
+    </fragment>
+
+</navigation>

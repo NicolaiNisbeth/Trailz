@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profile_navigation"
+    app:startDestination="@id/profileFragment">
+
+    <include app:graph="@navigation/signin_navigation" />
+    <include app:graph="@navigation/signup_navigation" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.trailz.ui.profile.ProfileFragment"
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_profile_to_login"
+            app:destination="@id/signin_navigation" />
+        <action
+            android:id="@+id/action_profile_to_signup"
+            app:destination="@id/signup_navigation" />
+    </fragment>
+
+</navigation>
