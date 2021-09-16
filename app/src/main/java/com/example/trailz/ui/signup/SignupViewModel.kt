@@ -84,7 +84,7 @@ class SignupViewModel @Inject constructor(
             val userId = createUserUseCase(User(username!!, email!!, password!!, studyPath!!))
             if (userId != null){
                 _signupSuccess.value = true
-                ActiveUser.id = userId
+                ActiveUser.setId(userId)
             }
             _loading.value = false
         }
