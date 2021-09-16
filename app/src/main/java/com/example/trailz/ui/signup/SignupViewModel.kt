@@ -4,9 +4,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SignupViewModel(
+@HiltViewModel
+class SignupViewModel @Inject constructor(
     private val createUserUseCase: CreateUserUseCase
 ) : ViewModel() {
 
@@ -78,7 +81,7 @@ class SignupViewModel(
         viewModelScope.launch {
             _loading.value = true
             val isCreated = createUserUseCase(User(username!!, email!!, password!!, studyPath!!))
-            _signupSuccess.value = isCreated
+            //_signupSuccess.value = isCreated
             _loading.value = false
         }
 

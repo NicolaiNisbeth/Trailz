@@ -1,11 +1,13 @@
 package com.example.trailz.ui.signup
 
 import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.*
 
 data class User(
     val username: String,
@@ -64,21 +66,31 @@ interface UserService {
     fun deleteUser(email: String): Boolean
 }
 
-class UserFirebase: UserService {
+class UserFirebase(
+    private val databaseReference: FirebaseDatabase
+): UserService {
 
-    private val database: DatabaseReference = Firebase.database.getReference("users")
+    val emailToKey: (String) -> String = {
+        it.replace("@", "trailz").replace(".", "trailz")
+    }
 
     override fun createUser(user: User): Boolean {
-        database.child(user.email).setValue(user)
+        databaseReference.getReference("users")
+            .child(emailToKey(user.email))
+            .setValue(user)
         return true
     }
 
     override fun getUser(email: String, listener: ValueEventListener) {
-        database.child(email).addListenerForSingleValueEvent(listener)
+        databaseReference.getReference("users")
+            .child(emailToKey(email))
+            .addListenerForSingleValueEvent(listener)
     }
 
     override fun deleteUser(email: String): Boolean {
-        database.child(email).setValue(null)
+        databaseReference.getReference("users")
+            .child(emailToKey(email))
+            .setValue(null)
         return true
     }
 
