@@ -41,7 +41,7 @@ class DeleteUserUseCase(
 }
 
 interface UserRepository {
-    fun createUser(user: User): Boolean
+    fun createUser(user: User): String?
     fun getUser(email: String, listener: ValueEventListener)
     fun deleteUser(email: String): Boolean
 }
@@ -61,7 +61,7 @@ class UserRepositoryImpl(
 }
 
 interface UserService {
-    fun createUser(user: User): Boolean
+    fun createUser(user: User): String?
     fun getUser(email: String, listener: ValueEventListener)
     fun deleteUser(email: String): Boolean
 }
@@ -70,26 +70,23 @@ class UserFirebase(
     private val databaseReference: FirebaseDatabase
 ): UserService {
 
-    val emailToKey: (String) -> String = {
-        it.replace("@", "trailz").replace(".", "trailz")
-    }
 
-    override fun createUser(user: User): Boolean {
-        databaseReference.getReference("users")
-            .child(emailToKey(user.email))
-            .setValue(user)
-        return true
+
+    override fun createUser(user: User): String? {
+        val key = databaseReference.getReference("users").push()
+        key.setValue(user)
+        return key.key
     }
 
     override fun getUser(email: String, listener: ValueEventListener) {
         databaseReference.getReference("users")
-            .child(emailToKey(email))
+            .child(email)
             .addListenerForSingleValueEvent(listener)
     }
 
     override fun deleteUser(email: String): Boolean {
         databaseReference.getReference("users")
-            .child(emailToKey(email))
+            .child(email)
             .setValue(null)
         return true
     }
