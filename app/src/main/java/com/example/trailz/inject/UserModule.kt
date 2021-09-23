@@ -1,6 +1,7 @@
 package com.example.trailz.inject
 
 import android.content.Context
+import com.example.trailz.ui.signup.BecomeUserUseCase
 import com.example.trailz.ui.signup.CreateUserUseCase
 import com.example.trailz.ui.signup.DeleteUserUseCase
 import com.example.trailz.ui.signup.GetUserUseCase
@@ -55,6 +56,12 @@ class UserModule {
     @ViewModelScoped
     fun provideDeleteUserUseCase(repository: UserRepository): DeleteUserUseCase {
         return DeleteUserUseCase(repository)
+    }
+
+    @Provides
+    @ViewModelScoped
+    fun provideBecomeUserUseCase(repository: UserRepository): BecomeUserUseCase {
+        return BecomeUserUseCase(repository)
     }
 
     @Provides
