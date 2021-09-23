@@ -6,5 +6,6 @@
     <string name="title_study_planner">Study Planner</string>
     <string name="login_title">Login</string>
     <string name="singup_title">Signup</string>
+    <string name="logout_title">Logout</string>
     <string name="alternative_title">Or use</string>
 </resources>

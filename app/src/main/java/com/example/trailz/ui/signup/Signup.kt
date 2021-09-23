@@ -65,7 +65,6 @@ fun Signup(
     viewModel: SignupViewModel,
     onSignupSuccess: () -> Unit,
 ) {
-
     val hasError by viewModel.error.observeAsState(initial = false)
     val isLoading by viewModel.loading.observeAsState(initial = false)
     val isSignupSuccess by viewModel.signupSuccess.observeAsState(initial = false)
@@ -98,7 +97,7 @@ fun Signup(
         onStudyPathChange = viewModel::changeStudyPath,
         hasError = hasError,
         isLoading = isLoading,
-        onSignup = viewModel::signup,
+        onSignup = { viewModel.signup() },
     )
 }
 
@@ -151,7 +150,6 @@ internal fun Signup(
                     value = username,
                     onValueChange = onUsernameChange,
                     label = "Username",
-                    placeholder = "abc",
                     contentDescription = "Username",
                     isError = hasError,
                     imeAction = ImeAction.Next,
@@ -166,11 +164,10 @@ internal fun Signup(
                     value = email,
                     onValueChange = onEmailChange,
                     label = "Email address",
-                    placeholder = "abc@gmail.com",
                     contentDescription = "Email address",
                     isError = hasError,
                     imeAction = ImeAction.Next,
-                    keyboardType = KeyboardType.Text,
+                    keyboardType = KeyboardType.Email,
                     leadingIcon = rememberVectorPainter(Icons.Default.Email),
                     keyboardActions = KeyboardActions(onNext = {
                         focusManager.moveFocus(FocusDirection.Down)
@@ -181,7 +178,6 @@ internal fun Signup(
                     value = password,
                     onValueChange = onPasswordChange,
                     label = "password",
-                    placeholder = "qwert12345",
                     contentDescription = "password",
                     isError = hasError,
                     imeAction = ImeAction.Done,

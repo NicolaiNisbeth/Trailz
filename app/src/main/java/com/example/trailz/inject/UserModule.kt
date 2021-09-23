@@ -1,5 +1,6 @@
 package com.example.trailz.inject
 
+import android.content.Context
 import com.example.trailz.ui.signup.CreateUserUseCase
 import com.example.trailz.ui.signup.DeleteUserUseCase
 import com.example.trailz.ui.signup.GetUserUseCase
@@ -12,6 +13,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ViewModelScoped
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -24,6 +26,12 @@ class AppModule{
     fun provideDatabaseReference(): FirebaseDatabase {
         return FirebaseDatabase
             .getInstance("https://trailz-4000f-default-rtdb.europe-west1.firebasedatabase.app/")
+    }
+
+    @Provides
+    @Singleton
+    fun provideSharedPref(@ApplicationContext appContext: Context): SharedPrefs {
+        return SharedPrefs(appContext)
     }
 }
 
