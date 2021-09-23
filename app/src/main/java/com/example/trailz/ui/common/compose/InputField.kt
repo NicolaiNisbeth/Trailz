@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 
 @Composable
@@ -20,7 +19,7 @@ fun InputFiled(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    placeholder: String,
+    placeholder: String? = null,
     contentDescription: String,
     maxLines: Int = 1,
     isError: Boolean,
@@ -36,7 +35,7 @@ fun InputFiled(
         value = value,
         onValueChange = onValueChange,
         label = { Text(text = label) },
-        placeholder = { Text(text = placeholder) },
+        placeholder = { if (placeholder != null) Text(text = placeholder) },
         maxLines = maxLines,
         isError = isError,
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = imeAction, keyboardType = keyboardType),

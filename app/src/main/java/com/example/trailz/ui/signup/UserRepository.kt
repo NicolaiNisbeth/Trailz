@@ -1,19 +1,15 @@
 package com.example.trailz.ui.signup
 
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.*
 
 data class User(
-    val username: String,
-    val email: String,
-    val password: String,
-    val studyPath: String
+    val username: String = "",
+    val email: String = "",
+    val password: String = "",
+    val studyPath: String = ""
 )
 
 class CreateUserUseCase(
@@ -27,7 +23,10 @@ class CreateUserUseCase(
 class GetUserUseCase(
     private val repository: UserRepository
 ){
-    suspend operator fun invoke(email: String, listener: ValueEventListener) = withContext(Dispatchers.IO){
+    suspend operator fun invoke(
+        email: String,
+        listener: ValueEventListener
+    ) = withContext(Dispatchers.IO){
         repository.getUser(email, listener)
     }
 }
@@ -69,8 +68,6 @@ interface UserService {
 class UserFirebase(
     private val databaseReference: FirebaseDatabase
 ): UserService {
-
-
 
     override fun createUser(user: User): String? {
         val key = databaseReference.getReference("users").push()

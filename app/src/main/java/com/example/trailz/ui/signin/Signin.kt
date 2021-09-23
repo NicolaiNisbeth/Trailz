@@ -115,11 +115,10 @@ internal fun Login(
                     value = email.text,
                     onValueChange = { email = TextFieldValue(it)},
                     label = "Email address",
-                    placeholder = "abc@gmail.com",
                     contentDescription = "Email address",
                     isError = hasError,
                     imeAction = ImeAction.Next,
-                    keyboardType = KeyboardType.Text,
+                    keyboardType = KeyboardType.Email,
                     leadingIcon = rememberVectorPainter(Icons.Default.Email),
                     keyboardActions = KeyboardActions(onNext = {
                         focusManager.moveFocus(FocusDirection.Down)
@@ -130,7 +129,6 @@ internal fun Login(
                     value = password.text,
                     onValueChange = { password = TextFieldValue(it) },
                     label = "password",
-                    placeholder = "qwert12345",
                     contentDescription = "password",
                     isError = hasError,
                     imeAction = ImeAction.Done,

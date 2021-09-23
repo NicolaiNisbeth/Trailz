@@ -4,14 +4,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.trailz.inmemory.ActiveUser
+import com.example.trailz.inject.SharedPrefs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SignupViewModel @Inject constructor(
-    private val createUserUseCase: CreateUserUseCase
+    private val createUserUseCase: CreateUserUseCase,
+    private val sharedPrefs: SharedPrefs
 ) : ViewModel() {
 
     private val _username = MutableLiveData<String>()
@@ -83,8 +84,8 @@ class SignupViewModel @Inject constructor(
             _loading.value = true
             val userId = createUserUseCase(User(username!!, email!!, password!!, studyPath!!))
             if (userId != null){
+                sharedPrefs.loggedInId = userId
                 _signupSuccess.value = true
-                ActiveUser.setId(userId)
             }
             _loading.value = false
         }
