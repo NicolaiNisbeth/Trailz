@@ -34,6 +34,8 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
@@ -70,8 +72,6 @@ fun StudyPlanner(
         mutableStateOf(false)
     }
 
-    val list = listOf(1,2,3,4,5).toMutableStateList()
-
     Scaffold {
         Column(
             Modifier.padding(it)
@@ -105,7 +105,6 @@ fun StudyPlanner(
                                 for ((sem, courses) in semesterToCourses) {
                                     semesterCollapsedMemory[sem] = courses
                                     semesterToCourses[sem] = emptyList()
-
                                 }
                             }
                             for (semester in semesterToCourses.keys) {
@@ -122,70 +121,32 @@ fun StudyPlanner(
             ){
                 semesterToCourses.forEach { (sem, courses) ->
                     stickyHeader {
-                        Box(
-                            Modifier.background(MaterialTheme.colors.background)
-                                .clickable {
-                                    if (isSemesterCollapsed[sem] == true){
-                                        semesterCollapsedMemory.remove(sem)?.let {
+                        SemesterItem(
+                            title = sem,
+                            isCollapsed = isSemesterCollapsed[sem] == true,
+                            color = MaterialTheme.colors.primary,
+                            isCollapsedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowDown),
+                            isExpandedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowUp),
+                            onClick = {
+                                val isCollapsed = isSemesterCollapsed[sem] == true
+                                if (isCollapsed) {
+                                    semesterCollapsedMemory.remove(sem)
+                                        ?.let {
                                             semesterToCourses[sem] = it
                                         }
-                                        isSemesterCollapsed[sem] = false
-                                    } else {
-                                        semesterToCourses[sem]?.let {
-                                            semesterCollapsedMemory[sem] = it
-                                            semesterToCourses[sem] = emptyList()
-                                        }
-                                        isSemesterCollapsed[sem] = true
+                                } else {
+                                    semesterToCourses[sem]?.let {
+                                        semesterCollapsedMemory[sem] = it
+                                        semesterToCourses[sem] = emptyList()
                                     }
                                 }
-                        ) {
-                            Spacer(
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .height(1.dp)
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colors.primary)
-                            )
-                            Text(
-                                text = sem,
-                                color = MaterialTheme.colors.primary,
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .background(MaterialTheme.colors.background)
-                                    .padding(horizontal = 16.dp)
-                            )
-                            Icon(
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .background(MaterialTheme.colors.background),
-                                contentDescription = null,
-                                tint = MaterialTheme.colors.primary,
-                                imageVector = if (isSemesterCollapsed[sem] == true)
-                                    Icons.Default.KeyboardArrowDown
-                                else
-                                    Icons.Default.KeyboardArrowUp
-                            )
-                        }
+                                isSemesterCollapsed[sem] = !isCollapsed
+                            }
+                        )
                     }
                     courses.forEach {
                         item {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = it,
-                                    style = MaterialTheme.typography.caption,
-                                )
-                                Text(
-                                    text = "Remove",
-                                    color = MaterialTheme.colors.error,
-                                    style = MaterialTheme.typography.caption,
-                                    modifier = Modifier.clickable { semesterToCourses[sem] = courses.minus(it) }
-                                )
-
-                            }
+                            CourseItem(title = it, onClick = { semesterToCourses[sem] = courses.minus(it) })
                         }
                     }
                     if ((isSemesterCollapsed[sem] == true).not()){
@@ -202,38 +163,16 @@ fun StudyPlanner(
                     }
                 }
                 item {
-                    Box(
-                        Modifier.background(MaterialTheme.colors.background)
-                            .clickable {
-                                isSemesterCollapsed["3. SEMESTER"] = false
-                                semesterToCourses["3. SEMESTER"] = emptyList()
-                            }
-                    ) {
-                        Spacer(
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .height(1.dp)
-                                .fillMaxWidth()
-                                .background(MaterialTheme.colors.secondaryVariant)
-                        )
-                        Text(
-                            text = "X. SEMESTER",
-                            color = MaterialTheme.colors.secondaryVariant,
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .background(MaterialTheme.colors.background)
-                                .padding(horizontal = 16.dp)
-                        )
-
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            tint = MaterialTheme.colors.secondaryVariant,
-                            modifier = Modifier
-                                .align(Alignment.CenterEnd)
-                                .background(MaterialTheme.colors.background)
-                        )
-                    }
+                    SemesterItem(
+                        title = "X. SEMESTER",
+                        isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Add),
+                        isExpandedIcon = rememberVectorPainter(image = Icons.Default.Add),
+                        color = MaterialTheme.colors.secondaryVariant,
+                        onClick = {
+                            isSemesterCollapsed["3. SEMESTER"] = false
+                            semesterToCourses["3. SEMESTER"] = emptyList()
+                        }
+                    )
                 }
                 item {
                     Text(
@@ -249,4 +188,67 @@ fun StudyPlanner(
     }
 }
 
+@Composable
+fun SemesterItem(
+    title: String,
+    isCollapsed: Boolean = true,
+    isCollapsedIcon: Painter,
+    isExpandedIcon: Painter,
+    color: Color,
+    onClick: (String) -> Unit
+){
+    Box(
+        Modifier
+            .background(MaterialTheme.colors.background)
+            .clickable { onClick(title) }
+    ) {
+        Spacer(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .height(1.dp)
+                .fillMaxWidth()
+                .background(color)
+        )
+        Text(
+            text = title,
+            color = color,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .background(MaterialTheme.colors.background)
+                .padding(horizontal = 16.dp)
+        )
+        Icon(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .background(MaterialTheme.colors.background),
+            contentDescription = null,
+            tint = color,
+            painter = if (isCollapsed) isCollapsedIcon else isExpandedIcon
+        )
+    }
+}
+
+@Composable
+fun CourseItem(
+    title: String,
+    onClick: (String) -> Unit
+){
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.caption,
+        )
+        Text(
+            text = "Remove",
+            color = MaterialTheme.colors.error,
+            style = MaterialTheme.typography.caption,
+            modifier = Modifier.clickable { onClick(title) }
+        )
+
+    }
+}
 
