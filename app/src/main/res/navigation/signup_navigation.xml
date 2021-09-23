@@ -7,6 +7,7 @@
     <fragment
         android:id="@+id/signupFragment"
         android:name="com.example.trailz.ui.signup.SignupFragment"
-        />
+        >
+    </fragment>
 
 </navigation>
