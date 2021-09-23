@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Michael/AndroidStudioProjects/Trailz/app/src/main/res/layout/activity_main.xml" value="0.15945805106826472" />
+        <entry key="..\:/Users/Michael/AndroidStudioProjects/Trailz/app/src/main/res/layout/fragment_study_planners.xml" value="0.13949275362318841" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.24427083333333333" />
         <entry key="app/src/main/res/layout/fragment_favorites.xml" value="0.11879432624113476" />
         <entry key="app/src/main/res/layout/fragment_notifications.xml" value="0.11879432624113476" />
@@ -13,7 +15,7 @@
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="JDK" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">
