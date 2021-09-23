@@ -3,15 +3,8 @@ package com.example.trailz.ui.studyplanner
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListItemInfo
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -25,23 +18,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.input.pointer.consumeAllChanges
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -63,10 +47,13 @@ fun StudyPlanner(
         )
     }
 
-    val semesterToCourses = remember { mutableStateMapOf(
-        "1. SEMESTER" to listOf("A", "B", "C"),
-        "2. SEMESTER" to emptyList(),
-    )}
+    val semesterToCourses = remember {
+        mutableStateMapOf(
+            "1. SEMESTER" to listOf("A", "B", "C"),
+            "2. SEMESTER" to emptyList(),
+        )
+    }
+
 
     var expandAll by remember {
         mutableStateOf(false)
@@ -119,7 +106,7 @@ fun StudyPlanner(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ){
-                semesterToCourses.forEach { (sem, courses) ->
+                semesterToCourses.toSortedMap().forEach { (sem, courses) ->
                     stickyHeader {
                         SemesterItem(
                             title = sem,
@@ -162,21 +149,24 @@ fun StudyPlanner(
                         }
                     }
                 }
-                item {
-                    SemesterItem(
-                        title = "X. SEMESTER",
-                        isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Add),
-                        isExpandedIcon = rememberVectorPainter(image = Icons.Default.Add),
-                        color = MaterialTheme.colors.secondaryVariant,
-                        onClick = {
-                            isSemesterCollapsed["3. SEMESTER"] = false
-                            semesterToCourses["3. SEMESTER"] = emptyList()
-                        }
-                    )
+                if (semesterToCourses.size < 9){
+                    item {
+                        SemesterItem(
+                            title = "X. SEMESTER",
+                            isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Add),
+                            isExpandedIcon = rememberVectorPainter(image = Icons.Default.Add),
+                            color = MaterialTheme.colors.secondaryVariant,
+                            onClick = {
+                                val key = "${semesterToCourses.size + 1}. SEMESTER"
+                                isSemesterCollapsed[key] = false
+                                semesterToCourses[key] = emptyList()
+                            }
+                        )
+                    }
                 }
                 item {
                     Text(
-                        text = "Last modified: ${SimpleDateFormat("yyyy/MM/dd").format(Date())}",
+                        text = "Last modified: ${SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(Date())}",
                         style = MaterialTheme.typography.overline,
                         modifier = Modifier
                     )
