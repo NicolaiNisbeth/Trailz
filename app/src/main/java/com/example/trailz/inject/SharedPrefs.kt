@@ -10,4 +10,8 @@ class SharedPrefs(
     var loggedInId: String?
         get() = getDefaultSharedPreferences(context).getString("in_memory_user_id", null)
         set(value) = getDefaultSharedPreferences(context).edit { putString("in_memory_user_id", value) }
+
+    var languagePreference: String?
+        get() = getDefaultSharedPreferences(context).getString("in_memory_language_preference", "en")
+        set(value) = getDefaultSharedPreferences(context).edit { putString("in_memory_language_preference", value) }
 }
