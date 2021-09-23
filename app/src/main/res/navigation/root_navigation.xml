@@ -7,6 +7,5 @@
     <include app:graph="@navigation/study_planners_navigation" />
     <include app:graph="@navigation/favorites_navigation" />
     <include app:graph="@navigation/study_planner_navigation" />
-    <include app:graph="@navigation/onboarding_navigation" />
 
 </navigation>

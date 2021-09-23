@@ -7,8 +7,6 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
-import com.example.trailz.R
-
 
 class SignInFragment: Fragment() {
 
@@ -21,7 +19,6 @@ class SignInFragment: Fragment() {
             setContent {
                 Login(
                     onLoginSuccess = findNavController()::navigateUp,
-                    onSignUp = { findNavController().navigate(R.id.action_signin_to_signup) }
                 )
             }
         }

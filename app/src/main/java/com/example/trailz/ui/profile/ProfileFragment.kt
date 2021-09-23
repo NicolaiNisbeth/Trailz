@@ -9,7 +9,14 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.trailz.R
 import com.example.trailz.databinding.FragmentProfileBinding
+import com.example.trailz.ui.signup.User
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.getValue
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class ProfileFragment : Fragment() {
 
     // This property is only valid between onCreateView and
@@ -18,6 +25,16 @@ class ProfileFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: ProfileViewModel by viewModels()
+
+    private val listener = object: ValueEventListener {
+        override fun onDataChange(snapshot: DataSnapshot) {
+            binding.textNotifications.text = snapshot.value.toString()
+        }
+
+        override fun onCancelled(error: DatabaseError) {
+            binding.textNotifications.text = error.message
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,8 +49,12 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.text.observe(viewLifecycleOwner){
-            binding.textNotifications.text = it
+        viewModel.userId.observe(viewLifecycleOwner){ userId ->
+            if (userId != null){
+                viewModel.getUser(userId, listener)
+                binding.loginButton.visibility = View.GONE
+                binding.signupButton.visibility = View.GONE
+            }
         }
     }
 
@@ -44,7 +65,7 @@ class ProfileFragment : Fragment() {
 
     private fun setupClickListeners(loginButton: View, signupButton: View) {
         loginButton.setOnClickListener {
-            findNavController().navigate(R.id.action_profile_to_login)
+            findNavController().navigate(R.id.action_profile_to_signin)
         }
 
         signupButton.setOnClickListener {
