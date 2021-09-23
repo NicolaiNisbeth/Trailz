@@ -13,26 +13,27 @@ import com.google.android.material.composethemeadapter.MdcTheme
 import android.os.Build
 import android.util.AttributeSet
 import androidx.compose.ui.unit.ExperimentalUnitApi
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.transition.*
+import dagger.hilt.android.AndroidEntryPoint
 
 
-
-
+@AndroidEntryPoint
 @ExperimentalUnitApi
 class MarketplaceFragment: Fragment() {
-
+    private val viewModel: StudyPlansViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
+        viewModel.getAllStudyPlans()
         return ComposeView(requireContext()).apply {
             setContent {
                 MdcTheme{
-                    Market_place()
+                    Market_place(viewModel)
                 }
             }
         }
