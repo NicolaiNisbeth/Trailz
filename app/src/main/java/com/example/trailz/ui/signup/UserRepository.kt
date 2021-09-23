@@ -39,10 +39,21 @@ class DeleteUserUseCase(
     }
 }
 
+class BecomeUserUseCase(
+    private val repository: UserRepository
+){
+    suspend operator fun invoke(
+        listener: ValueEventListener
+    ) = withContext(Dispatchers.IO){
+        repository.becomeUser(listener)
+    }
+}
+
 interface UserRepository {
     fun createUser(user: User): String?
     fun getUser(email: String, listener: ValueEventListener)
     fun deleteUser(email: String): Boolean
+    fun becomeUser(listener: ValueEventListener)
 }
 
 class UserRepositoryImpl(
@@ -52,6 +63,10 @@ class UserRepositoryImpl(
     override fun createUser(user: User) = userService.createUser(user)
 
     override fun deleteUser(email: String) = userService.deleteUser(email)
+
+    override fun becomeUser(listener: ValueEventListener) {
+        userService.becomeUser(listener)
+    }
 
     override fun getUser(
         email: String,
@@ -63,6 +78,7 @@ interface UserService {
     fun createUser(user: User): String?
     fun getUser(email: String, listener: ValueEventListener)
     fun deleteUser(email: String): Boolean
+    fun becomeUser(listener: ValueEventListener)
 }
 
 class UserFirebase(
@@ -88,4 +104,8 @@ class UserFirebase(
         return true
     }
 
+    override fun becomeUser(listener: ValueEventListener) {
+        databaseReference.getReference("users")
+            .addValueEventListener(listener)
+    }
 }

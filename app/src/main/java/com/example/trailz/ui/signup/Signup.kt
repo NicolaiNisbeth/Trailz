@@ -65,14 +65,14 @@ fun Signup(
     viewModel: SignupViewModel,
     onSignupSuccess: () -> Unit,
 ) {
-    val hasError by viewModel.error.observeAsState(initial = false)
-    val isLoading by viewModel.loading.observeAsState(initial = false)
-    val isSignupSuccess by viewModel.signupSuccess.observeAsState(initial = false)
     val username by viewModel.username.observeAsState(initial = "")
     val email by viewModel.email.observeAsState(initial = "")
     val password by viewModel.password.observeAsState(initial = "")
     val studyPath by viewModel.studyPath.observeAsState(initial = "Softwareteknologi")
     val studyPaths by viewModel.studyPaths.observeAsState(initial = emptyList())
+    val isLoading by viewModel.loading.observeAsState(initial = false)
+    val hasError by viewModel.error.observeAsState(initial = false)
+    val isSignupSuccess by viewModel.signupSuccess.observeAsState(initial = false)
 
     val pagerState = rememberPagerState(
         pageCount = studyPaths.count(),
@@ -97,7 +97,7 @@ fun Signup(
         onStudyPathChange = viewModel::changeStudyPath,
         hasError = hasError,
         isLoading = isLoading,
-        onSignup = { viewModel.signup() },
+        onSignup = viewModel::signup,
     )
 }
 

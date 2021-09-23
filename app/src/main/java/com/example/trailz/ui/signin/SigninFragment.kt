@@ -6,9 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
+import dagger.hilt.android.AndroidEntryPoint
 
-class SignInFragment: Fragment() {
+@AndroidEntryPoint
+class SigninFragment: Fragment() {
+
+    private val viewModel: SigninViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -17,8 +22,9 @@ class SignInFragment: Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                Login(
-                    onLoginSuccess = findNavController()::navigateUp,
+                Sigin(
+                    viewModel = viewModel,
+                    onSigninSuccess = findNavController()::navigateUp,
                 )
             }
         }

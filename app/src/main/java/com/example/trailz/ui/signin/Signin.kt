@@ -2,7 +2,6 @@ package com.example.trailz.ui.signin
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,7 +24,9 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,13 +35,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -48,41 +46,42 @@ import androidx.compose.ui.unit.sp
 import com.example.trailz.R
 import com.example.trailz.ui.common.compose.DividerWithText
 import com.example.trailz.ui.common.compose.InputFiled
-import com.example.trailz.ui.common.compose.invalidInput
 
 @Composable
-fun Login(
-    onLoginSuccess: () -> Unit,
+fun Sigin(
+    viewModel: SigninViewModel,
+    onSigninSuccess: () -> Unit,
 ) {
+    val email by viewModel.email.observeAsState(initial = "")
+    val password by viewModel.password.observeAsState(initial = "")
+    val hasError by viewModel.error.observeAsState(initial = false)
+    val isLoading by viewModel.loading.observeAsState(initial = false)
+    val isSigninSuccess by viewModel.signinSuccess.observeAsState(initial = false)
 
-    var hasError by remember { mutableStateOf(false) }
-    var loading by remember { mutableStateOf(false) }
+    SideEffect { if (isSigninSuccess) onSigninSuccess() }
 
-    Login(
+    Sigin(
+        email = email,
+        password = password,
+        onEmailChange = viewModel::changeEmail,
+        onPasswordChange = viewModel::changePassword,
+        isLoading = isLoading,
         hasError = hasError,
-        loading = loading,
-        onLogin = { email, password ->
-            if (invalidInput(email, password)) {
-                hasError = true
-                loading = false
-            } else {
-                hasError = false
-                loading = true
-                onLoginSuccess()
-            }
-        }
+        onSignin = viewModel::signin
     )
 }
 
 @Composable
-internal fun Login(
+internal fun Sigin(
+    email: String,
+    password: String,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    isLoading: Boolean,
     hasError: Boolean,
-    loading: Boolean,
-    onLogin: (String, String) -> Unit,
+    onSignin: () -> Unit,
 ){
     val focusManager = LocalFocusManager.current
-    var email by remember { mutableStateOf(TextFieldValue("")) }
-    var password by remember { mutableStateOf(TextFieldValue("")) }
     var passwordVisibility by remember { mutableStateOf(false) }
 
     val (passwordIcon, passwordTransformation) = if (passwordVisibility){
@@ -112,8 +111,8 @@ internal fun Login(
 
             item {
                 InputFiled(
-                    value = email.text,
-                    onValueChange = { email = TextFieldValue(it)},
+                    value = email,
+                    onValueChange = onEmailChange,
                     label = "Email address",
                     contentDescription = "Email address",
                     isError = hasError,
@@ -126,8 +125,8 @@ internal fun Login(
                 )
 
                 InputFiled(
-                    value = password.text,
-                    onValueChange = { password = TextFieldValue(it) },
+                    value = password,
+                    onValueChange = onPasswordChange,
                     label = "password",
                     contentDescription = "password",
                     isError = hasError,
@@ -139,21 +138,21 @@ internal fun Login(
                     onTrailingIconClicked = { passwordVisibility = !passwordVisibility },
                     keyboardActions = KeyboardActions(onDone = {
                         focusManager.clearFocus()
-                        onLogin(email.text, password.text)
+                        onSignin()
                     })
                 )
             }
 
             item {
                 Button(
-                    onClick = { onLogin(email.text, password.text) },
+                    onClick = onSignin,
                     modifier = Modifier
                         .fillMaxWidth()
                         .animateContentSize(tween())
                         .height(50.dp)
                         .clip(CircleShape)
                 ) {
-                    Text(text = if (loading) "Loading..." else "Log In")
+                    Text(text = if (isLoading) "Loading..." else "Log In")
                 }
             }
 

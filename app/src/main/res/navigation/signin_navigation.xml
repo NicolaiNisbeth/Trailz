@@ -9,7 +9,7 @@
 
     <fragment
         android:id="@+id/signinFragment"
-        android:name="com.example.trailz.ui.signin.SignInFragment">
+        android:name="com.example.trailz.ui.signin.SigninFragment">
 
     </fragment>
 
