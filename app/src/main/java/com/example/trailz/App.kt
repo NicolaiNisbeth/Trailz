@@ -3,11 +3,14 @@ package com.example.trailz
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.example.trailz.ui.onboarding.OnboardingActivity
 import com.example.trailz.ui.onboarding.OnboardingActivity.Companion.COMPLETED_ONBOARDING_PREF
+import dagger.hilt.android.AndroidEntryPoint
 
-class App : Activity() {
+@AndroidEntryPoint
+class App : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
