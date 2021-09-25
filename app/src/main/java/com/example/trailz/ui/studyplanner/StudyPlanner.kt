@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -40,12 +41,6 @@ fun StudyPlanner(
             "2. SEMESTER" to true
         )
     }
-    val semesterCollapsedMemory = remember {
-        mutableStateMapOf(
-            "1. SEMESTER" to listOf("A", "B", "C"),
-            "2. SEMESTER" to listOf("D", "E", "F"),
-        )
-    }
 
     val semesterToCourses = remember {
         mutableStateMapOf(
@@ -53,7 +48,6 @@ fun StudyPlanner(
             "2. SEMESTER" to emptyList(),
         )
     }
-
 
     var expandAll by remember {
         mutableStateOf(false)
@@ -85,16 +79,7 @@ fun StudyPlanner(
                         .align(Alignment.TopEnd)
                         .padding(horizontal = 16.dp, vertical = 10.dp)
                         .clickable {
-                            if (expandAll) {
-                                semesterToCourses.putAll(semesterCollapsedMemory)
-                                semesterCollapsedMemory.clear()
-                            } else {
-                                for ((sem, courses) in semesterToCourses) {
-                                    semesterCollapsedMemory[sem] = courses
-                                    semesterToCourses[sem] = emptyList()
-                                }
-                            }
-                            for (semester in semesterToCourses.keys) {
+                            semesterToCourses.keys.forEach { semester ->
                                 isSemesterCollapsed[semester] = !expandAll
                             }
                             expandAll = !expandAll
@@ -107,46 +92,37 @@ fun StudyPlanner(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ){
                 semesterToCourses.toSortedMap().forEach { (sem, courses) ->
+                    val isCollapsed = isSemesterCollapsed[sem] == true
                     stickyHeader {
                         SemesterItem(
                             title = sem,
-                            isCollapsed = isSemesterCollapsed[sem] == true,
+                            isCollapsed = isCollapsed,
                             color = MaterialTheme.colors.primary,
                             isCollapsedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowDown),
                             isExpandedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowUp),
-                            onClick = {
-                                val isCollapsed = isSemesterCollapsed[sem] == true
-                                if (isCollapsed) {
-                                    semesterCollapsedMemory.remove(sem)
-                                        ?.let {
-                                            semesterToCourses[sem] = it
-                                        }
-                                } else {
-                                    semesterToCourses[sem]?.let {
-                                        semesterCollapsedMemory[sem] = it
-                                        semesterToCourses[sem] = emptyList()
-                                    }
-                                }
-                                isSemesterCollapsed[sem] = !isCollapsed
-                            }
+                            onClick = { isSemesterCollapsed[sem] = isCollapsed.not() }
                         )
                     }
-                    courses.forEach {
-                        item {
-                            CourseItem(title = it, onClick = { semesterToCourses[sem] = courses.minus(it) })
+                    if (isCollapsed.not()){
+                        courses.forEach {
+                            item {
+                                CourseItem(
+                                    title = it,
+                                    onClick = { semesterToCourses[sem] = courses.minus(it) }
+                                )
+                            }
                         }
-                    }
-                    if ((isSemesterCollapsed[sem] == true).not()){
                         item {
                             Text(
                                 text = "Add",
                                 color = MaterialTheme.colors.secondaryVariant,
                                 style = MaterialTheme.typography.caption,
                                 modifier = Modifier.clickable {
-                                    semesterToCourses[sem] = courses.plus("new")
+                                    semesterToCourses[sem] = courses.plus("?")
                                 }
                             )
                         }
+
                     }
                 }
                 if (semesterToCourses.size < 9){
@@ -155,7 +131,7 @@ fun StudyPlanner(
                             title = "X. SEMESTER",
                             isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Add),
                             isExpandedIcon = rememberVectorPainter(image = Icons.Default.Add),
-                            color = MaterialTheme.colors.secondaryVariant,
+                            color = MaterialTheme.colors.primary.copy(alpha = ContentAlpha.disabled),
                             onClick = {
                                 val key = "${semesterToCourses.size + 1}. SEMESTER"
                                 isSemesterCollapsed[key] = false
@@ -165,8 +141,10 @@ fun StudyPlanner(
                     }
                 }
                 item {
+                    val pattern = "yyyy/MM/dd"
+                    val date = SimpleDateFormat(pattern, Locale.getDefault()).format(Date())
                     Text(
-                        text = "Last modified: ${SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(Date())}",
+                        text = "Last modified: $date",
                         style = MaterialTheme.typography.overline,
                         modifier = Modifier
                     )
