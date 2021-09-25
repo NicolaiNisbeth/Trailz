@@ -7,13 +7,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.ModeEdit
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -49,7 +55,7 @@ fun StudyPlanner(
         )
     }
 
-    var expandAll by remember {
+    var inEdit by remember {
         mutableStateOf(false)
     }
 
@@ -72,41 +78,53 @@ fun StudyPlanner(
                     style = MaterialTheme.typography.caption,
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )
-                Text(
-                    text = if (expandAll) "Expand" else "Collapse",
-                    style = MaterialTheme.typography.caption,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(horizontal = 16.dp, vertical = 10.dp)
-                        .clickable {
-                            semesterToCourses.keys.forEach { semester ->
-                                isSemesterCollapsed[semester] = !expandAll
-                            }
-                            expandAll = !expandAll
-                        }
-                )
+                IconButton(
+                    onClick = {inEdit = !inEdit},
+                    modifier = Modifier.align(Alignment.TopEnd)
+                ){
+                    Icon(
+                        imageVector = if (inEdit) Icons.Default.Save else Icons.Default.ModeEdit,
+                        contentDescription = null
+                    )
+                }
             }
 
             LazyColumn(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ){
-                semesterToCourses.toSortedMap().forEach { (sem, courses) ->
-                    val isCollapsed = isSemesterCollapsed[sem] == true
-                    stickyHeader {
-                        SemesterItem(
-                            title = sem,
-                            isCollapsed = isCollapsed,
-                            color = MaterialTheme.colors.primary,
-                            isCollapsedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowDown),
-                            isExpandedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowUp),
-                            onClick = { isSemesterCollapsed[sem] = isCollapsed.not() }
+                if (inEdit){
+                    item {
+                        SemesterItemSave(
+                            title = "X. SEMESTER",
+                            isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Add),
+                            isExpandedIcon = rememberVectorPainter(image = Icons.Default.Add),
+                            color = MaterialTheme.colors.secondaryVariant,
+                            onClick = {
+                                val key = "${semesterToCourses.size + 1}. SEMESTER"
+                                isSemesterCollapsed[key] = false
+                                semesterToCourses[key] = emptyList()
+                            }
                         )
                     }
-                    if (isCollapsed.not()){
+                }
+                semesterToCourses.toSortedMap().forEach { (sem, courses) ->
+                    val isCollapsed = isSemesterCollapsed[sem] == true
+                    if (inEdit){
+                        stickyHeader {
+                            SemesterItemEdit(
+                                title = sem,
+                                isCollapsed = isCollapsed,
+                                color = MaterialTheme.colors.primary,
+                                isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Clear),
+                                isExpandedIcon = rememberVectorPainter(image = Icons.Default.Clear),
+                                onClick = { semesterToCourses.remove(it) }
+                            )
+                        }
+
                         courses.forEach {
                             item {
-                                CourseItem(
+                                CourseItemEdit(
                                     title = it,
                                     onClick = { semesterToCourses[sem] = courses.minus(it) }
                                 )
@@ -122,22 +140,24 @@ fun StudyPlanner(
                                 }
                             )
                         }
-
-                    }
-                }
-                if (semesterToCourses.size < 9){
-                    item {
-                        SemesterItem(
-                            title = "X. SEMESTER",
-                            isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Add),
-                            isExpandedIcon = rememberVectorPainter(image = Icons.Default.Add),
-                            color = MaterialTheme.colors.primary.copy(alpha = ContentAlpha.disabled),
-                            onClick = {
-                                val key = "${semesterToCourses.size + 1}. SEMESTER"
-                                isSemesterCollapsed[key] = false
-                                semesterToCourses[key] = emptyList()
+                    } else {
+                        stickyHeader {
+                            SemesterItemSave(
+                                title = sem,
+                                isCollapsed = isCollapsed,
+                                color = MaterialTheme.colors.primary,
+                                isCollapsedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowDown),
+                                isExpandedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowUp),
+                                onClick = { isSemesterCollapsed[sem] = isCollapsed.not() }
+                            )
+                        }
+                        if (isCollapsed.not()){
+                            courses.forEach {
+                                item {
+                                    CourseItemSave(title = it)
+                                }
                             }
-                        )
+                        }
                     }
                 }
                 item {
@@ -157,7 +177,7 @@ fun StudyPlanner(
 }
 
 @Composable
-fun SemesterItem(
+fun SemesterItemSave(
     title: String,
     isCollapsed: Boolean = true,
     isCollapsedIcon: Painter,
@@ -197,7 +217,47 @@ fun SemesterItem(
 }
 
 @Composable
-fun CourseItem(
+fun SemesterItemEdit(
+    title: String,
+    isCollapsed: Boolean = true,
+    isCollapsedIcon: Painter,
+    isExpandedIcon: Painter,
+    color: Color,
+    onClick: (String) -> Unit
+){
+    Box(
+        Modifier
+            .background(MaterialTheme.colors.background)
+            .clickable { onClick(title) }
+    ) {
+        Spacer(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .height(1.dp)
+                .fillMaxWidth()
+                .background(color)
+        )
+        Text(
+            text = title,
+            color = color,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .background(MaterialTheme.colors.background)
+                .padding(horizontal = 16.dp)
+        )
+        Icon(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .background(MaterialTheme.colors.background),
+            contentDescription = null,
+            tint = color,
+            painter = if (isCollapsed) isCollapsedIcon else isExpandedIcon
+        )
+    }
+}
+
+@Composable
+fun CourseItemEdit(
     title: String,
     onClick: (String) -> Unit
 ){
@@ -217,6 +277,22 @@ fun CourseItem(
             modifier = Modifier.clickable { onClick(title) }
         )
 
+    }
+}
+
+@Composable
+fun CourseItemSave(
+    title: String,
+){
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.caption,
+        )
     }
 }
 
