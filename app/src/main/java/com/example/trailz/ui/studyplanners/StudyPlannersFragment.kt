@@ -10,7 +10,9 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.trailz.R
 import com.example.trailz.databinding.FragmentStudyPlannersBinding
+import com.example.trailz.inject.SharedPrefs
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class StudyPlannersFragment : Fragment() {
@@ -21,6 +23,9 @@ class StudyPlannersFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: StudyPlannersViewModel by viewModels()
+
+    @Inject
+    lateinit var sharedPrefs: SharedPrefs
 
     override fun onCreateView(
         inflater: LayoutInflater,

@@ -1,4 +1,4 @@
-package com.example.studyplan.domain
+package com.example.base.domain
 
 data class Semester(
     val order: Int = -1,

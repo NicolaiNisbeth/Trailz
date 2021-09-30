@@ -1,12 +1,10 @@
 package com.example.studyplan
 
-import com.example.studyplan.domain.StudyPlan
-import com.google.firebase.firestore.CollectionReference
+import com.example.base.domain.StudyPlan
+import com.example.base.Result
 import kotlinx.coroutines.flow.Flow
 
 interface StudyPlanRepository {
-    val collectionPath: String
-    val collection: CollectionReference
 
     suspend fun getStudyPlan(id: String): Flow<Result<StudyPlan>>
 

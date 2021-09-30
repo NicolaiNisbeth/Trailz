@@ -9,7 +9,11 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.trailz.R
 import com.example.trailz.databinding.FragmentFavoritesBinding
+import com.example.trailz.inject.SharedPrefs
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class FavoritesFragment : Fragment() {
 
     // This property is only valid between onCreateView and
@@ -19,11 +23,15 @@ class FavoritesFragment : Fragment() {
 
     private val viewModel: FavoritesViewModel by viewModels()
 
+    @Inject
+    lateinit var sharedPrefs: SharedPrefs
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        sharedPrefs.loggedInId?.let { viewModel.initObserveFavoriteBy(it) }
         return FragmentFavoritesBinding.inflate(inflater, container, false)
             .also { _binding = it }
             .also { setupClickListeners(it.profileBtn, it.studyPlannerBtn) }
@@ -42,8 +50,8 @@ class FavoritesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.text.observe(viewLifecycleOwner){
-            binding.textDashboard.text = it
+        viewModel.favorite.observe(viewLifecycleOwner){
+            binding.textDashboard.text = it.followedUserIds.toString()
         }
     }
 

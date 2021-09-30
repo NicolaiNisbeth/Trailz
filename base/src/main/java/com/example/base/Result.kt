@@ -1,4 +1,4 @@
-package com.example.studyplan
+package com.example.base
 
 sealed class Result<T> {
     class Loading<T> : Result<T>()

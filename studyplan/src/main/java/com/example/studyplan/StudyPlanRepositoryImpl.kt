@@ -1,8 +1,8 @@
 package com.example.studyplan
 
 import android.util.Log
-import com.example.studyplan.domain.StudyPlan
-import com.google.firebase.firestore.CollectionReference
+import com.example.base.domain.StudyPlan
+import com.example.base.Result
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -13,12 +13,10 @@ import kotlinx.coroutines.tasks.await
 class StudyPlanRepositoryImpl: StudyPlanRepository {
 
     private val TAG = javaClass.name
-
-    override val collectionPath: String
-        get() = "/studyplans"
-
-    override val collection: CollectionReference
-        get() = FirebaseFirestore.getInstance().collection(collectionPath)
+    private val collectionPath = "/studyplans"
+    private val collection by lazy {
+        FirebaseFirestore.getInstance().collection(collectionPath)
+    }
 
     override suspend fun getStudyPlan(id: String) = flow<Result<StudyPlan>> {
         emit(Result.loading())
@@ -46,6 +44,8 @@ class StudyPlanRepositoryImpl: StudyPlanRepository {
 
     @ExperimentalCoroutinesApi
     override suspend fun observeStudyPlans() = callbackFlow<Result<List<StudyPlan>>> {
+        trySend(Result.loading())
+
         val listener = collection.addSnapshotListener { documents, error ->
             documents?.let {
                 val studyPlans = it.toObjects(StudyPlan::class.java)
