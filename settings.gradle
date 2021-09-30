@@ -8,3 +8,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Trailz"
 include ':app'
+include ':studyplan'

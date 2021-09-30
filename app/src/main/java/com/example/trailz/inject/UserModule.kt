@@ -1,6 +1,8 @@
 package com.example.trailz.inject
 
 import android.content.Context
+import com.example.studyplan.StudyPlanRepository
+import com.example.studyplan.StudyPlanRepositoryImpl
 import com.example.trailz.ui.signup.BecomeUserUseCase
 import com.example.trailz.ui.signup.CreateUserUseCase
 import com.example.trailz.ui.signup.DeleteUserUseCase
@@ -75,4 +77,17 @@ class UserModule {
     fun provideUserService(database: FirebaseDatabase): UserService {
         return UserFirebase(database)
     }
+}
+
+
+@Module
+@InstallIn(ViewModelComponent::class)
+class StudyPlannerModule {
+
+    @Provides
+    @ViewModelScoped
+    fun provideStudyPlanRepository(): StudyPlanRepository {
+        return StudyPlanRepositoryImpl()
+    }
+
 }
