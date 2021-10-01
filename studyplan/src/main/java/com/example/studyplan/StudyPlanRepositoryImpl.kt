@@ -69,10 +69,10 @@ class StudyPlanRepositoryImpl: StudyPlanRepository {
         Log.d(TAG, it.message.toString())
     }.flowOn(Dispatchers.IO)
 
-    override suspend fun createStudyPlan(studyPlan: StudyPlan) = flow<Result<String>> {
+    override suspend fun createStudyPlan(studyPlan: StudyPlan) = flow<Result<Unit>> {
         emit(Result.Loading())
-        val createdDocument = collection.add(studyPlan).await()
-        emit(Result.Success(createdDocument.id))
+        collection.document(studyPlan.userId).set(studyPlan).await()
+        emit(Result.Success(Unit))
     }.catch {
         emit(Result.failed(it.message.toString()))
         Log.d(TAG, it.message.toString())

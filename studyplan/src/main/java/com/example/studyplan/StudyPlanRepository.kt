@@ -14,7 +14,7 @@ interface StudyPlanRepository {
 
     suspend fun deleteStudyPlan(id: String): Flow<Result<Unit>>
 
-    suspend fun createStudyPlan(studyPlan: StudyPlan): Flow<Result<String>>
+    suspend fun createStudyPlan(studyPlan: StudyPlan): Flow<Result<Unit>>
 
     suspend fun updateStudyPlan(id: String, studyPlan: StudyPlan): Flow<Result<Unit>>
 }

@@ -1,25 +1,44 @@
 package com.example.trailz.ui.studyplanner
 
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 
 @Composable
-fun StudyPlanner(
+fun StudyPlan(
+    viewModel: StudyPlannerViewModel,
     openMarketplace: () -> Unit
 ){
-    Column {
-        Text(text = "Study Planner2")
-        Button(onClick = openMarketplace) {
-            Text(text = "Open marketplace")
+    val studyPlan by viewModel.studyPlan.observeAsState(initial = StudyPlanUiModel(loading = true))
+    StudyPlan(
+        studyPlan = studyPlan
+    )
+}
+
+@Composable
+fun StudyPlan(
+    studyPlan: StudyPlanUiModel
+) {
+    studyPlan.studyPlan?.let {
+        Column {
+            Text(text = it.userId)
+            Text(text = it.title)
+            it.semesters.forEach {
+                Text(text = "Semester #${it.order}")
+                it.courses.forEach {
+                    Text(text = it.title)
+                }
+            }
         }
+    }
+
+    studyPlan.error?.let { errorMsg ->
+        Text(text = errorMsg)
+    }
+
+    if (studyPlan.loading){
+        CircularProgressIndicator()
     }
 }
 
