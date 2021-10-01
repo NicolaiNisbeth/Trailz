@@ -50,9 +50,10 @@ android {
 
 dependencies {
 
+    implementation project(":base")
     implementation project(":studyplan")
     implementation project(':favorite')
-    implementation project(":base")
+    implementation project(':user')
 
     implementation 'androidx.core:core-ktx:1.6.0'
     implementation 'androidx.appcompat:appcompat:1.3.1'
