@@ -4,6 +4,7 @@
     <bytecodeTargetLevel target="1.7">
       <module name="Trailz.app" target="11" />
       <module name="Trailz.course" target="11" />
+      <module name="Trailz.degree" target="11" />
       <module name="Trailz.favorite" target="11" />
       <module name="Trailz.studyplan" target="11" />
       <module name="Trailz.user" target="11" />
