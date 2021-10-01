@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/my_study_plan_navigation"
+    app:startDestination="@id/myStudyPlanFragment">
+
+
+    <fragment
+        android:id="@+id/myStudyPlanFragment"
+        android:name="com.example.trailz.ui.mystudyplan.MyStudyPlanFragment"
+        android:label="MyStudyPlanFragment" />
+
+</navigation>

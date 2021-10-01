@@ -48,4 +48,38 @@ class FavoritesViewModel @Inject constructor(
             }
         }
     }
+
+    fun addToFavorite(favoritedId: String, userId: String?){
+        viewModelScope.launch {
+            repository.addToFavorite(favoritedId, userId).collect {
+                when (it){
+                    is Result.Failed -> {
+                        _isError.value = it.message
+                        _isLoading.value = false
+                    }
+                    is Result.Loading -> _isLoading.value = true
+                    is Result.Success -> {
+                        _isLoading.value = false
+                    }
+                }
+            }
+        }
+    }
+
+    fun removeFromFavorite(favoritedId: String, userId: String?){
+        viewModelScope.launch {
+            repository.removeFromFavorite(favoritedId, userId).collect {
+                when (it){
+                    is Result.Failed -> {
+                        _isError.value = it.message
+                        _isLoading.value = false
+                    }
+                    is Result.Loading -> _isLoading.value = true
+                    is Result.Success -> {
+                        _isLoading.value = false
+                    }
+                }
+            }
+        }
+    }
 }
