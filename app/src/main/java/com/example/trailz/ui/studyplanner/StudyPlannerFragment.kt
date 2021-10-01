@@ -25,9 +25,7 @@ class StudyPlannerFragment: Fragment() {
             setContent {
                 StudyPlan(
                     viewModel = viewModel,
-                    openMarketplace = {
-                        findNavController().navigate(R.id.action_study_planner_to_marketplace)
-                    }
+                    navigateUp = findNavController()::navigateUp
                 )
             }
         }

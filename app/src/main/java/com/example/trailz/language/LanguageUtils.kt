@@ -15,12 +15,20 @@ enum class LanguageConfig(
     EU("Europe", "eu", "en", R.drawable.flag_eu);
 
     companion object {
-        fun codeToLanguage(code: String): String {
+        fun codeToConfig(code: String?): LanguageConfig {
             return when(code){
-                DK.code -> DK.language
-                EU.code -> EU.language
-                else -> EU.language
+                DK.code -> DK
+                EU.code -> EU
+                else -> EU
             }
+        }
+        fun languageToConfig(language: String?): LanguageConfig {
+            return when (language){
+                DK.language -> DK
+                EU.language -> EU
+                else -> EU
+            }
+
         }
     }
 }

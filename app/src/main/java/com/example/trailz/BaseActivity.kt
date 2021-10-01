@@ -39,7 +39,8 @@ open class BaseActivity: AppCompatActivity(), ChangeLanguageListener {
     }
 
     override fun onChangeLanguage(code: String) {
-        sharedPrefs.languagePreference = LanguageConfig.codeToLanguage(code)
+        val country = LanguageConfig.codeToConfig(code)
+        sharedPrefs.languagePreference = country.language
         finish()
         restartApp()
 

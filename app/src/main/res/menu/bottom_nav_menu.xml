@@ -9,7 +9,7 @@
     <item
         android:id="@+id/my_study_plan_navigation"
         android:icon="@drawable/ic_baseline_book_24"
-        android:title="@string/title_study_planner" />
+        android:title="@string/title_my_study_planner" />
 
     <item
         android:id="@+id/favorites_navigation"
