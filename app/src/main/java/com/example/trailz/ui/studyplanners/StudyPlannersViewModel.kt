@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.base.domain.StudyPlan
 import com.example.base.Result
+import com.example.base.domain.Favorite
 import com.example.favorite.FavoriteRepository
 import com.example.studyplan.StudyPlanRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +24,10 @@ class StudyPlannersViewModel @Inject constructor(
     val studyPlans: LiveData<List<StudyPlan>>
         get() = _studyplans
 
+    private val _favorite = MutableLiveData<Favorite>()
+    val favorite: LiveData<Favorite>
+        get() = _favorite
+
     private val _favoriteSuccess = MutableLiveData<Unit>()
     val favoriteSuccess: LiveData<Unit>
         get() = _favoriteSuccess
@@ -34,42 +39,6 @@ class StudyPlannersViewModel @Inject constructor(
     private val _isError = MutableLiveData<String>()
     val isError: LiveData<String>
         get() = _isError
-
-    fun addToFavorite(favoritedId: String, userId: String){
-        viewModelScope.launch {
-            favoriteRepository.addToFavorite(favoritedId, userId).collect {
-                when (it){
-                    is Result.Failed -> {
-                        _isError.value = it.message
-                        _isLoading.value = false
-                    }
-                    is Result.Loading -> _isLoading.value = true
-                    is Result.Success -> {
-                        _favoriteSuccess.value = Unit
-                        _isLoading.value = false
-                    }
-                }
-            }
-        }
-    }
-
-    fun removeFromFavorite(favoritedId: String, userId: String){
-        viewModelScope.launch {
-            favoriteRepository.removeFromFavorite(favoritedId, userId).collect {
-                when (it){
-                    is Result.Failed -> {
-                        _isError.value = it.message
-                        _isLoading.value = false
-                    }
-                    is Result.Loading -> _isLoading.value = true
-                    is Result.Success -> {
-                        _favoriteSuccess.value = Unit
-                        _isLoading.value = false
-                    }
-                }
-            }
-        }
-    }
 
     init {
         viewModelScope.launch {
@@ -89,4 +58,58 @@ class StudyPlannersViewModel @Inject constructor(
             }
         }
     }
+
+    fun initObserveFavorites(userId: String?){
+        viewModelScope.launch {
+            favoriteRepository.observeFavoriteBy(userId).collect {
+                when (it){
+                    is Result.Failed -> {
+                        _isError.value = it.message
+                    }
+                    is Result.Loading -> _isLoading.value = true
+                    is Result.Success -> {
+                        val favorite = it.data
+                        _favorite.value = favorite
+                    }
+                }
+            }
+        }
+    }
+
+    fun addToFavorite(favoritedId: String, userId: String?){
+        viewModelScope.launch {
+            favoriteRepository.addToFavorite(favoritedId, userId).collect {
+                when (it){
+                    is Result.Failed -> {
+                        _isError.value = it.message
+                        _isLoading.value = false
+                    }
+                    is Result.Loading -> _isLoading.value = true
+                    is Result.Success -> {
+                        _favoriteSuccess.value = Unit
+                        _isLoading.value = false
+                    }
+                }
+            }
+        }
+    }
+
+    fun removeFromFavorite(favoritedId: String, userId: String?){
+        viewModelScope.launch {
+            favoriteRepository.removeFromFavorite(favoritedId, userId).collect {
+                when (it){
+                    is Result.Failed -> {
+                        _isError.value = it.message
+                        _isLoading.value = false
+                    }
+                    is Result.Loading -> _isLoading.value = true
+                    is Result.Success -> {
+                        _favoriteSuccess.value = Unit
+                        _isLoading.value = false
+                    }
+                }
+            }
+        }
+    }
+
 }

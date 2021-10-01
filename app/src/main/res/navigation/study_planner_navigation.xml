@@ -5,6 +5,10 @@
     app:startDestination="@id/studyPlannerFragment">
 
     <include app:graph="@navigation/marketplace_navigation" />
+    <argument
+        android:name="ownerId"
+        app:argType="string"
+        />
 
     <fragment
         android:id="@+id/studyPlannerFragment"

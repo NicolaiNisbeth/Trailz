@@ -20,7 +20,9 @@ class FavoriteRepositoryImpl: FavoriteRepository {
     }
 
     @ExperimentalCoroutinesApi
-    override fun observeFavoriteBy(userId: String) = callbackFlow<Result<Favorite>> {
+    override fun observeFavoriteBy(userId: String?) = callbackFlow<Result<Favorite>> {
+        if (userId == null) return@callbackFlow
+
         trySend(Result.loading())
         val listener = collection.document(userId)
             .addSnapshotListener { document, error ->
@@ -40,7 +42,9 @@ class FavoriteRepositoryImpl: FavoriteRepository {
         awaitClose { listener.remove() }
     }
 
-    override fun addToFavorite(favoritedId: String, userId: String) = flow<Result<Unit>> {
+    override fun addToFavorite(favoritedId: String, userId: String?) = flow<Result<Unit>> {
+        if (userId == null) return@flow
+
         emit(Result.loading())
 
         val documentReference = collection.document(userId)
@@ -64,7 +68,9 @@ class FavoriteRepositoryImpl: FavoriteRepository {
         Log.d(TAG, it.message.toString())
     }.flowOn(Dispatchers.IO)
 
-    override fun removeFromFavorite(favoritedId: String, userId: String) = flow<Result<Unit>> {
+    override fun removeFromFavorite(favoritedId: String, userId: String?) = flow<Result<Unit>> {
+        if (userId == null) return@flow
+
         emit(Result.loading())
 
         val documentReference = collection.document(userId)
