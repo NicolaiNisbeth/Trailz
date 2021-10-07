@@ -4,7 +4,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -14,6 +17,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import com.example.base.domain.Favorite
 import com.example.trailz.ui.studyplanners.StudyPlan
 import com.example.trailz.ui.studyplanners.StudyPlans
@@ -68,16 +72,25 @@ fun Favorites(
             )
         }
     ) {
-        Column {
-            favorite.followedUserIds.forEach {
-                StudyPlan(
-                    userId = it,
-                    title = it,
-                    checked = true,
-                    onFavorite = onFavorite,
-                    onRemove = onRemove,
-                    onStudyPlan = onStudyPlan
-                )
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ){
+            LazyColumn(
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ){
+                favorite.followedUserIds.forEach {
+                    item {
+                        StudyPlan(
+                            userId = it,
+                            title = it,
+                            checked = true,
+                            onFavorite = onFavorite,
+                            onRemove = onRemove,
+                            onStudyPlan = onStudyPlan
+                        )
+                    }
+                }
             }
             if (!isLoading && favorite.followedUserIds.isEmpty()){
                 Column(
