@@ -7,7 +7,6 @@
 
     <include app:graph="@navigation/study_planner_navigation" />
     <include app:graph="@navigation/profile_navigation" />
-    <include app:graph="@navigation/study_planners_navigation" />
 
     <fragment
         android:id="@+id/favoritesFragment"
@@ -27,7 +26,12 @@
 
         <action
             android:id="@+id/action_favorites_to_profile"
-            app:destination="@id/profile_navigation" />
+            app:destination="@id/profile_navigation"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
 
         <action
             android:id="@+id/action_favorites_to_study_planners"
