@@ -95,7 +95,7 @@ fun MyStudyPlan(
         }
     ) {
         Column(
-            modifier = Modifier.padding(it),
+            modifier = Modifier.padding(it).fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
