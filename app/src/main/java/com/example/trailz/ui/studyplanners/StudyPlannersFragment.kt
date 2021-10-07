@@ -4,51 +4,64 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.PermIdentity
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.example.base.domain.Favorite
+import com.example.base.domain.StudyPlan
 import com.example.trailz.R
-import com.example.trailz.databinding.FragmentStudyPlannersBinding
+import com.example.trailz.inject.SharedPrefs
+import com.example.trailz.ui.common.compose.FavoriteButton
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class StudyPlannersFragment : Fragment() {
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private var _binding: FragmentStudyPlannersBinding? = null
-    private val binding get() = _binding!!
 
     private val viewModel: StudyPlannersViewModel by viewModels()
 
+    @Inject
+    lateinit var sharedPrefs: SharedPrefs
+
+    @ExperimentalMaterialApi
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return FragmentStudyPlannersBinding.inflate(inflater, container, false)
-            .also { _binding = it }
-            .also { setupClickListeners(it.profileBtn, it.studyPlannerBtn) }
-            .run { root }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        viewModel.text.observe(viewLifecycleOwner){
-            binding.textHome.text = it
+        viewModel.initObserveFavorites(sharedPrefs.loggedInId)
+        return ComposeView(requireContext()).apply {
+            setContent {
+                StudyPlans(
+                    viewModel = viewModel,
+                    userId = sharedPrefs.loggedInId,
+                    onStudyPlan = ::openStudyPlan,
+                    onProfile = ::openProfile
+                )
+            }
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun openStudyPlan(ownerId: String){
+        val direction = StudyPlannersFragmentDirections.actionStudyPlannersToStudyPlanner(ownerId)
+        findNavController().navigate(direction)
     }
 
-    private fun setupClickListeners(profileBtn: View, studyPlannerBtn: View) {
-        profileBtn.setOnClickListener {
-            findNavController().navigate(R.id.action_study_planners_to_profile)
-        }
-
-        studyPlannerBtn.setOnClickListener {
-            findNavController().navigate(R.id.action_study_planners_to_study_planner)
-        }
+    private fun openProfile(){
+        findNavController().navigate(R.id.action_study_planners_to_profile)
     }
 }

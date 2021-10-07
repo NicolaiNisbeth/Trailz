@@ -27,7 +27,7 @@ class SignupFragment: Fragment() {
             setContent {
                 Signup(
                     viewModel = viewModel,
-                    onSignupSuccess = findNavController()::navigateUp,
+                    navigateUp = findNavController()::navigateUp,
                 )
             }
         }

@@ -11,6 +11,12 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/base" />
+            <option value="$PROJECT_DIR$/course" />
+            <option value="$PROJECT_DIR$/degree" />
+            <option value="$PROJECT_DIR$/favorite" />
+            <option value="$PROJECT_DIR$/studyplan" />
+            <option value="$PROJECT_DIR$/user" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
