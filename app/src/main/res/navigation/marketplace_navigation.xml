@@ -7,6 +7,17 @@
     <fragment
         android:id="@+id/marketplaceFragment"
         android:name="com.example.trailz.ui.marketplace.MarketplaceFragment">
+
+        <action
+            android:id="@+id/action_marketplace_to_study_plan"
+            app:destination="@id/study_planner_navigation" >
+
+            <argument
+                android:name="ownerId"
+                app:argType="string"
+                />
+
+        </action>
     </fragment>
 
 </navigation>
