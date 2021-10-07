@@ -63,8 +63,8 @@ class StudyPlannersFragment : Fragment() {
         }
     }
 
-    private fun openStudyPlan(id:View, post:String){
-        val extra = FragmentNavigatorExtras(id to post)
+    private fun openStudyPlan(view:TestElementBinding){
+        val extra = FragmentNavigatorExtras(view.imageView to "image_big",  view.textView to "text_big")
         findNavController().navigate(
             R.id.action_study_planners_to_study_planner,
             null,
@@ -86,7 +86,7 @@ class StudyPlanListViewModel @Inject constructor(
 
 
 class StudyPlanListAdapter(
-    private val onShippingProviderClicked: (id:View, post:String) -> Unit
+    private val onShippingProviderClicked: (view:TestElementBinding) -> Unit
 ) : ListAdapter<StudyPlan, StudyPlanViewHolder>(IdEqualsDiffCallback { it.info }) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudyPlanViewHolder {
@@ -124,12 +124,12 @@ class IdEqualsDiffCallback<T : Any, R>(
 class StudyPlanViewHolder(
     val binding: TestElementBinding,
 
-    val onShippingProviderClicked: (id:View, post:String) -> Unit
+    val onShippingProviderClicked: (view:TestElementBinding) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(provider: StudyPlan) {
         binding.root.setOnClickListener {
-            onShippingProviderClicked(binding.textView, "image_big")
+            onShippingProviderClicked(binding)
         }
     }
 }
