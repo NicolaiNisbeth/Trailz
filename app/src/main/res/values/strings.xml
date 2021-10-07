@@ -3,7 +3,7 @@
     <string name="title_study_planners">Study Planners</string>
     <string name="title_favorites">Favorites</string>
     <string name="title_profile">Profile</string>
-    <string name="title_study_planner">Study Planner</string>
+    <string name="title_my_study_planner">My plan</string>
     <string name="login_title">Login</string>
     <string name="singup_title">Signup</string>
     <string name="logout_title">Logout</string>

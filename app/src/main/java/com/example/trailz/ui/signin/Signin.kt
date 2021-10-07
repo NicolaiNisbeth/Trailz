@@ -2,6 +2,7 @@ package com.example.trailz.ui.signin
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,30 +12,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Facebook
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.filled.VpnKey
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -45,12 +33,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.trailz.R
 import com.example.trailz.ui.common.compose.DividerWithText
-import com.example.trailz.ui.common.compose.InputFiled
+import com.example.trailz.ui.common.compose.InputField
 
 @Composable
-fun Sigin(
+fun SignIn(
     viewModel: SigninViewModel,
-    onSigninSuccess: () -> Unit,
+    navigateUp: () -> Unit
 ) {
     val email by viewModel.email.observeAsState(initial = "")
     val password by viewModel.password.observeAsState(initial = "")
@@ -58,21 +46,22 @@ fun Sigin(
     val isLoading by viewModel.loading.observeAsState(initial = false)
     val isSigninSuccess by viewModel.signinSuccess.observeAsState(initial = false)
 
-    SideEffect { if (isSigninSuccess) onSigninSuccess() }
+    SideEffect { if (isSigninSuccess) navigateUp() }
 
-    Sigin(
+    SignIn(
         email = email,
         password = password,
         onEmailChange = viewModel::changeEmail,
         onPasswordChange = viewModel::changePassword,
         isLoading = isLoading,
         hasError = hasError,
-        onSignin = viewModel::signin
+        onSignin = viewModel::signin,
+        navigateUp = navigateUp
     )
 }
 
 @Composable
-internal fun Sigin(
+internal fun SignIn(
     email: String,
     password: String,
     onEmailChange: (String) -> Unit,
@@ -80,6 +69,7 @@ internal fun Sigin(
     isLoading: Boolean,
     hasError: Boolean,
     onSignin: () -> Unit,
+    navigateUp: () -> Unit
 ){
     val focusManager = LocalFocusManager.current
     var passwordVisibility by remember { mutableStateOf(false) }
@@ -90,7 +80,19 @@ internal fun Sigin(
         Icons.Filled.VisibilityOff to PasswordVisualTransformation()
     }
 
-    Scaffold {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "Sign In") },
+                backgroundColor = MaterialTheme.colors.background,
+                navigationIcon = {
+                    IconButton(onClick = navigateUp) {
+                        Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = null)
+                    }
+                },
+            )
+        }
+    ) {
         LazyColumn(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -110,7 +112,7 @@ internal fun Sigin(
             }
 
             item {
-                InputFiled(
+                InputField(
                     value = email,
                     onValueChange = onEmailChange,
                     label = "Email address",
@@ -124,7 +126,7 @@ internal fun Sigin(
                     })
                 )
 
-                InputFiled(
+                InputField(
                     value = password,
                     onValueChange = onPasswordChange,
                     label = "password",

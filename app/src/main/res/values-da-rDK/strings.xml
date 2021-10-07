@@ -4,7 +4,7 @@
     <string name="title_study_planners">StudiePlaner</string>
     <string name="title_favorites">Favoritter</string>
     <string name="title_profile">Profil</string>
-    <string name="title_study_planner">StudiePlan</string>
+    <string name="title_my_study_planner">Min Plan</string>
     <string name="login_title">Login</string>
     <string name="singup_title">Opret</string>
     <string name="logout_title">Log ud</string>

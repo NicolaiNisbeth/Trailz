@@ -22,9 +22,9 @@ class SigninFragment: Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                Sigin(
+                SignIn(
                     viewModel = viewModel,
-                    onSigninSuccess = findNavController()::navigateUp,
+                    navigateUp = findNavController()::navigateUp,
                 )
             }
         }

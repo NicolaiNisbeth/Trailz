@@ -6,14 +6,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -27,6 +32,7 @@ import com.example.trailz.R
 import com.example.trailz.databinding.FragmentProfileBinding
 import com.example.trailz.inject.SharedPrefs
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 import javax.inject.Inject
@@ -34,13 +40,12 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class ProfileFragment : Fragment() {
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private var _binding: FragmentProfileBinding? = null
-    private val binding get() = _binding!!
-
     @Inject
     lateinit var sharedPrefs: SharedPrefs
+
+    private val appliedCountry by lazy {
+        LanguageConfig.languageToConfig(sharedPrefs.languagePreference)
+    }
 
     private val viewModel: ProfileViewModel by viewModels()
 
@@ -50,69 +55,37 @@ class ProfileFragment : Fragment() {
         super.onAttach(context)
         try {
             onLanguageListener = context as ChangeLanguageListener
-        } catch (e: Error){
+        } catch (e: Error) {
             throw IllegalStateException("Activity must implement $onLanguageListener")
         }
     }
 
+    @ExperimentalMaterialApi
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         viewModel.getUser()
-        return FragmentProfileBinding.inflate(inflater, container, false)
-            .also { _binding = it }
-            .also { setupClickListeners(it.loginButton, it.signupButton, it.logoutButton) }
-            .also { setupLanguageOptions(it.languageListView) }
-            .run { root }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        lifecycleScope.launch {
-            viewModel.state.observe(viewLifecycleOwner) {
-                binding.progressCircular.visibility = if (it.isLoading) View.VISIBLE else View.GONE
-                binding.signupButton.visibility = if (!it.isLoggedIn) View.VISIBLE else View.GONE
-                binding.loginButton.visibility = if (!it.isLoggedIn) View.VISIBLE else View.GONE
-                binding.logoutButton.visibility = if (it.isLoggedIn) View.VISIBLE else View.GONE
-                binding.textNotifications.text = it.user.toString()
-                it.error?.let { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+        return ComposeView(requireContext()).apply {
+            setContent {
+                Profile(
+                    viewModel = viewModel,
+                    appliedCountry = appliedCountry,
+                    onChangeLanguage = { onLanguageListener.onChangeLanguage(it) },
+                    navigateUp = { findNavController().navigateUp() },
+                    signIn = ::signIn,
+                    signUp = ::signUp
+                )
             }
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun signIn(){
+        findNavController().navigate(R.id.action_profile_to_signin)
     }
 
-    private fun setupClickListeners(loginButton: View, signupButton: View, logoutButton: View) {
-        loginButton.setOnClickListener {
-            findNavController().navigate(R.id.action_profile_to_signin)
-        }
-
-        signupButton.setOnClickListener {
-            findNavController().navigate(R.id.action_profile_to_signup)
-        }
-        logoutButton.setOnClickListener {
-            viewModel.logout()
-        }
-    }
-
-    private fun setupLanguageOptions(languageListView: ComposeView) {
-        languageListView.setContent {
-            Row {
-                LanguageConfig.values().forEach {
-                    Button(onClick = { onLanguageListener.onChangeLanguage(it.code) }) {
-                        Row {
-                            Image(painterResource(id = it.flagResource), contentDescription = null)
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(text = it.title, modifier = Modifier.align(CenterVertically))
-                        }
-                    }
-                }
-            }
-        }
+    private fun signUp(){
+        findNavController().navigate(R.id.action_profile_to_signup)
     }
 }

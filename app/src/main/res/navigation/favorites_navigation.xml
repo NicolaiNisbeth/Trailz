@@ -15,11 +15,27 @@
 
         <action
             android:id="@+id/action_favorites_to_study_planner"
-            app:destination="@id/study_planner_navigation" />
+            app:destination="@id/study_planner_navigation" >
+
+            <argument
+                android:name="ownerId"
+                app:argType="string"
+                />
+
+        </action>
 
         <action
             android:id="@+id/action_favorites_to_profile"
-            app:destination="@id/profile_navigation" />
+            app:destination="@id/profile_navigation"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
+
+        <action
+            android:id="@+id/action_favorites_to_study_planners"
+            app:destination="@id/study_planners_navigation" />
 
     </fragment>
 

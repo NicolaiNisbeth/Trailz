@@ -12,18 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,13 +29,14 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.trailz.ui.common.compose.InputFiled
+import com.example.trailz.ui.common.compose.InputField
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import android.annotation.SuppressLint
+import androidx.compose.material.*
+import androidx.compose.material.icons.filled.*
 import com.google.android.material.animation.AnimationUtils
-import androidx.compose.material.icons.filled.FlutterDash
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -63,7 +53,7 @@ import kotlinx.coroutines.flow.collect
 @Composable
 fun Signup(
     viewModel: SignupViewModel,
-    onSignupSuccess: () -> Unit,
+    navigateUp: () -> Unit
 ) {
     val username by viewModel.username.observeAsState(initial = "")
     val email by viewModel.email.observeAsState(initial = "")
@@ -83,7 +73,7 @@ fun Signup(
             .takeUnless { it == -1 } ?: 0
     )
 
-    SideEffect { if (isSignupSuccess) onSignupSuccess() }
+    SideEffect { if (isSignupSuccess) navigateUp() }
 
     Signup(
         username = username,
@@ -98,6 +88,7 @@ fun Signup(
         hasError = hasError,
         isLoading = isLoading,
         onSignup = viewModel::signup,
+        navigateUp = navigateUp
     )
 }
 
@@ -116,6 +107,7 @@ internal fun Signup(
     hasError: Boolean,
     isLoading: Boolean,
     onSignup: () -> Unit,
+    navigateUp: () -> Unit
 ){
     val focusManager = LocalFocusManager.current
     var passwordVisibility by remember { mutableStateOf(false) }
@@ -126,7 +118,19 @@ internal fun Signup(
         Icons.Filled.VisibilityOff to PasswordVisualTransformation()
     }
 
-    Scaffold {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "Sign Up") },
+                backgroundColor = MaterialTheme.colors.background,
+                navigationIcon = {
+                    IconButton(onClick = navigateUp) {
+                        Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = null)
+                    }
+                },
+            )
+        }
+    ) {
         LazyColumn(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -146,7 +150,7 @@ internal fun Signup(
             }
 
             item {
-                InputFiled(
+                InputField(
                     value = username,
                     onValueChange = onUsernameChange,
                     label = "Username",
@@ -160,7 +164,7 @@ internal fun Signup(
                     })
                 )
 
-                InputFiled(
+                InputField(
                     value = email,
                     onValueChange = onEmailChange,
                     label = "Email address",
@@ -174,7 +178,7 @@ internal fun Signup(
                     })
                 )
 
-                InputFiled(
+                InputField(
                     value = password,
                     onValueChange = onPasswordChange,
                     label = "password",
