@@ -13,6 +13,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -24,6 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.base.domain.Course
+import com.example.base.domain.StudyPlan
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -36,7 +39,24 @@ fun MyStudyPlan(
     onProfile: () -> Unit,
     navigateUp: () -> Unit
 ) {
+
+    val studyPlan by viewModel.unsavedStudyPlan.observeAsState(StudyPlan())
+    val semesterToCourses = viewModel.semesterToCourses
+    val inEditMode by viewModel.inEditMode
+
     MyStudyPlan(
+        studyPlan = studyPlan,
+        semesterToCourses = semesterToCourses,
+        inEditMode = inEditMode,
+        changeEditMode = viewModel::changeEditMode,
+        isSemesterCollapsed = viewModel::isSemesterCollapsed,
+        collapseSemester = viewModel::collapseSemester,
+        expandSemester = viewModel::expandSemester,
+        addSemester = viewModel::addSemester,
+        removeSemester = viewModel::removeSemester,
+        addCourse = viewModel::addCourse,
+        removeCourse = viewModel::removeCourse,
+        replaceCourseAt = viewModel::replaceCourseAt,
         onProfile = onProfile,
         navigateUp = navigateUp
     )
@@ -46,28 +66,22 @@ fun MyStudyPlan(
 @ExperimentalFoundationApi
 @Composable
 fun MyStudyPlan(
+    studyPlan: StudyPlan,
+    semesterToCourses: Map<Int, List<Course>>,
+    inEditMode: Boolean,
+    changeEditMode: (Boolean) -> Unit,
+    isSemesterCollapsed: (Int) -> Boolean,
+    collapseSemester: (Int) -> Unit,
+    expandSemester: (Int) -> Unit,
+    addSemester: () -> Unit,
+    removeSemester: (Int) -> Unit,
+    addCourse: (Course, Int) -> Unit,
+    replaceCourseAt: (Int, Int, Course) -> Unit,
+    removeCourse: (Course, Int) -> Unit,
     onProfile: () -> Unit,
     navigateUp: () -> Unit
 
 ) {
-    val isSemesterCollapsed = remember {
-        mutableStateMapOf(
-            "1. SEMESTER" to false,
-            "2. SEMESTER" to true
-        )
-    }
-
-    val semesterToCourses = remember {
-        mutableStateMapOf(
-            "1. SEMESTER" to listOf("A", "BBBBBBB", "C"),
-            "2. SEMESTER" to emptyList(),
-        )
-    }
-
-    var inEdit by remember {
-        mutableStateOf(false)
-    }
-
     val date = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(Date())
 
     Scaffold(
@@ -84,9 +98,9 @@ fun MyStudyPlan(
                     IconButton(onClick = onProfile) {
                         Icon(imageVector = Icons.Default.PermIdentity, contentDescription = null)
                     }
-                    IconButton(onClick = { inEdit = !inEdit }){
+                    IconButton(onClick = { changeEditMode(!inEditMode) }){
                         Icon(
-                            imageVector = if (inEdit) Icons.Default.Save else Icons.Default.ModeEdit,
+                            imageVector = if (inEditMode) Icons.Default.Save else Icons.Default.ModeEdit,
                             contentDescription = null
                         )
                     }
@@ -95,7 +109,9 @@ fun MyStudyPlan(
         }
     ) {
         Column(
-            modifier = Modifier.padding(it).fillMaxSize(),
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -116,34 +132,27 @@ fun MyStudyPlan(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ){
+
                 semesterToCourses.toSortedMap().forEach { (semester, courses) ->
-                    val isCollapsed = isSemesterCollapsed[semester] == true
-                    if (inEdit){
+                    val isCollapsed = isSemesterCollapsed(semester)
+                    if (inEditMode){
                         stickyHeader {
                             SemesterItemEdit(
-                                title = semester,
+                                title = "$semester",
                                 isCollapsed = isCollapsed,
                                 color = MaterialTheme.colors.primary,
                                 isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Clear),
                                 isExpandedIcon = rememberVectorPainter(image = Icons.Default.Clear),
-                                onClick = { semesterToCourses.remove(it) }
+                                onClick = { removeSemester(semester) }
                             )
                         }
 
                         courses.forEachIndexed { index, course ->
                             item {
                                 CourseItemEdit(
-                                    title = course,
-                                    onRemove = {
-                                        semesterToCourses[semester] = courses.minus(it)
-                                    },
-                                    onTitleChange = { newCourse -> semesterToCourses[semester]
-                                        ?.toMutableList()
-                                        ?.let { newCourseList ->
-                                            newCourseList[index] = newCourse
-                                            semesterToCourses[semester] = newCourseList
-                                        }
-                                    }
+                                    title = course.title,
+                                    onRemove = { removeCourse(course, semester) },
+                                    onTitleChange = { title -> replaceCourseAt(index, semester, Course(title)) }
                                 )
                             }
                         }
@@ -152,43 +161,37 @@ fun MyStudyPlan(
                                 text = "Add",
                                 color = MaterialTheme.colors.secondaryVariant,
                                 style = MaterialTheme.typography.caption,
-                                modifier = Modifier.clickable {
-                                    semesterToCourses[semester] = courses.plus("?")
-                                }
+                                modifier = Modifier.clickable { addCourse(Course("?"), semester, ) }
                             )
                         }
                     } else {
                         stickyHeader {
                             SemesterItemSave(
-                                title = semester,
+                                title = "$semester",
                                 isCollapsed = isCollapsed,
                                 color = MaterialTheme.colors.primary,
                                 isCollapsedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowDown),
                                 isExpandedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowUp),
-                                onClick = { isSemesterCollapsed[semester] = isCollapsed.not() }
+                                onClick = { if (isSemesterCollapsed(semester)) expandSemester(semester) else collapseSemester(semester) }
                             )
                         }
                         if (isCollapsed.not()){
                             courses.forEach {
                                 item {
-                                    CourseItemSave(title = it)
+                                    CourseItemSave(title = it.title)
                                 }
                             }
                         }
                     }
                 }
-                if (inEdit){
+                if (inEditMode){
                     item {
                         SemesterItemSave(
                             title = "X. SEMESTER",
                             isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Add),
                             isExpandedIcon = rememberVectorPainter(image = Icons.Default.Add),
                             color = MaterialTheme.colors.secondaryVariant,
-                            onClick = {
-                                val key = "${semesterToCourses.size + 1}. SEMESTER"
-                                isSemesterCollapsed[key] = false
-                                semesterToCourses[key] = emptyList()
-                            }
+                            onClick = { addSemester() }
                         )
                     }
                 }
