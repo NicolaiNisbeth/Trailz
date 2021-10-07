@@ -4,10 +4,18 @@
     android:id="@+id/my_study_plan_navigation"
     app:startDestination="@id/myStudyPlanFragment">
 
+    <include app:graph="@navigation/profile_navigation" />
 
     <fragment
         android:id="@+id/myStudyPlanFragment"
         android:name="com.example.trailz.ui.mystudyplan.MyStudyPlanFragment"
-        android:label="MyStudyPlanFragment" />
+        android:label="MyStudyPlanFragment" >
+
+        <action
+            android:id="@+id/action_my_study_plan_to_profile"
+            app:destination="@id/profile_navigation" />
+
+
+    </fragment>
 
 </navigation>

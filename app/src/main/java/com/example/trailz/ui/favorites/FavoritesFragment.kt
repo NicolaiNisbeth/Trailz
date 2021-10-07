@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.trailz.R
-import com.example.trailz.databinding.FragmentFavoritesBinding
 import com.example.trailz.inject.SharedPrefs
 import com.example.trailz.ui.studyplanners.StudyPlannersFragmentDirections
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,7 +36,8 @@ class FavoritesFragment : Fragment() {
                     viewModel = viewModel,
                     userId = sharedPrefs.loggedInId,
                     onStudyPlan = ::openStudyPlan,
-                    onProfile = ::openProfile
+                    onProfile = ::openProfile,
+                    onFindFavorite = ::openStudyPlanners
                 )
             }
         }
@@ -50,5 +50,9 @@ class FavoritesFragment : Fragment() {
 
     private fun openProfile(){
         findNavController().navigate(R.id.action_favorites_to_profile)
+    }
+
+    private fun openStudyPlanners(){
+        findNavController().navigate(R.id.action_favorites_to_study_planners)
     }
 }
