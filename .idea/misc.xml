@@ -12,8 +12,6 @@
         <entry key="..\:/Users/nicol/AndroidStudioProjects/Trailz/app/src/main/res/drawable/ic_notifications_black_24dp.xml" value="0.3255208333333333" />
         <entry key="..\:/Users/nicol/AndroidStudioProjects/Trailz/app/src/main/res/layout/activity_main.xml" value="0.15045592705167174" />
         <entry key="..\:/Users/nicol/AndroidStudioProjects/Trailz/app/src/main/res/layout/fragment_favorites.xml" value="0.1" />
-        <entry key="..\:/Users/nicol/AndroidStudioProjects/Trailz/app/src/main/res/layout/fragment_onboarding.xml" value="0.18478260869565216" />
-        <entry key="..\:/Users/nicol/AndroidStudioProjects/Trailz/app/src/main/res/layout/fragment_profile.xml" value="0.309375" />
         <entry key="..\:/Users/nicol/AndroidStudioProjects/Trailz/app/src/main/res/layout/fragment_study_planners.xml" value="0.1" />
         <entry key="..\:/Users/nicol/AndroidStudioProjects/Trailz/app/src/main/res/menu/bottom_nav_menu.xml" value="0.309375" />
         <entry key="..\:/Users/nicol/AndroidStudioProjects/Trailz/app/src/main/res/menu/menu_counter.xml" value="0.16666666666666666" />
@@ -32,5 +30,12 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.24456521739130435" />
+      </ProjectState>
+    </option>
   </component>
 </project>

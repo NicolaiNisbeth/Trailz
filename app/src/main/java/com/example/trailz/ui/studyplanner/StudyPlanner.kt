@@ -39,11 +39,13 @@ import java.util.*
 fun StudyPlanner(
     viewModel: StudyPlannerViewModel,
     navigateUp: () -> Unit,
+    openmarketplace: () -> Unit
 ){
     val studyPlan by viewModel.studyPlan.observeAsState(initial = StudyPlanUiModel())
     StudyPlanner(
         studyPlan = studyPlan,
         navigateUp = navigateUp,
+        openmarketplace = openmarketplace
     )
 }
 
@@ -52,6 +54,7 @@ fun StudyPlanner(
 fun StudyPlanner(
     studyPlan: StudyPlanUiModel,
     navigateUp: () -> Unit,
+    openmarketplace: () -> Unit,
 ){
     val (studyPlan, error, loading) = studyPlan
 
@@ -73,7 +76,9 @@ fun StudyPlanner(
                 .padding(it)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        ) { Button(onClick = { openmarketplace() }) {
+
+        }
             Box(Modifier.fillMaxSize()) {
                 if (loading) CircularProgressIndicator(Modifier.align(Alignment.Center))
                 if (!error.isNullOrBlank()) Text(text = error, modifier = Modifier.align(Alignment.Center))
