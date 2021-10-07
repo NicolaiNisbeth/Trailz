@@ -5,7 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.ContentAlpha
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -14,8 +16,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.ModeEdit
@@ -27,15 +27,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import java.text.SimpleDateFormat
 import java.util.*
 
+@ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 @Composable
 fun StudyPlanner(
@@ -50,7 +55,7 @@ fun StudyPlanner(
 
     val semesterToCourses = remember {
         mutableStateMapOf(
-            "1. SEMESTER" to listOf("A", "B", "C"),
+            "1. SEMESTER" to listOf("A", "BBBBBBB", "C"),
             "2. SEMESTER" to emptyList(),
         )
     }
@@ -108,12 +113,12 @@ fun StudyPlanner(
                         )
                     }
                 }
-                semesterToCourses.toSortedMap().forEach { (sem, courses) ->
-                    val isCollapsed = isSemesterCollapsed[sem] == true
+                semesterToCourses.toSortedMap().forEach { (semester, courses) ->
+                    val isCollapsed = isSemesterCollapsed[semester] == true
                     if (inEdit){
                         stickyHeader {
                             SemesterItemEdit(
-                                title = sem,
+                                title = semester,
                                 isCollapsed = isCollapsed,
                                 color = MaterialTheme.colors.primary,
                                 isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Clear),
@@ -122,11 +127,20 @@ fun StudyPlanner(
                             )
                         }
 
-                        courses.forEach {
+                        courses.forEachIndexed { index, course ->
                             item {
                                 CourseItemEdit(
-                                    title = it,
-                                    onClick = { semesterToCourses[sem] = courses.minus(it) }
+                                    title = course,
+                                    onRemove = {
+                                        semesterToCourses[semester] = courses.minus(it)
+                                   },
+                                    onTitleChange = { newCourse -> semesterToCourses[semester]
+                                        ?.toMutableList()
+                                        ?.let { newCourseList ->
+                                            newCourseList[index] = newCourse
+                                            semesterToCourses[semester] = newCourseList
+                                        }
+                                    }
                                 )
                             }
                         }
@@ -136,19 +150,19 @@ fun StudyPlanner(
                                 color = MaterialTheme.colors.secondaryVariant,
                                 style = MaterialTheme.typography.caption,
                                 modifier = Modifier.clickable {
-                                    semesterToCourses[sem] = courses.plus("?")
+                                    semesterToCourses[semester] = courses.plus("?")
                                 }
                             )
                         }
                     } else {
                         stickyHeader {
                             SemesterItemSave(
-                                title = sem,
+                                title = semester,
                                 isCollapsed = isCollapsed,
                                 color = MaterialTheme.colors.primary,
                                 isCollapsedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowDown),
                                 isExpandedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowUp),
-                                onClick = { isSemesterCollapsed[sem] = isCollapsed.not() }
+                                onClick = { isSemesterCollapsed[semester] = isCollapsed.not() }
                             )
                         }
                         if (isCollapsed.not()){
@@ -256,27 +270,37 @@ fun SemesterItemEdit(
     }
 }
 
+@ExperimentalComposeUiApi
 @Composable
 fun CourseItemEdit(
     title: String,
-    onClick: (String) -> Unit
+    onRemove: (String) -> Unit,
+    onTitleChange: (String) -> Unit
 ){
+    val focusManager = LocalFocusManager.current
+    var newTitle by remember { mutableStateOf(title) }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.caption,
+        BasicTextField(
+            value = newTitle,
+            onValueChange = { newTitle = it},
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done, keyboardType = KeyboardType.Password),
+            keyboardActions = KeyboardActions(onDone = {
+                onTitleChange(newTitle)
+                focusManager.clearFocus()
+            }),
         )
+
         Text(
             text = "Remove",
             color = MaterialTheme.colors.error,
             style = MaterialTheme.typography.caption,
-            modifier = Modifier.clickable { onClick(title) }
+            modifier = Modifier.clickable { onRemove(newTitle) }
         )
-
     }
 }
 

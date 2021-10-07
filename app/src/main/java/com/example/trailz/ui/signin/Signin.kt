@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.trailz.R
 import com.example.trailz.ui.common.compose.DividerWithText
-import com.example.trailz.ui.common.compose.InputFiled
+import com.example.trailz.ui.common.compose.InputField
 
 @Composable
 fun Sigin(
@@ -110,7 +110,7 @@ internal fun Sigin(
             }
 
             item {
-                InputFiled(
+                InputField(
                     value = email,
                     onValueChange = onEmailChange,
                     label = "Email address",
@@ -124,7 +124,7 @@ internal fun Sigin(
                     })
                 )
 
-                InputFiled(
+                InputField(
                     value = password,
                     onValueChange = onPasswordChange,
                     label = "password",

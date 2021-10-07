@@ -15,7 +15,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 
 @Composable
-fun InputFiled(
+fun InputField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,

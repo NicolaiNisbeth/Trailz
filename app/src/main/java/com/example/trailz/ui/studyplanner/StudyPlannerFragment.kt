@@ -5,12 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.example.trailz.R
 
 class StudyPlannerFragment: Fragment() {
+    @ExperimentalComposeUiApi
     @ExperimentalFoundationApi
     override fun onCreateView(
         inflater: LayoutInflater,
