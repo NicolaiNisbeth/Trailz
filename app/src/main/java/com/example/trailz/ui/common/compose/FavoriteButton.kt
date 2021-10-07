@@ -19,10 +19,12 @@ import androidx.compose.ui.unit.dp
 @SuppressLint("UnusedTransitionTargetStateParameter")
 @Composable
 fun FavoriteButton(
+    modifier: Modifier = Modifier,
     isChecked: Boolean,
     onClick: () -> Unit
 ) {
     IconToggleButton(
+        modifier = modifier,
         checked = isChecked,
         onCheckedChange = { onClick() }
     ) {

@@ -15,7 +15,7 @@ class StudyPlanerModule {
 
     @Provides
     @ViewModelScoped
-    fun providegetAllStudyPlansUseCase(repository: StudyPLansRepository): GetAllStudyPlansUseCase {
+    fun provideGetAllStudyPlansUseCase(repository: StudyPLansRepository): GetAllStudyPlansUseCase {
         return GetAllStudyPlansUseCase(repository)
     }
     @Provides
