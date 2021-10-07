@@ -29,7 +29,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.trailz.ui.common.compose.InputFiled
+import com.example.trailz.ui.common.compose.InputField
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -150,7 +150,7 @@ internal fun Signup(
             }
 
             item {
-                InputFiled(
+                InputField(
                     value = username,
                     onValueChange = onUsernameChange,
                     label = "Username",
@@ -164,7 +164,7 @@ internal fun Signup(
                     })
                 )
 
-                InputFiled(
+                InputField(
                     value = email,
                     onValueChange = onEmailChange,
                     label = "Email address",
@@ -178,7 +178,7 @@ internal fun Signup(
                     })
                 )
 
-                InputFiled(
+                InputField(
                     value = password,
                     onValueChange = onPasswordChange,
                     label = "password",

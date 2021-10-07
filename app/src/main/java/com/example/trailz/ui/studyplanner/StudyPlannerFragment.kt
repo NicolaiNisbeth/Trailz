@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -16,6 +18,8 @@ class StudyPlannerFragment: Fragment() {
 
     private val viewModel: StudyPlannerViewModel by viewModels()
 
+    @ExperimentalFoundationApi
+    @ExperimentalComposeUiApi
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -23,7 +27,7 @@ class StudyPlannerFragment: Fragment() {
     ): View? {
         return ComposeView(requireContext()).apply {
             setContent {
-                StudyPlan(
+                StudyPlanner(
                     viewModel = viewModel,
                     navigateUp = findNavController()::navigateUp
                 )
