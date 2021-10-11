@@ -49,7 +49,7 @@ class MyStudyPlanViewModel @Inject constructor(
     fun expandSemester(semesterID: Int) { collapsedSemesters[semesterID] = false }
 
     fun addSemester() {
-        val newSemester = semesterToCourses.count()
+        val newSemester = semesterToCourses.keys.maxOrNull()?.plus(1) ?: 1
         semesterToCourses[newSemester] = emptyList()
         collapsedSemesters[newSemester] = false
     }
@@ -57,6 +57,15 @@ class MyStudyPlanViewModel @Inject constructor(
     fun removeSemester(semesterId: Int) {
         semesterToCourses.remove(semesterId)
         collapsedSemesters.remove(semesterId)
+    }
+
+    fun editSemester(id: Int, newTitle: String){
+        val title = newTitle.toIntOrNull() ?: return
+        val isTitleUnique = semesterToCourses[title] == null
+        if (isTitleUnique){
+            semesterToCourses[title] = semesterToCourses[id] ?: emptyList()
+            removeSemester(id)
+        }
     }
 
     fun addCourse(course: Course, semesterId: Int) {
@@ -98,10 +107,10 @@ class MyStudyPlanViewModel @Inject constructor(
                 userId = sharedPrefs.loggedInId ?: "userId",
                 title = "Awesome study planner",
                 semesters = listOf(
-                    Semester(order = 1, emptyList()),
-                    Semester(order = 2, emptyList()),
-                    Semester(order = 3, emptyList()),
-                    Semester(order = 4, emptyList()),
+                    Semester(order = 1, courses = emptyList()),
+                    Semester(order = 2, courses = emptyList()),
+                    Semester(order = 3, courses = emptyList()),
+                    Semester(order = 4, courses = emptyList()),
                 )
             )
             _savedStudyPlan.value = studyPlan

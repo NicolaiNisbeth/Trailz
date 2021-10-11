@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,17 +16,20 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
 import com.example.base.domain.StudyPlan
-import kotlinx.coroutines.launch
+import com.example.trailz.ui.common.compose.InputFieldDialog
+import com.example.trailz.ui.common.compose.InputFieldFocus
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -54,6 +56,7 @@ fun MyStudyPlan(
         expandSemester = viewModel::expandSemester,
         addSemester = viewModel::addSemester,
         removeSemester = viewModel::removeSemester,
+        editSemester = viewModel::editSemester,
         addCourse = viewModel::addCourse,
         removeCourse = viewModel::removeCourse,
         replaceCourseAt = viewModel::replaceCourseAt,
@@ -75,6 +78,7 @@ fun MyStudyPlan(
     expandSemester: (Int) -> Unit,
     addSemester: () -> Unit,
     removeSemester: (Int) -> Unit,
+    editSemester: (Int, String) -> Unit,
     addCourse: (Course, Int) -> Unit,
     replaceCourseAt: (Int, Int, Course) -> Unit,
     removeCourse: (Course, Int) -> Unit,
@@ -143,7 +147,8 @@ fun MyStudyPlan(
                                 color = MaterialTheme.colors.primary,
                                 isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Clear),
                                 isExpandedIcon = rememberVectorPainter(image = Icons.Default.Clear),
-                                onClick = { removeSemester(semester) }
+                                onClick = { removeSemester(semester) },
+                                onTitleChange = { editSemester(semester, it) }
                             )
                         }
 
@@ -191,7 +196,7 @@ fun MyStudyPlan(
                             isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Add),
                             isExpandedIcon = rememberVectorPainter(image = Icons.Default.Add),
                             color = MaterialTheme.colors.secondaryVariant,
-                            onClick = { addSemester() }
+                            onClick = { addSemester() },
                         )
                     }
                 }
@@ -243,19 +248,23 @@ fun SemesterItemSave(
     }
 }
 
+@ExperimentalComposeUiApi
 @Composable
 fun SemesterItemEdit(
+    modifier: Modifier = Modifier,
     title: String,
     isCollapsed: Boolean = true,
     isCollapsedIcon: Painter,
     isExpandedIcon: Painter,
     color: Color,
-    onClick: (String) -> Unit
+    onClick: (String) -> Unit,
+    onTitleChange: (String) -> Unit
 ){
+    var openDialog by remember { mutableStateOf(false) }
+
     Box(
-        Modifier
+        modifier
             .background(MaterialTheme.colors.background)
-            .clickable { onClick(title) }
     ) {
         Spacer(
             modifier = Modifier
@@ -271,15 +280,27 @@ fun SemesterItemEdit(
                 .align(Alignment.Center)
                 .background(MaterialTheme.colors.background)
                 .padding(horizontal = 16.dp)
+                .clickable { openDialog = true }
         )
         Icon(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .background(MaterialTheme.colors.background),
+                .background(MaterialTheme.colors.background)
+                .clickable { onClick(title) },
             contentDescription = null,
             tint = color,
             painter = if (isCollapsed) isCollapsedIcon else isExpandedIcon
         )
+
+        if (openDialog) {
+            InputFieldDialog(
+                title = "What semester is it?",
+                confirmTitle = "Confirm",
+                dismissTitle = "Dismiss",
+                onTitleChange = { onTitleChange(it) },
+                onDismiss = { openDialog = false }
+            )
+        }
     }
 }
 
