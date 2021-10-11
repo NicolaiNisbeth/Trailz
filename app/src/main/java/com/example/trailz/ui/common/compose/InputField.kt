@@ -65,29 +65,16 @@ fun InputField(
 @ExperimentalComposeUiApi
 @Composable
 fun InputFieldFocus(
-    title: String,
-    titleChange: (String) -> Unit,
     focusRequester: FocusRequester = FocusRequester(),
-    onDone: () -> Unit
+    inputField: @Composable (Modifier) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val keyboardOptions = KeyboardOptions.Default.copy(
-        imeAction = ImeAction.Done,
-        keyboardType = KeyboardType.Number
-    )
-
-    val focusManager = LocalFocusManager.current
     val focusModifier = Modifier
         .focusRequester(focusRequester)
         .onFocusEvent { if (it.hasFocus || it.isFocused) keyboardController?.show() }
 
-    TextField(
-        modifier = focusModifier,
-        value = title,
-        onValueChange = titleChange,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus(); onDone() }),
-    )
+    inputField(focusModifier)
+
     DisposableEffect(Unit) {
         focusRequester.requestFocus()
         onDispose { }

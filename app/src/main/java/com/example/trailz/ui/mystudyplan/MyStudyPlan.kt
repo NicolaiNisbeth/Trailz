@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -21,13 +20,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
 import com.example.base.domain.StudyPlan
+import com.example.trailz.ui.common.Event
 import com.example.trailz.ui.common.compose.InputFieldDialog
 import com.example.trailz.ui.common.compose.InputFieldFocus
 import java.text.SimpleDateFormat
@@ -86,7 +85,17 @@ fun MyStudyPlan(
     navigateUp: () -> Unit
 
 ) {
+    val focusManager = LocalFocusManager.current
     val date = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(Date())
+
+    var openDialog by remember { mutableStateOf(false) }
+    var newTitleSemester by remember { mutableStateOf(-1) }
+
+    val submitNameChange: (String) -> Unit = {
+        focusManager.clearFocus()
+        addCourse(Course(it), newTitleSemester)
+        openDialog = false
+    }
 
     Scaffold(
         topBar = {
@@ -166,7 +175,10 @@ fun MyStudyPlan(
                                 text = "Add",
                                 color = MaterialTheme.colors.secondaryVariant,
                                 style = MaterialTheme.typography.caption,
-                                modifier = Modifier.clickable { addCourse(Course("?"), semester, ) }
+                                modifier = Modifier.clickable {
+                                    newTitleSemester = semester
+                                    openDialog = true
+                                }
                             )
                         }
                     } else {
@@ -201,6 +213,29 @@ fun MyStudyPlan(
                     }
                 }
                 item { Spacer(modifier = Modifier.height(73.dp)) }
+            }
+
+            if (openDialog) {
+                InputFieldDialog(
+                    title = "What course is this?",
+                    confirmTitle = "Confirm",
+                    dismissTitle = "Dismiss",
+                    onConfirm = submitNameChange,
+                    onDismiss = { openDialog = false }
+                ){ value, onValueChange ->
+                    InputFieldFocus { focusModifier ->
+                        TextField(
+                            modifier = focusModifier,
+                            value = value,
+                            onValueChange = onValueChange,
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Done,
+                                keyboardType = KeyboardType.Password
+                            ),
+                            keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
+                        )
+                    }
+                }
             }
 
         }
@@ -261,6 +296,13 @@ fun SemesterItemEdit(
     onTitleChange: (String) -> Unit
 ){
     var openDialog by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+
+    val submitNameChange: (String) -> Unit = {
+        focusManager.clearFocus()
+        onTitleChange(it)
+        openDialog = false
+    }
 
     Box(
         modifier
@@ -297,9 +339,22 @@ fun SemesterItemEdit(
                 title = "What semester is it?",
                 confirmTitle = "Confirm",
                 dismissTitle = "Dismiss",
-                onTitleChange = { onTitleChange(it) },
+                onConfirm = submitNameChange,
                 onDismiss = { openDialog = false }
-            )
+            ){ value, onValueChange ->
+                InputFieldFocus { focusModifier ->
+                    TextField(
+                        modifier = focusModifier,
+                        value = value,
+                        onValueChange = onValueChange,
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done,
+                            keyboardType = KeyboardType.Number
+                        ),
+                        keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
+                    )
+                }
+            }
         }
     }
 }
@@ -312,29 +367,53 @@ fun CourseItemEdit(
     onTitleChange: (String) -> Unit
 ){
     val focusManager = LocalFocusManager.current
-    var newTitle by remember { mutableStateOf(title) }
+    var openDialog by remember { mutableStateOf(false) }
+
+    val submitNameChange: (String) -> Unit = {
+        focusManager.clearFocus()
+        onTitleChange(it)
+        openDialog = false
+    }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        BasicTextField(
-            value = newTitle,
-            onValueChange = { newTitle = it},
-            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done, keyboardType = KeyboardType.Password),
-            keyboardActions = KeyboardActions(onDone = {
-                onTitleChange(newTitle)
-                focusManager.clearFocus()
-            }),
+        Text(
+            text = title,
+            style = MaterialTheme.typography.caption,
+            modifier = Modifier.clickable { openDialog = true }
         )
-
         Text(
             text = "Remove",
             color = MaterialTheme.colors.error,
             style = MaterialTheme.typography.caption,
-            modifier = Modifier.clickable { onRemove(newTitle) }
+            modifier = Modifier.clickable { onRemove(title) }
         )
+    }
+
+    if (openDialog) {
+        InputFieldDialog(
+            title = "Course name",
+            confirmTitle = "Confirm",
+            dismissTitle = "Dismiss",
+            onConfirm = submitNameChange,
+            onDismiss = { openDialog = false }
+        ){ value, onValueChange ->
+            InputFieldFocus { focusModifier ->
+                TextField(
+                    modifier = focusModifier,
+                    value = value,
+                    onValueChange = onValueChange,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Done,
+                        keyboardType = KeyboardType.Password
+                    ),
+                    keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
+                )
+            }
+        }
     }
 }
 
