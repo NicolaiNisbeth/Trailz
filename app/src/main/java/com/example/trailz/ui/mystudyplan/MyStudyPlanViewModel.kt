@@ -81,9 +81,11 @@ class MyStudyPlanViewModel @Inject constructor(
     }
 
     fun replaceCourseAt(index: Int, semesterId: Int, course: Course){
-        semesterToCourses[semesterId]?.toMutableList()?.let {
-            it[index] = course
-            semesterToCourses[semesterId] = it
+        if (course.title.isNotBlank()){
+            semesterToCourses[semesterId]?.toMutableList()?.let {
+                it[index] = course
+                semesterToCourses[semesterId] = it
+            }
         }
     }
 

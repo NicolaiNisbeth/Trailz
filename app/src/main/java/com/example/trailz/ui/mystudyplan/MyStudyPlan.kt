@@ -317,7 +317,7 @@ fun SemesterItemEdit(
         )
         Text(
             text = title,
-            color = color,
+            color = MaterialTheme.colors.secondaryVariant,
             modifier = Modifier
                 .align(Alignment.Center)
                 .background(MaterialTheme.colors.background)
