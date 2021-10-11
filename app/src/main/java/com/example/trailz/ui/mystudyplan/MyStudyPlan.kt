@@ -15,7 +15,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -26,7 +25,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
 import com.example.base.domain.StudyPlan
-import com.example.trailz.ui.common.Event
 import com.example.trailz.ui.common.compose.InputFieldDialog
 import com.example.trailz.ui.common.compose.InputFieldFocus
 import java.text.SimpleDateFormat
@@ -49,6 +47,8 @@ fun MyStudyPlan(
         studyPlan = studyPlan,
         semesterToCourses = semesterToCourses,
         inEditMode = inEditMode,
+        toggleAllCollapsed = viewModel::toggleAllSemesters,
+        isAnyCollapsed = viewModel::isAnyCollapsed,
         changeEditMode = viewModel::changeEditMode,
         isSemesterCollapsed = viewModel::isSemesterCollapsed,
         collapseSemester = viewModel::collapseSemester,
@@ -71,6 +71,8 @@ fun MyStudyPlan(
     studyPlan: StudyPlan,
     semesterToCourses: Map<Int, List<Course>>,
     inEditMode: Boolean,
+    toggleAllCollapsed: (Boolean) -> Unit,
+    isAnyCollapsed: () -> Boolean,
     changeEditMode: (Boolean) -> Unit,
     isSemesterCollapsed: (Int) -> Boolean,
     collapseSemester: (Int) -> Unit,
@@ -108,6 +110,17 @@ fun MyStudyPlan(
                     }
                 },
                 actions = {
+                    if (inEditMode){
+                        IconButton(onClick = addSemester ) {
+                            Icon(imageVector = Icons.Default.Add, contentDescription = null)
+                        }
+                    } else {
+                        val collapsed = isAnyCollapsed()
+                        val icon = if (collapsed) Icons.Default.Expand else Icons.Default.Compress
+                        IconButton(onClick = { toggleAllCollapsed(collapsed) }) {
+                            Icon(imageVector = icon, contentDescription = null)
+                        }
+                    }
                     IconButton(onClick = onProfile) {
                         Icon(imageVector = Icons.Default.PermIdentity, contentDescription = null)
                     }
@@ -199,17 +212,6 @@ fun MyStudyPlan(
                                 }
                             }
                         }
-                    }
-                }
-                if (inEditMode){
-                    item {
-                        SemesterItemSave(
-                            title = "X. SEMESTER",
-                            isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Add),
-                            isExpandedIcon = rememberVectorPainter(image = Icons.Default.Add),
-                            color = MaterialTheme.colors.secondaryVariant,
-                            onClick = { addSemester() },
-                        )
                     }
                 }
                 item { Spacer(modifier = Modifier.height(73.dp)) }

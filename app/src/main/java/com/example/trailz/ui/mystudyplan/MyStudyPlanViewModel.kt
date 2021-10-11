@@ -48,6 +48,12 @@ class MyStudyPlanViewModel @Inject constructor(
 
     fun expandSemester(semesterID: Int) { collapsedSemesters[semesterID] = false }
 
+    fun isAnyCollapsed() = collapsedSemesters.any { it.value }
+
+    fun toggleAllSemesters(allCollapsed: Boolean){
+        semesterToCourses.keys.forEach { if (allCollapsed) expandSemester(it) else collapseSemester(it) }
+    }
+
     fun addSemester() {
         val newSemester = semesterToCourses.keys.maxOrNull()?.plus(1) ?: 1
         semesterToCourses[newSemester] = emptyList()
@@ -69,9 +75,11 @@ class MyStudyPlanViewModel @Inject constructor(
     }
 
     fun addCourse(course: Course, semesterId: Int) {
-        semesterToCourses[semesterId] = semesterToCourses[semesterId]
-            ?.plus(course)
-            ?: emptyList()
+        if (course.title.isNotBlank()){
+            semesterToCourses[semesterId] = semesterToCourses[semesterId]
+                ?.plus(course)
+                ?: emptyList()
+        }
     }
 
     fun removeCourse(course: Course, semesterId: Int) {
