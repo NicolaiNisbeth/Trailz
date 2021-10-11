@@ -2,7 +2,6 @@ package com.example.trailz.ui.mystudyplan
 
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.toMutableStateMap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -26,21 +25,39 @@ class MyStudyPlanViewModel @Inject constructor(
 
     private val _savedStudyPlan = MutableLiveData<StudyPlan>()
 
-    private val _unsavedStudyPLan = MutableLiveData<StudyPlan>()
-    val unsavedStudyPlan: LiveData<StudyPlan> = _unsavedStudyPLan
-
     private val _isUpdated = MutableLiveData<Boolean>()
     val isUpdated: LiveData<Boolean> = _isUpdated
 
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
+
     private var collapsedSemesters = mutableStateMapOf<Int, Boolean>()
-
     var semesterToCourses = mutableStateMapOf<Int, List<Course>>()
-
     var inEditMode = mutableStateOf(false)
 
-    private fun isStudyPlanModified() = unsavedStudyPlan.value != _savedStudyPlan.value
+    init {
+        viewModelScope.launch {
+            repository.getStudyPlan(sharedPrefs.loggedInId).collect {
+                when(it){
+                    is Result.Failed -> { inEditMode.value = true; _isLoading.value = false }
+                    is Result.Loading -> _isLoading.value = false
+                    is Result.Success -> {
+                        val studyPlan = it.data
+                        studyPlan.semesters.forEach { addSemester(it.order, it.courses) }
+                        studyPlan.semesters.forEach { expandSemester(it.order) }
+                        _savedStudyPlan.value = studyPlan
+                        _isLoading.value = false
+                    }
+                }
+            }
+        }
+    }
 
-    fun changeEditMode(edit: Boolean){ inEditMode.value = edit }
+    private fun isStudyPlanModified(unsavedStudyPlan: StudyPlan) = unsavedStudyPlan != _savedStudyPlan.value
+
+    fun changeEditMode(edit: Boolean){
+        inEditMode.value = edit
+    }
 
     fun isSemesterCollapsed(semesterId: Int) = collapsedSemesters[semesterId] ?: false
 
@@ -54,10 +71,10 @@ class MyStudyPlanViewModel @Inject constructor(
         semesterToCourses.keys.forEach { if (allCollapsed) expandSemester(it) else collapseSemester(it) }
     }
 
-    fun addSemester() {
-        val newSemester = semesterToCourses.keys.maxOrNull()?.plus(1) ?: 1
-        semesterToCourses[newSemester] = emptyList()
-        collapsedSemesters[newSemester] = false
+    fun addSemester(semesterId: Int? = null, courses: List<Course> = emptyList()) {
+        val newSemesterId = semesterId ?: semesterToCourses.keys.maxOrNull()?.plus(1) ?: 1
+        semesterToCourses[newSemesterId] = courses
+        collapsedSemesters[newSemesterId] = false
     }
 
     fun removeSemester(semesterId: Int) {
@@ -97,56 +114,29 @@ class MyStudyPlanViewModel @Inject constructor(
         }
     }
 
-    fun saveStudyPlan(studyPlan: StudyPlan){
-        if (!isStudyPlanModified()) return
-
-        viewModelScope.launch {
-            repository.createStudyPlan(studyPlan).collect {
-                when (it){
-                    is Result.Failed -> { _isUpdated.value = true }
-                    is Result.Loading -> {}
-                    is Result.Success -> { _isUpdated.value = true }
-                }
-            }
-        }
-    }
-
-    init {
-        viewModelScope.launch {
+    fun saveStudyPlan(){
+        sharedPrefs.loggedInId?.let {
             val studyPlan = StudyPlan(
-                userId = sharedPrefs.loggedInId ?: "userId",
-                title = "Awesome study planner",
-                semesters = listOf(
-                    Semester(order = 1, courses = emptyList()),
-                    Semester(order = 2, courses = emptyList()),
-                    Semester(order = 3, courses = emptyList()),
-                    Semester(order = 4, courses = emptyList()),
-                )
+                userId = it,
+                title = it,
+                semesters = semesterToCourses.map { Semester(it.key, it.value) }
             )
-            _savedStudyPlan.value = studyPlan
-            _unsavedStudyPLan.value = studyPlan
-            semesterToCourses = studyPlan.semesters.map { it.order to it.courses }.toMutableStateMap()
-            collapsedSemesters = studyPlan.semesters
-                .map { it.order to false }
-                .toMutableStateMap()
-            /*
-            repository.getStudyPlan(sharedPrefs.loggedInId).collect {
-                when(it){
-                    is Result.Failed -> { }
-                    is Result.Loading -> {}
-                    is Result.Success -> {
-                        val studyPlan = it.data
-                        _savedStudyPlan.value = studyPlan
-                        _unsavedStudyPLan.value = studyPlan
-                        collapsedSemesters = studyPlan.semesters
-                            .map { it.order to false }
-                            .toMutableStateMap()
+            if (isStudyPlanModified(studyPlan)){
+                viewModelScope.launch {
+                    repository.createStudyPlan(studyPlan).collect {
+                        when (it){
+                            is Result.Failed -> { _isLoading.value = false; _isUpdated.value = false }
+                            is Result.Loading -> _isLoading.value = true
+                            is Result.Success -> {
+                                _isLoading.value = false
+                                _isUpdated.value = true
+                            }
+                        }
                     }
                 }
             }
-
-             */
+        } ?: {
+            // save in db
         }
     }
-
 }

@@ -98,12 +98,12 @@ fun StudyPlanner(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ){
 
-                studyPlan?.semesters?.sortedBy { it.order }?.forEach { (title, _, courses) ->
+                studyPlan?.semesters?.sortedBy { it.order }?.forEach { (title, courses) ->
                     //val isCollapsed = isSemesterCollapsed[semester] == true
                     val isCollapsed = false
                     stickyHeader {
                         SemesterItemSave(
-                            title = title,
+                            title = "$title",
                             isCollapsed = isCollapsed,
                             color = MaterialTheme.colors.primary,
                             isCollapsedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowDown),

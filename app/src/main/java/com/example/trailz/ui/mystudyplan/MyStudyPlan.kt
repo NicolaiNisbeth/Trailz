@@ -23,10 +23,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.example.base.domain.Course
 import com.example.base.domain.StudyPlan
 import com.example.trailz.ui.common.compose.InputFieldDialog
 import com.example.trailz.ui.common.compose.InputFieldFocus
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -39,16 +42,18 @@ fun MyStudyPlan(
     navigateUp: () -> Unit
 ) {
 
-    val studyPlan by viewModel.unsavedStudyPlan.observeAsState(StudyPlan())
     val semesterToCourses = viewModel.semesterToCourses
     val inEditMode by viewModel.inEditMode
+    val isLoading by viewModel.isLoading.observeAsState(initial = true)
+    val isUpdated by viewModel.isUpdated.observeAsState()
 
     MyStudyPlan(
-        studyPlan = studyPlan,
         semesterToCourses = semesterToCourses,
         inEditMode = inEditMode,
-        toggleAllCollapsed = viewModel::toggleAllSemesters,
+        isLoading = isLoading,
+        isUpdated = isUpdated,
         isAnyCollapsed = viewModel::isAnyCollapsed,
+        toggleAllCollapsed = viewModel::toggleAllSemesters,
         changeEditMode = viewModel::changeEditMode,
         isSemesterCollapsed = viewModel::isSemesterCollapsed,
         collapseSemester = viewModel::collapseSemester,
@@ -59,6 +64,7 @@ fun MyStudyPlan(
         addCourse = viewModel::addCourse,
         removeCourse = viewModel::removeCourse,
         replaceCourseAt = viewModel::replaceCourseAt,
+        saveStudyPlan = viewModel::saveStudyPlan,
         onProfile = onProfile,
         navigateUp = navigateUp
     )
@@ -68,11 +74,12 @@ fun MyStudyPlan(
 @ExperimentalFoundationApi
 @Composable
 fun MyStudyPlan(
-    studyPlan: StudyPlan,
     semesterToCourses: Map<Int, List<Course>>,
     inEditMode: Boolean,
-    toggleAllCollapsed: (Boolean) -> Unit,
+    isLoading: Boolean,
+    isUpdated: Boolean?,
     isAnyCollapsed: () -> Boolean,
+    toggleAllCollapsed: (Boolean) -> Unit,
     changeEditMode: (Boolean) -> Unit,
     isSemesterCollapsed: (Int) -> Boolean,
     collapseSemester: (Int) -> Unit,
@@ -83,12 +90,15 @@ fun MyStudyPlan(
     addCourse: (Course, Int) -> Unit,
     replaceCourseAt: (Int, Int, Course) -> Unit,
     removeCourse: (Course, Int) -> Unit,
+    saveStudyPlan: () -> Unit,
     onProfile: () -> Unit,
     navigateUp: () -> Unit
 
 ) {
     val focusManager = LocalFocusManager.current
     val date = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(Date())
+    val coroutineScope = rememberCoroutineScope()
+    val scaffoldState = rememberScaffoldState()
 
     var openDialog by remember { mutableStateOf(false) }
     var newTitleSemester by remember { mutableStateOf(-1) }
@@ -100,15 +110,11 @@ fun MyStudyPlan(
     }
 
     Scaffold(
+        scaffoldState = scaffoldState,
         topBar = {
             TopAppBar(
                 title = { Text(text = "My Plan") },
                 backgroundColor = MaterialTheme.colors.background,
-                navigationIcon = {
-                    IconButton(onClick = navigateUp) {
-                        Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = null)
-                    }
-                },
                 actions = {
                     if (inEditMode){
                         IconButton(onClick = addSemester ) {
@@ -124,7 +130,10 @@ fun MyStudyPlan(
                     IconButton(onClick = onProfile) {
                         Icon(imageVector = Icons.Default.PermIdentity, contentDescription = null)
                     }
-                    IconButton(onClick = { changeEditMode(!inEditMode) }){
+                    IconButton(onClick = {
+                        if (inEditMode) saveStudyPlan()
+                        changeEditMode(!inEditMode)
+                    }){
                         Icon(
                             imageVector = if (inEditMode) Icons.Default.Save else Icons.Default.ModeEdit,
                             contentDescription = null
@@ -140,6 +149,15 @@ fun MyStudyPlan(
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            if (isLoading) CircularProgressIndicator()
+            isUpdated?.let {
+                coroutineScope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar(
+                        message = if (it) "Updated" else "Failed to update!"
+                    )
+                }
+            }
+
             Text(
                 text = "Roadmap for Winners",
                 style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
