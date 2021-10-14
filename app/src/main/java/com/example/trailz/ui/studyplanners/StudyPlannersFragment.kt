@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.compose.material.*
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnPreDraw
@@ -40,6 +39,7 @@ class StudyPlannersFragment : Fragment() {
     @Inject
     lateinit var sharedPrefs: SharedPrefs
 
+
     @ExperimentalMaterialApi
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,7 +53,6 @@ class StudyPlannersFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         postponeEnterTransition()
-
         viewModel.shippingProvider.observe(viewLifecycleOwner){
             adapter.submitList(it) {
                 (view.parent as? ViewGroup)?.doOnPreDraw {
@@ -65,9 +64,11 @@ class StudyPlannersFragment : Fragment() {
 
     private fun openStudyPlan(view:TestElementBinding){
         val extra = FragmentNavigatorExtras(view.imageView to "image_big",  view.textView to "text_big")
+        val args = Bundle().apply {
+            putString("text_big", view.textView.text.toString())}
         findNavController().navigate(
             R.id.action_study_planners_to_study_planner,
-            null,
+            args,
             null,
             extra)
     }
@@ -77,10 +78,20 @@ class StudyPlannersFragment : Fragment() {
 @HiltViewModel
 class StudyPlanListViewModel @Inject constructor(
 ) : ViewModel() {
-    val exampleList = listOf(StudyPlan("1",0),
-        StudyPlan("2",1),
-        StudyPlan("3",2),
-        StudyPlan("4",3))
+    val exampleList = listOf(   StudyPlan("1",0),
+                                StudyPlan("2",1),
+                                StudyPlan("3",2),
+                                StudyPlan("4",3),
+                                StudyPlan("5",4),
+                                StudyPlan("6",5),
+                                StudyPlan("7",6),
+                                StudyPlan("8",7),
+                                StudyPlan("9",8),
+                                StudyPlan("10",9),
+                                StudyPlan("11",10),
+                                StudyPlan("12",11),
+                                StudyPlan("13",12))
+
     val shippingProvider = MutableLiveData(exampleList)
 }
 
@@ -128,6 +139,9 @@ class StudyPlanViewHolder(
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(provider: StudyPlan) {
+        binding.textView.text ="${provider.id}"
+        ViewCompat.setTransitionName(binding.textView, "text_small${provider.id}")
+        ViewCompat.setTransitionName(binding.imageView, "image_small${provider.id}")
         binding.root.setOnClickListener {
             onShippingProviderClicked(binding)
         }
