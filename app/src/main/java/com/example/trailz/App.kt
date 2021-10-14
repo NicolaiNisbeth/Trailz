@@ -3,6 +3,8 @@ package com.example.trailz
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.Window
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.example.trailz.ui.onboarding.OnboardingActivity
@@ -14,7 +16,11 @@ class App : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        val w: Window = window
+        w.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        )
         val completedOnboarding = PreferenceManager.getDefaultSharedPreferences(this)
             .getBoolean(COMPLETED_ONBOARDING_PREF, false)
 

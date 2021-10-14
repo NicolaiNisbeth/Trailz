@@ -1,5 +1,8 @@
 package com.example.trailz
 
+import android.content.Context
+import android.graphics.Color
+import android.graphics.Point
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil
@@ -17,6 +20,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.view.WindowManager
+
+import android.os.Build
+import android.view.View
+import android.view.Window
+import android.view.WindowInsets
+
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity() {
@@ -25,6 +35,17 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val w: Window = window
+        w.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        )
+        this.window.apply {
+            clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+            addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            statusBarColor = Color.TRANSPARENT
+        }
         val bottomNavigationView = DataBindingUtil
             .setContentView<ActivityMainBinding>(this, R.layout.activity_main)
             .navView
