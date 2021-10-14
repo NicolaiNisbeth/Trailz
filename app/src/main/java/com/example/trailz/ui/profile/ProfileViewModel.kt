@@ -19,7 +19,7 @@ data class ProfileUiState(
     val isLoading: Boolean = false,
     val error: String? = null
 ) {
-    val isLoggedIn = user != null && !isLoading
+    val isLoggedIn = user != null
 }
 
 @HiltViewModel
@@ -36,9 +36,8 @@ class ProfileViewModel @Inject constructor(
         _state.value = ProfileUiState()
     }
 
-    fun getUser(){
-        val loggedInId = sharedPrefs.loggedInId
-        if (loggedInId.isNullOrBlank()) {
+    fun getUser(userId: String?){
+        if (userId.isNullOrBlank()) {
             // default state is logged out
             _state.value = ProfileUiState()
             return
@@ -46,7 +45,7 @@ class ProfileViewModel @Inject constructor(
 
         viewModelScope.launch {
             ProfileUiState(isLoading = true)
-            getUserUseCase(loggedInId, object: ValueEventListener {
+            getUserUseCase(userId, object: ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     _state.value = ProfileUiState(User(email = snapshot.value.toString()))
                 }
