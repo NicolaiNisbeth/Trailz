@@ -51,7 +51,7 @@ import kotlinx.coroutines.flow.collect
 
 @ExperimentalPagerApi
 @Composable
-fun Signup(
+fun SignUp(
     viewModel: SignupViewModel,
     navigateUp: () -> Unit
 ) {
@@ -75,7 +75,7 @@ fun Signup(
 
     SideEffect { if (isSignupSuccess) navigateUp() }
 
-    Signup(
+    SignUp(
         username = username,
         email = email,
         password = password,
@@ -94,7 +94,7 @@ fun Signup(
 
 @ExperimentalPagerApi
 @Composable
-internal fun Signup(
+internal fun SignUp(
     username: String,
     email: String,
     password: String,
@@ -197,16 +197,22 @@ internal fun Signup(
                 )
             }
 
+            /*
             item {
                 HorizontalPager(
                     modifier = Modifier.fillMaxWidth(),
                     state = pagerState.apply {
+                        /*
                         // listen on page changes
                         LaunchedEffect(this) {
                             snapshotFlow { currentPage }.collect { index ->
-                                onStudyPathChange(studyPaths[index])
+                                if (studyPaths.isNotEmpty()){
+                                    onStudyPathChange(studyPaths[index])
+                                }
                             }
                         }
+
+                         */
                     },
                 ) { page ->
                     PagerItem(
@@ -219,6 +225,8 @@ internal fun Signup(
                     )
                 }
             }
+
+             */
 
             item {
                 Button(
