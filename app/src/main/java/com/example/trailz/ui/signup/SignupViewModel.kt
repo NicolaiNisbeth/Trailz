@@ -24,7 +24,7 @@ class SignupViewModel @Inject constructor(
     private val _password = MutableLiveData<String>()
     val password: LiveData<String> = _password
 
-    private val _studyPath = MutableLiveData<String>()
+    private val _studyPath = MutableLiveData<String>("Softwareteknologi")
     val studyPath: LiveData<String> = _studyPath
 
     private val _studyPaths = MutableLiveData<List<String>>()
