@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.ComposeView
@@ -60,13 +61,14 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    @ExperimentalComposeUiApi
     @ExperimentalMaterialApi
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewModel.getUser()
+        viewModel.getUser(sharedPrefs.loggedInId)
         return ComposeView(requireContext()).apply {
             setContent {
                 Profile(
@@ -75,10 +77,15 @@ class ProfileFragment : Fragment() {
                     onChangeLanguage = { onLanguageListener.onChangeLanguage(it) },
                     navigateUp = { findNavController().navigateUp() },
                     signIn = ::signIn,
-                    signUp = ::signUp
+                    signUp = ::signUp,
+                    rateApp = ::openGooglePlay
                 )
             }
         }
+    }
+
+    private fun openGooglePlay(){
+        Toast.makeText(requireContext(), "Not available yet...", Toast.LENGTH_SHORT).show()
     }
 
     private fun signIn(){
