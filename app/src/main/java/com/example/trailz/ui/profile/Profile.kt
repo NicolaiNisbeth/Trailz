@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -37,8 +38,10 @@ import kotlinx.coroutines.launch
 fun Profile(
     viewModel: ProfileViewModel,
     appliedCountry: LanguageConfig,
+    isDarkTheme: Boolean,
     onChangeLanguage: (String) -> Unit,
     navigateUp: () -> Unit,
+    toggleTheme: (Boolean) -> Unit,
     signIn: () -> Unit,
     signUp: () -> Unit,
     rateApp: () -> Unit,
@@ -53,10 +56,12 @@ fun Profile(
     Profile(
         state = uiState,
         coroutineScope = scope,
+        isDarkTheme = isDarkTheme,
         modalBottomSheetState = modalBottomSheetState,
         appliedCountry = appliedCountry,
         onChangeLanguage = onChangeLanguage,
         navigateUp = navigateUp,
+        toggleTheme = toggleTheme,
         signIn = signIn,
         signUp = signUp,
         logout = viewModel::logout,
@@ -71,10 +76,12 @@ fun Profile(
 fun Profile(
     state: ProfileUiState,
     coroutineScope: CoroutineScope,
+    isDarkTheme: Boolean,
     modalBottomSheetState: ModalBottomSheetState,
     appliedCountry: LanguageConfig,
     onChangeLanguage: (String) -> Unit,
     navigateUp: () -> Unit,
+    toggleTheme: (Boolean) -> Unit,
     signIn: () -> Unit,
     signUp: () -> Unit,
     logout: () -> Unit,
@@ -119,8 +126,8 @@ fun Profile(
             Box(Modifier.fillMaxSize()) {
                 when {
                     state.isLoading -> {}
-                    state.isLoggedIn -> LoggedInView(state.user!!, logout, rateApp, settings)
-                    else -> LoggedOutView(signUp, signIn, rateApp, settings)
+                    state.isLoggedIn -> LoggedInView(state.user!!, isDarkTheme, logout, rateApp, settings, toggleTheme)
+                    else -> LoggedOutView(isDarkTheme, signUp, signIn, rateApp, settings, toggleTheme)
                 }
             }
         }
@@ -171,9 +178,11 @@ fun LanguageView(
 @Composable
 fun LoggedInView(
     user: com.example.base.domain.User,
+    isDarkTheme: Boolean,
     logout: () -> Unit,
     rateApp: () -> Unit,
-    settings: () -> Unit
+    settings: () -> Unit,
+    toggleTheme: (Boolean) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -240,9 +249,10 @@ fun LoggedInView(
             textAlign = TextAlign.Center
         )
 
-        Column(Modifier
-            .fillMaxWidth()
-            .background(Color.LightGray.copy(alpha = 0.1f))
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .background(Color.LightGray.copy(alpha = 0.1f))
         ) {
             RateAppView(
                 modifier = Modifier.fillMaxWidth(),
@@ -252,13 +262,24 @@ fun LoggedInView(
                 modifier = Modifier.fillMaxWidth(),
                 onSettings = settings,
             )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(text = if (isDarkTheme) "Apply light mode" else "Apply dark mode")
+                Switch(isDarkTheme, toggleTheme,)
+            }
+
         }
 
         Text(
             text = "Logout",
             color = MaterialTheme.colors.error,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(16.dp).clickable { logout() }
+            modifier = Modifier
+                .padding(16.dp)
+                .clickable { logout() }
         )
     }
 }
@@ -266,12 +287,14 @@ fun LoggedInView(
 @ExperimentalComposeUiApi
 @Composable
 fun LoggedOutView(
+    isDarkTheme: Boolean,
     signUp: () -> Unit,
     signIn: () -> Unit,
     rateApp: () -> Unit,
-    settings: () -> Unit
+    settings: () -> Unit,
+    toggleTheme: (Boolean) -> Unit
 ) {
-    
+
     Column(
         modifier = Modifier.padding(vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -296,6 +319,14 @@ fun LoggedOutView(
                 .fillMaxWidth()
                 .background(Color.LightGray.copy(alpha = 0.1f))
         )
+        Row(
+            modifier = Modifier.fillMaxWidth().background(Color.LightGray.copy(alpha = 0.1f)).padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = if (isDarkTheme) "Apply dark mode" else "Apply light mode")
+            Switch(isDarkTheme, toggleTheme,)
+        }
     }
 }
 

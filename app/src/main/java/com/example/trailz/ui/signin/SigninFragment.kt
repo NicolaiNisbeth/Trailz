@@ -13,6 +13,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.example.trailz.R
 import com.example.trailz.databinding.FragmentSignInBinding
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.google.android.material.transition.platform.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
@@ -46,10 +47,12 @@ class SigninFragment: Fragment() {
     @ExperimentalComposeUiApi
     private fun setupSignInComposable(composeView: ComposeView) {
         composeView.setContent {
-            SignIn(
-                viewModel = viewModel,
-                navigateUp = findNavController()::navigateUp,
-            )
+            MdcTheme {
+                SignIn(
+                    viewModel = viewModel,
+                    navigateUp = findNavController()::navigateUp,
+                )
+            }
         }
     }
 }

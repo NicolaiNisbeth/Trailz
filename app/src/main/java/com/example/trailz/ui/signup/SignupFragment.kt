@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.trailz.R
 import com.example.trailz.databinding.FragmentSignUpBinding
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.google.android.material.transition.platform.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
@@ -48,10 +49,12 @@ class SignupFragment: Fragment() {
     @ExperimentalPagerApi
     private fun setupSignUpComposable(composeView: ComposeView) {
         composeView.setContent {
-            SignUp(
-                viewModel = viewModel,
-                navigateUp = findNavController()::navigateUp,
-            )
+            MdcTheme {
+                SignUp(
+                    viewModel = viewModel,
+                    navigateUp = findNavController()::navigateUp,
+                )
+            }
         }
     }
 }

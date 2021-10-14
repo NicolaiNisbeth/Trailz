@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.material.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.ComposeView
@@ -13,13 +14,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
-import com.example.trailz.ChangeAnimationListener
-import com.example.trailz.ChangeLanguageListener
-import com.example.trailz.OpenSettingsListener
-import com.example.trailz.language.LanguageConfig
+import com.example.trailz.*
 import com.example.trailz.R
+import com.example.trailz.language.LanguageConfig
 import com.example.trailz.databinding.FragmentProfileBinding
 import com.example.trailz.inject.SharedPrefs
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.google.android.material.transition.platform.MaterialElevationScale
 import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.google.android.material.transition.platform.MaterialSharedAxis
@@ -32,6 +32,9 @@ class ProfileFragment : Fragment() {
 
     @Inject
     lateinit var sharedPrefs: SharedPrefs
+
+    @Inject
+    lateinit var application: TrailzApplication
 
     private val appliedCountry by lazy {
         LanguageConfig.languageToConfig(sharedPrefs.languagePreference)
@@ -78,16 +81,29 @@ class ProfileFragment : Fragment() {
     @ExperimentalComposeUiApi
     private fun setupComposeView(composeViewProfile: ComposeView) {
         composeViewProfile.setContent {
-            Profile(
-                viewModel = viewModel,
-                appliedCountry = appliedCountry,
-                signIn = ::signIn,
-                signUp = ::signUp,
-                rateApp = ::openGooglePlay,
-                navigateUp = { findNavController().navigateUp() },
-                onChangeLanguage = onLanguageListener::onChangeLanguage,
-                settings = onSettingsListener::onOpenSettingsListener
-            )
+            MdcTheme {
+                Profile(
+                    viewModel = viewModel,
+                    appliedCountry = appliedCountry,
+                    isDarkTheme = application.isDark,
+                    signIn = ::signIn,
+                    signUp = ::signUp,
+                    rateApp = ::openGooglePlay,
+                    toggleTheme = ::toggleTheme,
+                    navigateUp = { findNavController().navigateUp() },
+                    onChangeLanguage = onLanguageListener::onChangeLanguage,
+                    settings = onSettingsListener::onOpenSettingsListener
+                )
+            }
+        }
+    }
+
+    private fun toggleTheme(isDarkTheme: Boolean){
+        application.isDark = isDarkTheme
+        if (isDarkTheme) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         }
     }
 

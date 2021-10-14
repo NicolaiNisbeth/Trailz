@@ -1,6 +1,7 @@
 package com.example.trailz.inject
 
 import android.content.Context
+import com.example.trailz.TrailzApplication
 import com.google.firebase.database.FirebaseDatabase
 import dagger.Module
 import dagger.Provides
@@ -23,5 +24,11 @@ class AppModule{
     @Singleton
     fun provideSharedPref(@ApplicationContext appContext: Context): SharedPrefs {
         return SharedPrefs(appContext)
+    }
+
+    @Provides
+    @Singleton
+    fun provideApplication(@ApplicationContext app: Context): TrailzApplication{
+        return app as TrailzApplication
     }
 }

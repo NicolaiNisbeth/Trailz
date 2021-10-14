@@ -28,6 +28,7 @@ import com.example.trailz.ChangeLanguageListener
 import com.example.trailz.OpenSettingsListener
 import com.example.trailz.R
 import com.example.trailz.databinding.FragmentMyStudyPlanBinding
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.google.android.material.transition.platform.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
@@ -65,11 +66,13 @@ class MyStudyPlanFragment: Fragment() {
 
     private fun setupComposeView(composeViewMyStudyPlan: ComposeView) {
         composeViewMyStudyPlan.setContent {
-            MyStudyPlan(
-                viewModel = viewModel,
-                onProfile = ::openProfile,
-                navigateUp = findNavController()::navigateUp
-            )
+            MdcTheme {
+                MyStudyPlan(
+                    viewModel = viewModel,
+                    onProfile = ::openProfile,
+                    navigateUp = findNavController()::navigateUp
+                )
+            }
         }
     }
 

@@ -15,6 +15,7 @@ import com.example.trailz.R
 import com.example.trailz.databinding.FragmentFavoritesBinding
 import com.example.trailz.inject.SharedPrefs
 import com.example.trailz.ui.studyplanners.StudyPlannersFragmentDirections
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.google.android.material.transition.platform.MaterialFadeThrough
 import com.google.android.material.transition.platform.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
@@ -55,13 +56,15 @@ class FavoritesFragment : Fragment() {
     @ExperimentalMaterialApi
     private fun setupComposeView(composeViewFavorites: ComposeView) {
         composeViewFavorites.setContent {
-            Favorites(
-                viewModel = viewModel,
-                userId = sharedPrefs.loggedInId,
-                onStudyPlan = ::openStudyPlan,
-                onProfile = ::openProfile,
-                onFindFavorite = ::openStudyPlanners
-            )
+            MdcTheme {
+                Favorites(
+                    viewModel = viewModel,
+                    userId = sharedPrefs.loggedInId,
+                    onStudyPlan = ::openStudyPlan,
+                    onProfile = ::openProfile,
+                    onFindFavorite = ::openStudyPlanners
+                )
+            }
         }
     }
 

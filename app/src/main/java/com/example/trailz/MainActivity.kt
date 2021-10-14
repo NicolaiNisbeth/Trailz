@@ -26,15 +26,25 @@ import android.os.Build
 import android.view.View
 import android.view.Window
 import android.view.WindowInsets
+import androidx.appcompat.app.AppCompatDelegate
 
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity() {
 
+    @Inject
+    lateinit var application: TrailzApplication
+
     val viewModel: MainActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+        /* FIXME: vi må lige rydde op i det her snask
         val w: Window = window
         w.setFlags(
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
@@ -46,6 +56,7 @@ class MainActivity : BaseActivity() {
             decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
             statusBarColor = Color.TRANSPARENT
         }
+         */
         val bottomNavigationView = DataBindingUtil
             .setContentView<ActivityMainBinding>(this, R.layout.activity_main)
             .navView
