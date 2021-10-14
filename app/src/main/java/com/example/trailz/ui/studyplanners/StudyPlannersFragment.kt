@@ -5,7 +5,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import android.view.animation.AnimationUtils
 import androidx.compose.material.*
+import androidx.core.content.ContextCompat.getDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
@@ -15,8 +18,10 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.TransitionInflater
 import com.example.trailz.R
 import com.example.trailz.databinding.TestBinding
 import com.example.trailz.databinding.TestElementBinding
@@ -24,6 +29,11 @@ import com.example.trailz.inject.SharedPrefs
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+
+
+
 
 @AndroidEntryPoint
 class StudyPlannersFragment : Fragment() {
@@ -39,6 +49,11 @@ class StudyPlannersFragment : Fragment() {
     @Inject
     lateinit var sharedPrefs: SharedPrefs
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val inflater = TransitionInflater.from(requireContext())
+        exitTransition = inflater.inflateTransition(R.transition.fade)
+    }
 
     @ExperimentalMaterialApi
     override fun onCreateView(
@@ -47,12 +62,22 @@ class StudyPlannersFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         return TestBinding.inflate(inflater, container, false).apply {
-        }.also { setupShippingList(it.recyclerView) }.root
+        }.also { setupShippingList(it.recyclerView)
+            val divider = DividerItemDecoration(it.recyclerView.getContext(),
+               DividerItemDecoration.VERTICAL);
+            divider.setDrawable(getDrawable(it.recyclerView.context, R.drawable.line)!!)
+            it.recyclerView.addItemDecoration(divider);
+            it.recyclerView.setHasFixedSize(true)
+            val mLayoutManager = LinearLayoutManager(activity)
+            it.recyclerView.setLayoutManager(mLayoutManager)
+            it.recyclerView.scheduleLayoutAnimation()
+        }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         postponeEnterTransition()
+
         viewModel.shippingProvider.observe(viewLifecycleOwner){
             adapter.submitList(it) {
                 (view.parent as? ViewGroup)?.doOnPreDraw {
@@ -97,8 +122,10 @@ class StudyPlanListViewModel @Inject constructor(
 
 
 class StudyPlanListAdapter(
+
     private val onShippingProviderClicked: (view:TestElementBinding) -> Unit
 ) : ListAdapter<StudyPlan, StudyPlanViewHolder>(IdEqualsDiffCallback { it.info }) {
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudyPlanViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -110,7 +137,6 @@ class StudyPlanListAdapter(
     override fun onBindViewHolder(holder: StudyPlanViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
-
 
 }
 data class StudyPlan(val info: String, val id: Int){

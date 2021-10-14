@@ -6,7 +6,6 @@
     android:viewportHeight="637">
     <group>
         <clip-path android:pathData="M0 0H3453V6370H0V0Z" />
-
         <group
             android:pivotX="172"
             android:pivotY="318"
@@ -15,20 +14,20 @@
             android:scaleY="2.222"
             android:translateX="1.505"
             android:translateY="0.051">
-
             <path android:pathData="M0 0V6370H3453V0">
                 <aapt:attr name="android:fillColor">
                     <gradient
                         android:centerX="172"
                         android:centerY="318"
-                        android:gradientRadius="86"
+                        android:gradientRadius="70"
                         android:type="radial">
                         <item
-                            android:color="#FFFFFF"
+                            android:color="#F5F5F5"
                             android:offset="0" />
                         <item
-                            android:color="#F3F3F3"
-                            android:offset="0.468" />
+                            android:color="#EBEBEB"
+                            android:offset="0.5
+" />
                         <item
                             android:color="#E2E2E2"
                             android:offset="1" />
