@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.runtime.Composable
@@ -17,7 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.HorizontalAlignmentLine
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -38,7 +41,8 @@ fun Profile(
     navigateUp: () -> Unit,
     signIn: () -> Unit,
     signUp: () -> Unit,
-    rateApp: () -> Unit
+    rateApp: () -> Unit,
+    settings: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val modalBottomSheetState = rememberModalBottomSheetState(
@@ -56,7 +60,8 @@ fun Profile(
         signIn = signIn,
         signUp = signUp,
         logout = viewModel::logout,
-        rateApp = rateApp
+        rateApp = rateApp,
+        settings = settings
     )
 }
 
@@ -73,7 +78,8 @@ fun Profile(
     signIn: () -> Unit,
     signUp: () -> Unit,
     logout: () -> Unit,
-    rateApp: () -> Unit
+    rateApp: () -> Unit,
+    settings: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -104,33 +110,57 @@ fun Profile(
             modifier = Modifier.padding(paddingValues),
             sheetState = modalBottomSheetState,
             sheetContent = {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "Sprog")
-                    LanguageConfig.values().forEach {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onChangeLanguage(it.code) }
-                        ) {
-
-                            Image(painterResource(id = it.flagResource), contentDescription = null)
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(text = it.title, modifier = Modifier.align(Alignment.CenterVertically))
-                            if (it.code == appliedCountry.code) {
-                                Icon(imageVector = Icons.Default.Done, contentDescription = null)
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(78.dp))
-                }
+                LanguageView(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp), onChangeLanguage, appliedCountry)
             }
         ) {
             Box(Modifier.fillMaxSize()) {
                 when {
                     state.isLoading -> CircularProgressIndicator()
                     state.isLoggedIn -> LoggedInView(state.user!!, logout)
-                    else -> LoggedOutView(signUp, signIn, rateApp)
+                    else -> LoggedOutView(signUp, signIn, rateApp, settings)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LanguageView(
+    modifier: Modifier = Modifier,
+    onChangeLanguage: (String) -> Unit,
+    appliedCountry: LanguageConfig
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Sprog",
+            style = MaterialTheme.typography.h6,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        LanguageConfig.values().forEach {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onChangeLanguage(it.code) }
+            ) {
+                Row(horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
+                    Image(painterResource(id = it.flagResource), null)
+                    Spacer(Modifier.width(18.dp))
+                    Text(it.title, textAlign = TextAlign.Center)
+                }
+                if (it.code == appliedCountry.code) {
+                    Icon(
+                        imageVector = Icons.Default.Done,
+                        contentDescription = null,
+                    )
                 }
             }
         }
@@ -155,10 +185,14 @@ fun LoggedInView(
 fun LoggedOutView(
     signUp: () -> Unit,
     signIn: () -> Unit,
-    rateApp: () -> Unit
+    rateApp: () -> Unit,
+    settings: () -> Unit
 ) {
     
-    Column(modifier = Modifier.padding(vertical = 16.dp)) {
+    Column(
+        modifier = Modifier.padding(vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         LoginHeader(
             onSignIn = signIn,
             onSignUp = signUp,
@@ -167,13 +201,35 @@ fun LoggedOutView(
                 .fillMaxHeight(0.3f)
                 .background(Color.LightGray.copy(alpha = 0.1f))
         )
-        Spacer(Modifier.height(16.dp))
         RateAppView(
             onRateApp = rateApp,
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.LightGray.copy(alpha = 0.1f))
         )
+        SettingsView(
+            onSettings = settings,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.LightGray.copy(alpha = 0.1f))
+        )
+    }
+}
+
+@Composable
+fun SettingsView(
+    modifier: Modifier = Modifier,
+    onSettings: () -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clickable { onSettings() }
+            .padding(16.dp)
+    ) {
+        Text(text = "Settings")
+        Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null)
     }
 }
 
@@ -228,7 +284,9 @@ fun RateAppView(
     onRateApp: () -> Unit
 ) {
     Row(
-        modifier = modifier.clickable { onRateApp() }.padding(16.dp),
+        modifier = modifier
+            .clickable { onRateApp() }
+            .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

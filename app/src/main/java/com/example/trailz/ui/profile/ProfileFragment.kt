@@ -28,6 +28,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.trailz.ChangeLanguageListener
+import com.example.trailz.OpenSettingsListener
 import com.example.trailz.language.LanguageConfig
 import com.example.trailz.R
 import com.example.trailz.databinding.FragmentProfileBinding
@@ -51,11 +52,13 @@ class ProfileFragment : Fragment() {
     private val viewModel: ProfileViewModel by viewModels()
 
     private lateinit var onLanguageListener: ChangeLanguageListener
+    private lateinit var onSettingsListener: OpenSettingsListener
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         try {
             onLanguageListener = context as ChangeLanguageListener
+            onSettingsListener = context as OpenSettingsListener
         } catch (e: Error) {
             throw IllegalStateException("Activity must implement $onLanguageListener")
         }
@@ -74,11 +77,12 @@ class ProfileFragment : Fragment() {
                 Profile(
                     viewModel = viewModel,
                     appliedCountry = appliedCountry,
-                    onChangeLanguage = { onLanguageListener.onChangeLanguage(it) },
-                    navigateUp = { findNavController().navigateUp() },
                     signIn = ::signIn,
                     signUp = ::signUp,
-                    rateApp = ::openGooglePlay
+                    rateApp = ::openGooglePlay,
+                    navigateUp = { findNavController().navigateUp() },
+                    onChangeLanguage = onLanguageListener::onChangeLanguage,
+                    settings = onSettingsListener::onOpenSettingsListener
                 )
             }
         }
