@@ -54,6 +54,13 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enterTransition = MaterialFadeThrough().apply {
+            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+        }
+    }
+
     @ExperimentalComposeUiApi
     @ExperimentalMaterialApi
     override fun onCreateView(

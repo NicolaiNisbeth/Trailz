@@ -212,9 +212,7 @@ fun LoggedInView(
                 Text(text = user.email, color = MaterialTheme.colors.primary, textAlign = TextAlign.Center)
             }
 
-            Spacer(modifier = Modifier
-                .height(1.dp)
-                .background(Color.LightGray),)
+            Divider(Modifier.height(1.dp), color = MaterialTheme.colors.onSurface.copy(0.1f))
 
             Row(Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -224,9 +222,7 @@ fun LoggedInView(
                 Text(text = "****", color = MaterialTheme.colors.primary, textAlign = TextAlign.Center, style = MaterialTheme.typography.h5)
             }
 
-            Spacer(modifier = Modifier
-                .height(3.dp)
-                .background(Color.Red),)
+            Divider(Modifier.height(1.dp), color = MaterialTheme.colors.onSurface.copy(0.1f))
 
             Row(Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,

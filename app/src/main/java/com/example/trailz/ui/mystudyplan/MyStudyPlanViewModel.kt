@@ -12,6 +12,7 @@ import com.example.base.domain.Semester
 import com.example.base.domain.StudyPlan
 import com.example.studyplan.StudyPlanRepository
 import com.example.trailz.inject.SharedPrefs
+import com.example.trailz.ui.common.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -25,8 +26,8 @@ class MyStudyPlanViewModel @Inject constructor(
 
     private val _savedStudyPlan = MutableLiveData<StudyPlan>()
 
-    private val _isUpdated = MutableLiveData<Boolean>()
-    val isUpdated: LiveData<Boolean> = _isUpdated
+    private val _isUpdated = MutableLiveData<Event<Boolean>>()
+    val isUpdated: LiveData<Event<Boolean>> = _isUpdated
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
@@ -125,11 +126,11 @@ class MyStudyPlanViewModel @Inject constructor(
                 viewModelScope.launch {
                     repository.createStudyPlan(studyPlan).collect {
                         when (it){
-                            is Result.Failed -> { _isLoading.value = false; _isUpdated.value = false }
+                            is Result.Failed -> { _isLoading.value = false; _isUpdated.value = Event(false) }
                             is Result.Loading -> _isLoading.value = true
                             is Result.Success -> {
                                 _isLoading.value = false
-                                _isUpdated.value = true
+                                _isUpdated.value = Event(true)
                             }
                         }
                     }

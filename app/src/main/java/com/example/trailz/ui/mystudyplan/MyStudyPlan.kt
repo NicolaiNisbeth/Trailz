@@ -22,13 +22,13 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.example.base.domain.Course
-import com.example.base.domain.StudyPlan
+import com.example.trailz.ui.common.Event
 import com.example.trailz.ui.common.compose.InputFieldDialog
 import com.example.trailz.ui.common.compose.InputFieldFocus
+import com.example.trailz.ui.common.compose.TextButtonV2
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -77,7 +77,7 @@ fun MyStudyPlan(
     semesterToCourses: Map<Int, List<Course>>,
     inEditMode: Boolean,
     isLoading: Boolean,
-    isUpdated: Boolean?,
+    isUpdated: Event<Boolean>?,
     isAnyCollapsed: () -> Boolean,
     toggleAllCollapsed: (Boolean) -> Unit,
     changeEditMode: (Boolean) -> Unit,
@@ -116,6 +116,9 @@ fun MyStudyPlan(
                 title = { Text(text = "My Plan") },
                 backgroundColor = MaterialTheme.colors.background,
                 actions = {
+                    IconButton(onClick = onProfile) {
+                        Icon(imageVector = Icons.Default.PermIdentity, contentDescription = null)
+                    }
                     if (inEditMode){
                         IconButton(onClick = addSemester ) {
                             Icon(imageVector = Icons.Default.Add, contentDescription = null)
@@ -126,9 +129,6 @@ fun MyStudyPlan(
                         IconButton(onClick = { toggleAllCollapsed(collapsed) }) {
                             Icon(imageVector = icon, contentDescription = null)
                         }
-                    }
-                    IconButton(onClick = onProfile) {
-                        Icon(imageVector = Icons.Default.PermIdentity, contentDescription = null)
                     }
                     IconButton(onClick = {
                         if (inEditMode) saveStudyPlan()
@@ -149,8 +149,7 @@ fun MyStudyPlan(
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (isLoading) CircularProgressIndicator()
-            isUpdated?.let {
+            isUpdated?.contentIfNotHandled()?.let{
                 coroutineScope.launch {
                     scaffoldState.snackbarHostState.showSnackbar(
                         message = if (it) "Updated" else "Failed to update!"
@@ -174,7 +173,7 @@ fun MyStudyPlan(
 
             LazyColumn(
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(if (inEditMode) 0.dp else 12.dp),
             ){
 
                 semesterToCourses.toSortedMap().forEach { (semester, courses) ->
@@ -187,7 +186,7 @@ fun MyStudyPlan(
                                 color = MaterialTheme.colors.primary,
                                 isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Clear),
                                 isExpandedIcon = rememberVectorPainter(image = Icons.Default.Clear),
-                                onClick = { removeSemester(semester) },
+                                onRemove = { removeSemester(semester) },
                                 onTitleChange = { editSemester(semester, it) }
                             )
                         }
@@ -202,15 +201,16 @@ fun MyStudyPlan(
                             }
                         }
                         item {
-                            Text(
-                                text = "Add",
-                                color = MaterialTheme.colors.secondaryVariant,
-                                style = MaterialTheme.typography.caption,
-                                modifier = Modifier.clickable {
-                                    newTitleSemester = semester
-                                    openDialog = true
-                                }
-                            )
+                            TextButtonV2(
+                                onClick = { newTitleSemester = semester; openDialog = true },
+                                horizontalArrangement = Arrangement.Start
+                            ){
+                                Text(
+                                    text = "Add",
+                                    color = MaterialTheme.colors.secondaryVariant,
+                                    style = MaterialTheme.typography.caption,
+                                )
+                            }
                         }
                     } else {
                         stickyHeader {
@@ -312,7 +312,7 @@ fun SemesterItemEdit(
     isCollapsedIcon: Painter,
     isExpandedIcon: Painter,
     color: Color,
-    onClick: (String) -> Unit,
+    onRemove: (String) -> Unit,
     onTitleChange: (String) -> Unit
 ){
     var openDialog by remember { mutableStateOf(false) }
@@ -335,24 +335,27 @@ fun SemesterItemEdit(
                 .fillMaxWidth()
                 .background(color)
         )
-        Text(
-            text = title,
-            color = MaterialTheme.colors.secondaryVariant,
+        TextButton(onClick = { openDialog = true },
             modifier = Modifier
                 .align(Alignment.Center)
                 .background(MaterialTheme.colors.background)
-                .padding(horizontal = 16.dp)
-                .clickable { openDialog = true }
-        )
-        Icon(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .background(MaterialTheme.colors.background)
-                .clickable { onClick(title) },
-            contentDescription = null,
-            tint = color,
-            painter = if (isCollapsed) isCollapsedIcon else isExpandedIcon
-        )
+        ){
+            Text(
+                text = title,
+                color = MaterialTheme.colors.secondaryVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+        IconButton(onClick = { onRemove(title) }, modifier = Modifier.align(Alignment.CenterEnd)) {
+            Icon(
+                contentDescription = null,
+                tint = color,
+                painter = if (isCollapsed) isCollapsedIcon else isExpandedIcon,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .background(MaterialTheme.colors.background)
+            )
+        }
 
         if (openDialog) {
             InputFieldDialog(
@@ -400,17 +403,20 @@ fun CourseItemEdit(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.caption,
-            modifier = Modifier.clickable { openDialog = true }
-        )
-        Text(
-            text = "Remove",
-            color = MaterialTheme.colors.error,
-            style = MaterialTheme.typography.caption,
-            modifier = Modifier.clickable { onRemove(title) }
-        )
+        TextButtonV2(onClick = { openDialog = true }, horizontalArrangement = Arrangement.Start){
+            Text(
+                text = title,
+                color = MaterialTheme.colors.onBackground,
+                style = MaterialTheme.typography.subtitle2,
+            )
+        }
+        TextButtonV2(onClick = { onRemove(title) }, horizontalArrangement = Arrangement.End){
+            Text(
+                text = "Remove",
+                color = MaterialTheme.colors.error,
+                style = MaterialTheme.typography.caption,
+            )
+        }
     }
 
     if (openDialog) {
