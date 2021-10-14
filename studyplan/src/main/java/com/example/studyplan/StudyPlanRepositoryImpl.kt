@@ -18,14 +18,16 @@ class StudyPlanRepositoryImpl: StudyPlanRepository {
         FirebaseFirestore.getInstance().collection(collectionPath)
     }
 
-    override suspend fun getStudyPlan(id: String) = flow<Result<StudyPlan>> {
-        emit(Result.loading())
-        val document = collection.document(id).get().await()
-        val studyPlan = document.toObject(StudyPlan::class.java)
-        if (studyPlan != null){
-            emit(Result.success(studyPlan))
-        } else {
-            emit(Result.failed("Study plan $id was not found"))
+    override suspend fun getStudyPlan(id: String?) = flow<Result<StudyPlan>> {
+        if (id != null){
+            emit(Result.loading())
+            val document = collection.document(id).get().await()
+            val studyPlan = document.toObject(StudyPlan::class.java)
+            if (studyPlan != null){
+                emit(Result.success(studyPlan))
+            } else {
+                emit(Result.failed("Study plan $id was not found"))
+            }
         }
     }.catch {
         emit(Result.failed(it.message.toString()))
