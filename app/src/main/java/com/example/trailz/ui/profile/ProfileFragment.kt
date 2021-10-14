@@ -6,36 +6,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import com.example.trailz.ChangeAnimationListener
 import com.example.trailz.ChangeLanguageListener
 import com.example.trailz.OpenSettingsListener
 import com.example.trailz.language.LanguageConfig
 import com.example.trailz.R
 import com.example.trailz.databinding.FragmentProfileBinding
 import com.example.trailz.inject.SharedPrefs
+import com.google.android.material.transition.platform.MaterialElevationScale
+import com.google.android.material.transition.platform.MaterialFadeThrough
+import com.google.android.material.transition.platform.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 import javax.inject.Inject
 
@@ -53,12 +41,14 @@ class ProfileFragment : Fragment() {
 
     private lateinit var onLanguageListener: ChangeLanguageListener
     private lateinit var onSettingsListener: OpenSettingsListener
+    private lateinit var changeAnimationListener: ChangeAnimationListener
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         try {
             onLanguageListener = context as ChangeLanguageListener
             onSettingsListener = context as OpenSettingsListener
+            changeAnimationListener = context as ChangeAnimationListener
         } catch (e: Error) {
             throw IllegalStateException("Activity must implement $onLanguageListener")
         }
@@ -72,19 +62,25 @@ class ProfileFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         viewModel.getUser(sharedPrefs.loggedInId)
-        return ComposeView(requireContext()).apply {
-            setContent {
-                Profile(
-                    viewModel = viewModel,
-                    appliedCountry = appliedCountry,
-                    signIn = ::signIn,
-                    signUp = ::signUp,
-                    rateApp = ::openGooglePlay,
-                    navigateUp = { findNavController().navigateUp() },
-                    onChangeLanguage = onLanguageListener::onChangeLanguage,
-                    settings = onSettingsListener::onOpenSettingsListener
-                )
-            }
+        val binding = FragmentProfileBinding.inflate(inflater, container, false)
+        setupComposeView(binding.composeViewProfile)
+        return binding.root
+    }
+
+    @ExperimentalMaterialApi
+    @ExperimentalComposeUiApi
+    private fun setupComposeView(composeViewProfile: ComposeView) {
+        composeViewProfile.setContent {
+            Profile(
+                viewModel = viewModel,
+                appliedCountry = appliedCountry,
+                signIn = ::signIn,
+                signUp = ::signUp,
+                rateApp = ::openGooglePlay,
+                navigateUp = { findNavController().navigateUp() },
+                onChangeLanguage = onLanguageListener::onChangeLanguage,
+                settings = onSettingsListener::onOpenSettingsListener
+            )
         }
     }
 
@@ -93,10 +89,28 @@ class ProfileFragment : Fragment() {
     }
 
     private fun signIn(){
-        findNavController().navigate(R.id.action_profile_to_signin)
+        changeAnimationListener.applyAnimationChanges {
+            exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true).apply {
+                duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+            }
+            reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false).apply {
+                duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+            }
+        }
+
+        findNavController().navigate(ProfileFragmentDirections.actionProfileToSignin())
     }
 
     private fun signUp(){
-        findNavController().navigate(R.id.action_profile_to_signup)
+        changeAnimationListener.applyAnimationChanges {
+            exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true).apply {
+                duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+            }
+            reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false).apply {
+                duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+            }
+        }
+
+        findNavController().navigate(ProfileFragmentDirections.actionProfileToSignup())
     }
 }

@@ -118,7 +118,7 @@ fun Profile(
         ) {
             Box(Modifier.fillMaxSize()) {
                 when {
-                    state.isLoading -> CircularProgressIndicator()
+                    state.isLoading -> {}
                     state.isLoggedIn -> LoggedInView(state.user!!, logout)
                     else -> LoggedOutView(signUp, signIn, rateApp, settings)
                 }
