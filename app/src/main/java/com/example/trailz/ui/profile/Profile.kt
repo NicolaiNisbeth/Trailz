@@ -96,7 +96,7 @@ fun Profile(
                         coroutineScope.launch {
                             modalBottomSheetState.animateTo(
                                 targetValue = ModalBottomSheetValue.Expanded,
-                                anim = tween(800)
+                                anim = tween(500)
                             )
                         }
                     }) {
