@@ -31,24 +31,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.trailz.ui.common.compose.InputField
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import android.annotation.SuppressLint
 import androidx.compose.material.*
 import androidx.compose.material.icons.filled.*
 import com.google.android.material.animation.AnimationUtils
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import com.example.trailz.ui.common.compose.InputFieldFocus
 import com.google.accompanist.pager.PagerState
-import kotlin.math.absoluteValue
-import com.google.accompanist.pager.calculateCurrentOffsetForPage
-import kotlinx.coroutines.flow.collect
 
+@ExperimentalComposeUiApi
 @ExperimentalPagerApi
 @Composable
 fun SignUp(
@@ -73,25 +71,25 @@ fun SignUp(
             .takeUnless { it == -1 } ?: 0
     )
 
-    SideEffect { if (isSignupSuccess) navigateUp() }
-
     SignUp(
         username = username,
         email = email,
         password = password,
         studyPaths = studyPaths,
         pagerState = pagerState,
+        isSignUpSuccess = isSignupSuccess,
         onUsernameChange = viewModel::changeUsername,
         onEmailChange = viewModel::changeEmail,
         onPasswordChange = viewModel::changePassword,
         onStudyPathChange = viewModel::changeStudyPath,
         hasError = hasError,
         isLoading = isLoading,
-        onSignup = viewModel::signup,
+        onSignup = viewModel::signUp,
         navigateUp = navigateUp
     )
 }
 
+@ExperimentalComposeUiApi
 @ExperimentalPagerApi
 @Composable
 internal fun SignUp(
@@ -104,6 +102,7 @@ internal fun SignUp(
     onStudyPathChange: (String) -> Unit,
     pagerState: PagerState,
     studyPaths: List<String>,
+    isSignUpSuccess: Boolean,
     hasError: Boolean,
     isLoading: Boolean,
     onSignup: () -> Unit,
@@ -116,6 +115,11 @@ internal fun SignUp(
         Icons.Filled.Visibility to VisualTransformation.None
     } else {
         Icons.Filled.VisibilityOff to PasswordVisualTransformation()
+    }
+
+    if (isSignUpSuccess) {
+        LocalSoftwareKeyboardController.current?.hide()
+        navigateUp()
     }
 
     Scaffold(
@@ -150,19 +154,22 @@ internal fun SignUp(
             }
 
             item {
-                InputField(
-                    value = username,
-                    onValueChange = onUsernameChange,
-                    label = "Username",
-                    contentDescription = "Username",
-                    isError = hasError,
-                    imeAction = ImeAction.Next,
-                    keyboardType = KeyboardType.Text,
-                    leadingIcon = rememberVectorPainter(Icons.Default.Person),
-                    keyboardActions = KeyboardActions(onNext = {
-                        focusManager.moveFocus(FocusDirection.Down)
-                    })
-                )
+                InputFieldFocus { focusModifier ->
+                    InputField(
+                        modifier = focusModifier,
+                        value = username,
+                        onValueChange = onUsernameChange,
+                        label = "Username",
+                        contentDescription = "Username",
+                        isError = hasError,
+                        imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Text,
+                        leadingIcon = rememberVectorPainter(Icons.Default.Person),
+                        keyboardActions = KeyboardActions(onNext = {
+                            focusManager.moveFocus(FocusDirection.Down)
+                        })
+                    )
+                }
 
                 InputField(
                     value = email,

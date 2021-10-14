@@ -4,20 +4,23 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.base.Result
 import com.example.trailz.inject.SharedPrefs
 import com.example.trailz.ui.common.compose.invalidInput
 import com.example.trailz.ui.signup.BecomeUserUseCase
 import com.example.trailz.ui.signup.User
+import com.example.user.UserRepository
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SigninViewModel @Inject constructor(
-    private val becomeUserUseCase: BecomeUserUseCase,
+    private val repository: UserRepository,
     private val sharedPrefs: SharedPrefs
 ): ViewModel() {
 
@@ -53,22 +56,16 @@ class SigninViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            _loading.value = true
-            becomeUserUseCase(validateUser)
-            _loading.value = false
-        }
-    }
-
-    private val validateUser = object: ValueEventListener {
-        override fun onDataChange(snapshot: DataSnapshot) {
-            val userExists = snapshot.children.find {
-                val user = it.getValue(User::class.java)
-                user?.email == email.value && user?.password == password.value
+            repository.signIn(email!!, password!!).collect {
+                when (it){
+                    is Result.Failed -> _error.value = true
+                    is Result.Loading -> _loading.value = true
+                    is Result.Success -> {
+                        _signinSuccess.value = true
+                        sharedPrefs.loggedInId = it.data
+                    }
+                }
             }
-            sharedPrefs.loggedInId = userExists?.key
-            _signinSuccess.value = userExists != null
-            _error.value = userExists == null
         }
-        override fun onCancelled(error: DatabaseError) { _error.value = true }
     }
 }

@@ -119,7 +119,7 @@ fun Profile(
             Box(Modifier.fillMaxSize()) {
                 when {
                     state.isLoading -> {}
-                    state.isLoggedIn -> LoggedInView(state.user!!, logout)
+                    state.isLoggedIn -> LoggedInView(state.user!!, logout, rateApp, settings)
                     else -> LoggedOutView(signUp, signIn, rateApp, settings)
                 }
             }
@@ -167,16 +167,103 @@ fun LanguageView(
     }
 }
 
+@ExperimentalComposeUiApi
 @Composable
 fun LoggedInView(
-    user: User,
-    logout: () -> Unit
+    user: com.example.base.domain.User,
+    logout: () -> Unit,
+    rateApp: () -> Unit,
+    settings: () -> Unit
 ) {
-    Column {
-        Text(text = user.toString())
-        Button(onClick = logout) {
-            Text(text = "Logout")
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.LightGray.copy(alpha = 0.1f))
+            .padding(vertical = 30.dp, horizontal = 16.dp)
+        ) {
+            Text(
+                text = "Velkommen ${user.username}",
+                style = MaterialTheme.typography.h4.copy(fontWeight = FontWeight.Bold),
+                textAlign = TextAlign.Center
+            )
         }
+
+        Text(
+            text = "Profile",
+            style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(start = 16.dp),
+            textAlign = TextAlign.Center
+        )
+
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .background(Color.LightGray.copy(alpha = 0.1f))
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(text = "Email", textAlign = TextAlign.Center)
+                Text(text = user.email, color = MaterialTheme.colors.primary, textAlign = TextAlign.Center)
+            }
+
+            Spacer(modifier = Modifier
+                .height(1.dp)
+                .background(Color.LightGray),)
+
+            Row(Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(text = "Password", textAlign = TextAlign.Center)
+                Text(text = "****", color = MaterialTheme.colors.primary, textAlign = TextAlign.Center, style = MaterialTheme.typography.h5)
+            }
+
+            Spacer(modifier = Modifier
+                .height(3.dp)
+                .background(Color.Red),)
+
+            Row(Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(text = "Degree", textAlign = TextAlign.Center)
+                Text(text = user.degree, color = MaterialTheme.colors.primary, textAlign = TextAlign.Center)
+            }
+        }
+
+        Text(
+            text = "About",
+            style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(start = 16.dp),
+            textAlign = TextAlign.Center
+        )
+
+        Column(Modifier
+            .fillMaxWidth()
+            .background(Color.LightGray.copy(alpha = 0.1f))
+        ) {
+            RateAppView(
+                modifier = Modifier.fillMaxWidth(),
+                onRateApp = rateApp,
+            )
+            SettingsView(
+                modifier = Modifier.fillMaxWidth(),
+                onSettings = settings,
+            )
+        }
+
+        Text(
+            text = "Logout",
+            color = MaterialTheme.colors.error,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(16.dp).clickable { logout() }
+        )
     }
 }
 

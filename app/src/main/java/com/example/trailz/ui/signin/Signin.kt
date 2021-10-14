@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
@@ -34,7 +35,9 @@ import androidx.compose.ui.unit.sp
 import com.example.trailz.R
 import com.example.trailz.ui.common.compose.DividerWithText
 import com.example.trailz.ui.common.compose.InputField
+import com.example.trailz.ui.common.compose.InputFieldFocus
 
+@ExperimentalComposeUiApi
 @Composable
 fun SignIn(
     viewModel: SigninViewModel,
@@ -60,6 +63,7 @@ fun SignIn(
     )
 }
 
+@ExperimentalComposeUiApi
 @Composable
 internal fun SignIn(
     email: String,
@@ -112,19 +116,22 @@ internal fun SignIn(
             }
 
             item {
-                InputField(
-                    value = email,
-                    onValueChange = onEmailChange,
-                    label = "Email address",
-                    contentDescription = "Email address",
-                    isError = hasError,
-                    imeAction = ImeAction.Next,
-                    keyboardType = KeyboardType.Email,
-                    leadingIcon = rememberVectorPainter(Icons.Default.Email),
-                    keyboardActions = KeyboardActions(onNext = {
-                        focusManager.moveFocus(FocusDirection.Down)
-                    })
-                )
+                InputFieldFocus { focusModifier ->
+                    InputField(
+                        modifier = focusModifier,
+                        value = email,
+                        onValueChange = onEmailChange,
+                        label = "Email address",
+                        contentDescription = "Email address",
+                        isError = hasError,
+                        imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Email,
+                        leadingIcon = rememberVectorPainter(Icons.Default.Email),
+                        keyboardActions = KeyboardActions(onNext = {
+                            focusManager.moveFocus(FocusDirection.Down)
+                        })
+                    )
+                }
 
                 InputField(
                     value = password,

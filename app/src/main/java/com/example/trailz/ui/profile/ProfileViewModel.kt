@@ -4,15 +4,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.base.Result
+import com.example.base.domain.User
 import com.example.trailz.inject.SharedPrefs
 import com.example.trailz.ui.signup.GetUserUseCase
-import com.example.trailz.ui.signup.User
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.user.UserRepository
+import kotlinx.coroutines.flow.collect
 
 data class ProfileUiState(
     val user: User? = null,
@@ -24,7 +27,7 @@ data class ProfileUiState(
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val getUserUseCase: GetUserUseCase,
+    private val repository: UserRepository,
     private val sharedPrefs: SharedPrefs
 ) : ViewModel() {
 
@@ -38,22 +41,19 @@ class ProfileViewModel @Inject constructor(
 
     fun getUser(userId: String?){
         if (userId.isNullOrBlank()) {
-            // default state is logged out
+            // default Ui state is logged out
             _state.value = ProfileUiState()
             return
         }
 
         viewModelScope.launch {
-            ProfileUiState(isLoading = true)
-            getUserUseCase(userId, object: ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    _state.value = ProfileUiState(User(email = snapshot.value.toString()))
+            repository.getUserBy(userId).collect {
+                _state.value = when (it){
+                    is Result.Loading -> ProfileUiState(isLoading = true)
+                    is Result.Failed -> ProfileUiState(error = it.message)
+                    is Result.Success -> ProfileUiState(user = it.data)
                 }
-
-                override fun onCancelled(error: DatabaseError) {
-                    _state.value = ProfileUiState(error = error.message)
-                }
-            })
+            }
         }
     }
 }

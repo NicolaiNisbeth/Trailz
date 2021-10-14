@@ -4,14 +4,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.base.Result
+import com.example.base.domain.User
 import com.example.trailz.inject.SharedPrefs
+import com.example.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SignupViewModel @Inject constructor(
-    private val createUserUseCase: CreateUserUseCase,
+    private val repository: UserRepository,
     private val sharedPrefs: SharedPrefs
 ) : ViewModel() {
 
@@ -65,7 +69,7 @@ class SignupViewModel @Inject constructor(
         _studyPath.value = studyPath
     }
 
-    fun signup(){
+    fun signUp(){
         val username = username.value
         val email = email.value
         val password = password.value
@@ -81,14 +85,17 @@ class SignupViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            _loading.value = true
-            val userId = createUserUseCase(User(username!!, email!!, password!!, studyPath!!))
-            if (userId != null){
-                sharedPrefs.loggedInId = userId
-                _signupSuccess.value = true
+            val user = User(username!!, email!!, password!!, studyPath!!)
+            repository.signUp(user).collect {
+                when (it){
+                    is Result.Failed -> _error.value = true
+                    is Result.Loading -> _loading.value = true
+                    is Result.Success -> {
+                        sharedPrefs.loggedInId = it.data
+                        _signupSuccess.value = true
+                    }
+                }
             }
-            _loading.value = false
         }
-
     }
 }
