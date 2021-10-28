@@ -1,92 +1,92 @@
 package com.example.studyplan
 
-import android.util.Log
 import com.example.base.domain.StudyPlan
 import com.example.base.Result
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.studyplan.local.StudyPlanLocalDataSource
+import com.example.studyplan.remote.StudyPlanRemoteDataSource
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.tasks.await
 
-class StudyPlanRepositoryImpl: StudyPlanRepository {
+class StudyPlanRepositoryImpl(
+    private val localDataSource: StudyPlanLocalDataSource,
+    private val remoteDataSource: StudyPlanRemoteDataSource
+): StudyPlanRepository {
 
-    private val TAG = javaClass.name
-    private val collectionPath = "/studyplans"
-    private val collection by lazy {
-        FirebaseFirestore.getInstance().collection(collectionPath)
-    }
-
-    override suspend fun getStudyPlan(id: String?) = flow<Result<StudyPlan>> {
-        if (id != null){
-            emit(Result.loading())
-            val document = collection.document(id).get().await()
-            val studyPlan = document.toObject(StudyPlan::class.java)
+    override suspend fun getStudyPlan(id: String?): Flow<Result<StudyPlan>> = if (id != null){
+        remoteDataSource.getStudyPlan(id)
+    } else {
+        flow {
+            val studyPlan = localDataSource.getStudyPlan()
             if (studyPlan != null){
-                emit(Result.success(studyPlan))
+                emit(Result.success<StudyPlan>(studyPlan))
             } else {
-                emit(Result.failed("Study plan $id was not found"))
+                emit(Result.failed<StudyPlan>(message = "user with id=$id has no studyplan"))
             }
         }
-    }.catch {
-        emit(Result.failed(it.message.toString()))
-        Log.d(TAG, it.message.toString())
     }.flowOn(Dispatchers.IO)
 
-    override suspend fun getStudyPlans() = flow<Result<List<StudyPlan>>> {
+    @FlowPreview
+    override suspend fun getStudyPlans() = observeStudyPlans()
+
+    fun refreshBreedsIfStale(forced: Boolean = false): Flow<Result<List<StudyPlan>>> = flow {
         emit(Result.loading())
-        val documents = collection.get().await()
-        val studyPlans = documents.toObjects(StudyPlan::class.java)
-        emit(Result.success(studyPlans))
-    }.catch {
-        emit(Result.failed(it.message.toString()))
-        Log.d(TAG, it.message.toString())
-    }.flowOn(Dispatchers.IO)
-
-    @ExperimentalCoroutinesApi
-    override suspend fun observeStudyPlans() = callbackFlow<Result<List<StudyPlan>>> {
-        trySend(Result.loading())
-
-        val listener = collection.addSnapshotListener { documents, error ->
-            documents?.let {
-                val studyPlans = it.toObjects(StudyPlan::class.java)
-                trySend(Result.success(studyPlans))
-            }
-            error?.let {
-                trySend(Result.failed(it.message.toString()))
-                Log.d(TAG, it.message.toString())
+        val networkBreedDataState: Flow<Result<List<StudyPlan>>>
+        if (forced) {
+            networkBreedDataState = remoteDataSource.getStudyPlans()
+            networkBreedDataState.collect {
+                if (it is Result.Success){
+                    it.data.forEach { localDataSource.createStudyPlan(it) }
+                } else {
+                    networkBreedDataState.collect { emit(it) }
+                }
             }
         }
-
-        awaitClose { listener.remove() }
     }
+
+    private suspend fun getStudyPlansFromCache(): Flow<Result<List<StudyPlan>>> =
+        localDataSource.observeStudyPlans()
+            .mapNotNull {
+                if (it.isEmpty()){
+                    null
+                } else {
+                    Result.success(it)
+                }
+            }
+
+    @FlowPreview
+    override suspend fun observeStudyPlans() = flowOf(
+        refreshBreedsIfStale(true),
+        getStudyPlansFromCache()
+    ).flattenMerge().flowOn(Dispatchers.IO)
 
     override suspend fun deleteStudyPlan(id: String) = flow<Result<Unit>> {
-        emit(Result.Loading())
-        collection.document(id).delete().await()
-        emit(Result.success(Unit))
-    }.catch {
-        emit(Result.failed(it.message.toString()))
-        Log.d(TAG, it.message.toString())
+        localDataSource.deleteStudyPlan(id)
+        remoteDataSource.deleteStudyPlan(id).collect {
+            if (it is Result.Success){
+                emit(it)
+            }
+        }
     }.flowOn(Dispatchers.IO)
 
     override suspend fun createStudyPlan(studyPlan: StudyPlan) = flow<Result<Unit>> {
-        emit(Result.Loading())
-        collection.document(studyPlan.userId).set(studyPlan).await()
-        emit(Result.Success(Unit))
-    }.catch {
-        emit(Result.failed(it.message.toString()))
-        Log.d(TAG, it.message.toString())
+        localDataSource.createStudyPlan(studyPlan)
+        /*
+        remoteDataSource.createStudyPlan(studyPlan).collect {
+            if (it is Result.Success){
+                emit(it)
+            }
+        }
+
+         */
     }.flowOn(Dispatchers.IO)
 
     override suspend fun updateStudyPlan(id: String, studyPlan: StudyPlan) = flow<Result<Unit>> {
-        emit(Result.loading())
-        collection.document(id).set(studyPlan).await()
-        emit(Result.Success(Unit))
-    }.catch {
-        emit(Result.Failed(it.message.toString()))
-        Log.d(TAG, it.message.toString())
+        localDataSource.updateStudyPlan(id, studyPlan)
+        remoteDataSource.updateStudyPlan(id, studyPlan).collect {
+            if (it is Result.Success){
+                emit(it)
+            }
+        }
     }.flowOn(Dispatchers.IO)
-
 }

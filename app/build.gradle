@@ -5,6 +5,7 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id 'com.google.gms.google-services'
     id 'androidx.navigation.safeargs'
+    id 'kotlinx-serialization'
 
 }
 
@@ -105,6 +106,12 @@ dependencies {
 
     // compose
     implementation 'com.airbnb.android:lottie:4.0.0'
+
+    // room
+    implementation "androidx.room:room-runtime:2.3.0"
+    kapt "androidx.room:room-compiler:2.3.0"
+    implementation "androidx.room:room-ktx:2.3.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1"
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

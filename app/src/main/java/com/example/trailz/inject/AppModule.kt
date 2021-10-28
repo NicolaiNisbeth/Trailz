@@ -1,6 +1,8 @@
 package com.example.trailz.inject
 
 import android.content.Context
+import androidx.room.Room
+import com.example.studyplan.local.AppDataBase
 import com.example.trailz.TrailzApplication
 import com.google.firebase.database.FirebaseDatabase
 import dagger.Module
@@ -30,5 +32,13 @@ class AppModule{
     @Singleton
     fun provideApplication(@ApplicationContext app: Context): TrailzApplication{
         return app as TrailzApplication
+    }
+
+    @Provides
+    @Singleton
+    fun provideRoomDatabase(@ApplicationContext appContext: Context): AppDataBase {
+        return Room.databaseBuilder(appContext, AppDataBase::class.java, "data.db")
+            .fallbackToDestructiveMigration()
+            .build()
     }
 }

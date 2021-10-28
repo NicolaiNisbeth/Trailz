@@ -116,28 +116,25 @@ class MyStudyPlanViewModel @Inject constructor(
     }
 
     fun saveStudyPlan(){
-        sharedPrefs.loggedInId?.let {
-            val studyPlan = StudyPlan(
-                userId = it,
-                title = it,
-                semesters = semesterToCourses.map { Semester(it.key, it.value) }
-            )
-            if (isStudyPlanModified(studyPlan)){
-                viewModelScope.launch {
-                    repository.createStudyPlan(studyPlan).collect {
-                        when (it){
-                            is Result.Failed -> { _isLoading.value = false; _isUpdated.value = Event(false) }
-                            is Result.Loading -> _isLoading.value = true
-                            is Result.Success -> {
-                                _isLoading.value = false
-                                _isUpdated.value = Event(true)
-                            }
+        val userId = sharedPrefs.loggedInId ?: "-1"
+        val studyPlan = StudyPlan(
+            userId = userId,
+            title = userId,
+            semesters = semesterToCourses.map { Semester(it.key, it.value) }
+        )
+        if (isStudyPlanModified(studyPlan)){
+            viewModelScope.launch {
+                repository.createStudyPlan(studyPlan).collect {
+                    when (it){
+                        is Result.Failed -> { _isLoading.value = false; _isUpdated.value = Event(false) }
+                        is Result.Loading -> _isLoading.value = true
+                        is Result.Success -> {
+                            _isLoading.value = false
+                            _isUpdated.value = Event(true)
                         }
                     }
                 }
             }
-        } ?: {
-            // save in db
         }
     }
 }
