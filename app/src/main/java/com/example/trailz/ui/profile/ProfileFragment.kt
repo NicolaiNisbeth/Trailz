@@ -33,9 +33,6 @@ class ProfileFragment : Fragment() {
     @Inject
     lateinit var sharedPrefs: SharedPrefs
 
-    @Inject
-    lateinit var application: TrailzApplication
-
     private val appliedCountry by lazy {
         LanguageConfig.languageToConfig(sharedPrefs.languagePreference)
     }
@@ -85,7 +82,7 @@ class ProfileFragment : Fragment() {
                 Profile(
                     viewModel = viewModel,
                     appliedCountry = appliedCountry,
-                    isDarkTheme = application.isDark,
+                    isDarkTheme = sharedPrefs.isDarkTheme,
                     signIn = ::signIn,
                     signUp = ::signUp,
                     rateApp = ::openGooglePlay,
@@ -99,7 +96,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun toggleTheme(isDarkTheme: Boolean){
-        application.isDark = isDarkTheme
+        sharedPrefs.isDarkTheme = isDarkTheme
         if (isDarkTheme) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         } else {

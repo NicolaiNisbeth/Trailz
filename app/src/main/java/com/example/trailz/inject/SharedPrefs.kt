@@ -14,4 +14,8 @@ class SharedPrefs(
     var languagePreference: String?
         get() = getDefaultSharedPreferences(context).getString("in_memory_language_preference", "en")
         set(value) = getDefaultSharedPreferences(context).edit { putString("in_memory_language_preference", value) }
+
+    var isDarkTheme: Boolean
+        get() = getDefaultSharedPreferences(context).getBoolean("in_memory_theme_preference", false)
+        set(value) = getDefaultSharedPreferences(context).edit { putBoolean("in_memory_theme_preference", value) }
 }

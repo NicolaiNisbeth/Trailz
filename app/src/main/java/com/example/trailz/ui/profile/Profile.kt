@@ -265,11 +265,13 @@ fun LoggedInView(
                 onSettings = settings,
             )
             Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = if (isDarkTheme) "Apply light mode" else "Apply dark mode")
+                Text(text = if (isDarkTheme) "Apply light theme" else "Apply dark theme")
                 Switch(isDarkTheme, toggleTheme,)
             }
 
@@ -298,7 +300,8 @@ fun LoggedOutView(
 ) {
 
     Column(
-        modifier = Modifier.padding(vertical = 16.dp)
+        modifier = Modifier
+            .padding(vertical = 16.dp)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -307,7 +310,7 @@ fun LoggedOutView(
             onSignUp = signUp,
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.3f)
+                .wrapContentHeight()
                 .background(Color.LightGray.copy(alpha = 0.1f))
         )
         RateAppView(
@@ -323,7 +326,10 @@ fun LoggedOutView(
                 .background(Color.LightGray.copy(alpha = 0.1f))
         )
         Row(
-            modifier = Modifier.fillMaxWidth().background(Color.LightGray.copy(alpha = 0.1f)).padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.LightGray.copy(alpha = 0.1f))
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -356,8 +362,8 @@ fun LoginHeader(
     onSignIn: () -> Unit,
     onSignUp: () -> Unit
 ) {
-    ConstraintLayout(modifier) {
-        val (signInBtn, signUpBtn, description) = createRefs()
+    ConstraintLayout(modifier.padding(16.dp)) {
+        val (signInBtn, signUpBtn, description, spacer) = createRefs()
         Text(
             textAlign = TextAlign.Center,
             text = "Se dine favoritter fra alle enheder",
@@ -365,16 +371,22 @@ fun LoginHeader(
                 top.linkTo(parent.top)
                 start.linkTo(signInBtn.start)
                 end.linkTo(signUpBtn.end)
-                bottom.linkTo(signUpBtn.top)
+                bottom.linkTo(spacer.top)
             }
         )
+        Spacer(Modifier.height(16.dp).constrainAs(spacer){
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+            bottom.linkTo(signInBtn.top)
+            top.linkTo(description.bottom)
+        })
         Button(
             onClick = onSignIn,
             modifier = Modifier.constrainAs(signInBtn){
                 start.linkTo(parent.start)
                 end.linkTo(signUpBtn.start)
                 bottom.linkTo(parent.bottom)
-                top.linkTo(description.bottom)
+                top.linkTo(spacer.bottom)
             }
         ) {
             Text(text = "Sign in")
@@ -386,7 +398,7 @@ fun LoginHeader(
                 end.linkTo(parent.end)
                 bottom.linkTo(parent.bottom)
                 start.linkTo(signInBtn.end)
-                top.linkTo(description.bottom)
+                top.linkTo(spacer.bottom)
             }
         ) {
             Text(text = "Sign up")
