@@ -145,9 +145,10 @@ fun MyStudyPlan(
     ) {
         Column(
             modifier = Modifier
-                .padding(it)
+                .padding(16.dp)
                 .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             isUpdated?.contentIfNotHandled()?.let{
                 coroutineScope.launch {
@@ -172,7 +173,6 @@ fun MyStudyPlan(
             )
 
             LazyColumn(
-                contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(if (inEditMode) 0.dp else 12.dp),
             ){
 
@@ -349,7 +349,7 @@ fun SemesterItemEdit(
         IconButton(onClick = { onRemove(title) }, modifier = Modifier.align(Alignment.CenterEnd)) {
             Icon(
                 contentDescription = null,
-                tint = color,
+                tint = MaterialTheme.colors.error,
                 painter = if (isCollapsed) isCollapsedIcon else isExpandedIcon,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)

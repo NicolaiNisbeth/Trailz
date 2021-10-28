@@ -71,14 +71,11 @@ class StudyPlanRepositoryImpl(
 
     override suspend fun createStudyPlan(studyPlan: StudyPlan) = flow<Result<Unit>> {
         localDataSource.createStudyPlan(studyPlan)
-        /*
         remoteDataSource.createStudyPlan(studyPlan).collect {
             if (it is Result.Success){
                 emit(it)
             }
         }
-
-         */
     }.flowOn(Dispatchers.IO)
 
     override suspend fun updateStudyPlan(id: String, studyPlan: StudyPlan) = flow<Result<Unit>> {

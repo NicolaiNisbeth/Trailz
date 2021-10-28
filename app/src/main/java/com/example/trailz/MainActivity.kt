@@ -35,11 +35,14 @@ class MainActivity : BaseActivity() {
     @Inject
     lateinit var application: TrailzApplication
 
+    @Inject
+    lateinit var prefs: SharedPrefs
+
     val viewModel: MainActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
+        if (prefs.isDarkTheme) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
@@ -84,7 +87,7 @@ class MainActivityViewModel @Inject constructor(
     private val sharedPref: SharedPrefs
 ): ViewModel(){
 
-    private val _count = MutableLiveData<Int>()
+    private val _count = MutableLiveData(0)
     val count: LiveData<Int> = _count
 
     init {

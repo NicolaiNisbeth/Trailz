@@ -272,7 +272,7 @@ fun LoggedInView(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(text = if (isDarkTheme) "Apply light theme" else "Apply dark theme")
-                Switch(isDarkTheme, toggleTheme,)
+                Switch(isDarkTheme, toggleTheme)
             }
 
         }
@@ -333,7 +333,7 @@ fun LoggedOutView(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = if (isDarkTheme) "Apply dark mode" else "Apply light mode")
+            Text(text = if (isDarkTheme) "Apply light theme" else "Apply dark theme")
             Switch(isDarkTheme, toggleTheme,)
         }
     }

@@ -98,9 +98,9 @@ class ProfileFragment : Fragment() {
     private fun toggleTheme(isDarkTheme: Boolean){
         sharedPrefs.isDarkTheme = isDarkTheme
         if (isDarkTheme) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
     }
 
