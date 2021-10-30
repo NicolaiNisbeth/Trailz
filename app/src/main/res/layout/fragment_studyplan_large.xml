@@ -14,7 +14,6 @@
         android:id="@+id/coord_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/background"
         android:theme="@style/CustomActionBarTheme"
         tools:context=".MainActivity">
 
@@ -38,6 +37,7 @@
                 app:layout_scrollFlags="scroll|snap|exitUntilCollapsed">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constraint_container"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
@@ -47,11 +47,12 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
                         android:transitionName="image_big"
-                        app:layout_constraintBottom_toTopOf="@+id/textView"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        tools:srcCompat="@tools:sample/avatars" />
+                        app:tint="?attr/colorOnBackground"
+                        tools:src="@drawable/ic_launcher_foreground"
+                        />
 
                     <TextView
                         android:id="@+id/textView"
@@ -59,54 +60,24 @@
                         android:layout_height="wrap_content"
                         android:text="TextView"
                         android:transitionName="text_big"
-                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:textColor="?attr/colorOnBackground"
+                        style="@style/TextAppearance.MaterialComponents.Headline4"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.498"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.586" />
+                        app:layout_constraintTop_toBottomOf="@id/imageView"
+                         />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </com.google.android.material.appbar.CollapsingToolbarLayout>
         </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.core.widget.NestedScrollView
-            android:id="@+id/nestedScrollView"
+
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/studyplan"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:behavior_overlapTop="45dp"
-            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+            android:layout_height="match_parent"/>
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerView"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-
-                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                </androidx.recyclerview.widget.RecyclerView>
-
-                <Button
-                    android:id="@+id/button2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Button"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/recyclerView" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-        </androidx.core.widget.NestedScrollView>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

@@ -39,6 +39,9 @@ import com.example.trailz.ui.common.themeColor
 @AndroidEntryPoint
 class StudyPlannersFragment : Fragment() {
 
+    @Inject
+    lateinit var sharedPrefs: SharedPrefs
+
     private val viewModel: StudyPlanListViewModel by viewModels()
     private val adapter: StudyPlanListAdapter =
         StudyPlanListAdapter(
@@ -46,13 +49,11 @@ class StudyPlannersFragment : Fragment() {
             onFavoriteClicked = { id, isChecked -> viewModel.updateChecked(id, isChecked) }
         )
 
-    @Inject
-    lateinit var sharedPrefs: SharedPrefs
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val inflater = TransitionInflater.from(requireContext())
-        exitTransition = inflater.inflateTransition(R.transition.fade)
+        exitTransition = TransitionInflater
+            .from(requireContext())
+            .inflateTransition(R.transition.fade)
     }
 
     @ExperimentalMaterialApi
@@ -71,7 +72,9 @@ class StudyPlannersFragment : Fragment() {
         postponeEnterTransition()
         viewModel.shippingProvider.observe(viewLifecycleOwner) {
             adapter.submitList(it){
-                (view.parent as? ViewGroup)?.doOnPreDraw { startPostponedEnterTransition() }
+                (view.parent as? ViewGroup)?.doOnPreDraw {
+                    startPostponedEnterTransition()
+                }
             }
         }
     }
@@ -81,26 +84,28 @@ class StudyPlannersFragment : Fragment() {
         shippingList.itemAnimator = null
         shippingList.setHasFixedSize(true)
         shippingList.scheduleLayoutAnimation()
-
-        val divider =
+        shippingList.addItemDecoration(
             DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL).apply {
                 val drawable = getDrawable(requireContext(), R.drawable.line)
                 if (drawable != null) setDrawable(drawable)
             }
-        shippingList.addItemDecoration(divider)
+        )
     }
 
     private fun openStudyPlan(view: StudyPlanlistBinding) {
-        val extra =
-            FragmentNavigatorExtras(view.imageView to "image_big", view.textView to "text_big")
         val args = Bundle().apply {
+            putInt("image_big", R.drawable.ic_launcher_foreground) // FIXME: cheating
             putString("text_big", view.textView.text.toString())
         }
+        val extra = FragmentNavigatorExtras(
+            view.imageView to "image_big",
+            view.textView to "text_big"
+        )
         findNavController().navigate(
-            R.id.action_study_planners_to_study_planner,
-            args,
-            null,
-            extra
+            resId = R.id.action_study_planners_to_study_planner,
+            args = args,
+            navOptions = null,
+            navigatorExtras = extra
         )
     }
 }

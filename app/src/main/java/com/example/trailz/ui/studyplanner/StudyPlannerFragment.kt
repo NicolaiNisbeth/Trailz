@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnPreDraw
@@ -14,12 +15,16 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.*
 import androidx.transition.TransitionInflater
 import com.example.trailz.R
 import com.example.trailz.databinding.FragmentStudyplanLargeBinding
 import com.example.trailz.databinding.SemesterBinding
 import com.example.trailz.ui.common.IdEqualsDiffCallback
+import com.example.trailz.ui.mystudyplan.MyStudyPlan
+import com.example.trailz.ui.mystudyplan.MyStudyPlanViewModel
+import com.google.android.material.composethemeadapter.MdcTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -28,7 +33,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class StudyPlannerFragment : Fragment() {
 
-    private val viewModel: StudyPlannerListViewModel by viewModels()
+    private val viewModel: MyStudyPlanViewModel by viewModels()
     lateinit var binding: FragmentStudyplanLargeBinding
     private val adapter: StudyPlannerListAdapter = StudyPlannerListAdapter {}
 
@@ -41,29 +46,43 @@ class StudyPlannerFragment : Fragment() {
     ): View {
         binding = FragmentStudyplanLargeBinding.inflate(inflater, container, false)
         return binding
-            .also { setupShippingList(it.recyclerView) }
+            .also { setupStudyPlan(it.studyplan) }
             .root
+    }
+
+    @ExperimentalFoundationApi
+    @ExperimentalComposeUiApi
+    private fun setupStudyPlan(studyplan: ComposeView) {
+        studyplan.setContent {
+            MdcTheme {
+
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val transition =
-            TransitionInflater.from(context).inflateTransition(android.R.transition.move)
-        sharedElementEnterTransition = transition
-        sharedElementReturnTransition = transition
+        postponeEnterTransition()
+        TransitionInflater.from(context)
+            .inflateTransition(android.R.transition.move)
+            .run {
+                sharedElementEnterTransition = this
+                sharedElementReturnTransition = this
+            }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.textView.text = arguments?.getString("text_big")
-        postponeEnterTransition()
+        val resource = arguments?.getInt("image_big")
+        if (resource != null) binding.imageView.setImageResource(resource)
+        startPostponedEnterTransition()
+        /*
         viewModel.shippingProvider.observe(viewLifecycleOwner) {
-            adapter.submitList(it){
-                (view.parent as? ViewGroup)?.doOnPreDraw {
-                    startPostponedEnterTransition()
-                }
-            }
+            adapter.submitList(it)
         }
+
+         */
     }
 
     private fun setupShippingList(shippingList: RecyclerView) {
@@ -128,8 +147,6 @@ class StudyPlannerViewHolder(
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(provider: StudyPlan) {
-        ViewCompat.setTransitionName(binding.textView, "text_small${provider.id}")
-        //ViewCompat.setTransitionName(binding.imageView, "image_small${provider.id}")
         binding.root.setOnClickListener {
             onShippingProviderClicked(binding)
         }
