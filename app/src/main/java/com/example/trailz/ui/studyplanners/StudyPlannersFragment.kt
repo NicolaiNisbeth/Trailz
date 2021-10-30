@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AlphaAnimation
-import android.view.animation.AnimationUtils
 import androidx.compose.material.*
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.core.view.ViewCompat
@@ -23,16 +21,13 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionInflater
 import com.example.trailz.R
-import com.example.trailz.databinding.TestBinding
-import com.example.trailz.databinding.TestElementBinding
 import com.example.trailz.inject.SharedPrefs
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-
-
+import com.example.trailz.databinding.FragmentStudyPlannersBinding
+import com.example.trailz.databinding.StudyPlanlistBinding
 
 
 @AndroidEntryPoint
@@ -61,7 +56,7 @@ class StudyPlannersFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return TestBinding.inflate(inflater, container, false).apply {
+        return FragmentStudyPlannersBinding.inflate(inflater, container, false).apply {
         }.also { setupShippingList(it.recyclerView)
             val divider = DividerItemDecoration(it.recyclerView.getContext(),
                DividerItemDecoration.VERTICAL);
@@ -87,7 +82,7 @@ class StudyPlannersFragment : Fragment() {
         }
     }
 
-    private fun openStudyPlan(view:TestElementBinding){
+    private fun openStudyPlan(view:StudyPlanlistBinding){
         val extra = FragmentNavigatorExtras(view.imageView to "image_big",  view.textView to "text_big")
         val args = Bundle().apply {
             putString("text_big", view.textView.text.toString())}
@@ -123,13 +118,13 @@ class StudyPlanListViewModel @Inject constructor(
 
 class StudyPlanListAdapter(
 
-    private val onShippingProviderClicked: (view:TestElementBinding) -> Unit
+    private val onShippingProviderClicked: (view:StudyPlanlistBinding) -> Unit
 ) : ListAdapter<StudyPlan, StudyPlanViewHolder>(IdEqualsDiffCallback { it.info }) {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudyPlanViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-        return TestElementBinding
+        return StudyPlanlistBinding
             .inflate(layoutInflater, parent, false)
             .run { StudyPlanViewHolder(this, onShippingProviderClicked) }
     }
@@ -159,9 +154,9 @@ class IdEqualsDiffCallback<T : Any, R>(
 }
 
 class StudyPlanViewHolder(
-    val binding: TestElementBinding,
+    val binding: StudyPlanlistBinding,
 
-    val onShippingProviderClicked: (view:TestElementBinding) -> Unit
+    val onShippingProviderClicked: (view:StudyPlanlistBinding) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(provider: StudyPlan) {
