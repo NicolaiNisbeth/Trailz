@@ -19,6 +19,7 @@ import androidx.transition.TransitionInflater
 import com.example.trailz.R
 import com.example.trailz.databinding.FragmentStudyplanLargeBinding
 import com.example.trailz.databinding.SemesterBinding
+import com.example.trailz.ui.common.IdEqualsDiffCallback
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -30,9 +31,6 @@ class StudyPlannerFragment : Fragment() {
     private val viewModel: StudyPlannerListViewModel by viewModels()
     lateinit var binding: FragmentStudyplanLargeBinding
     private val adapter: StudyPlannerListAdapter = StudyPlannerListAdapter {}
-    private fun setupShippingList(shippingList: RecyclerView) {
-        shippingList.adapter = adapter
-    }
 
     @ExperimentalFoundationApi
     @ExperimentalComposeUiApi
@@ -42,23 +40,9 @@ class StudyPlannerFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentStudyplanLargeBinding.inflate(inflater, container, false)
-        return binding.apply {
-        }.also {
-            setupShippingList(it.recyclerView)
-            val divider = DividerItemDecoration(
-                it.recyclerView.context,
-                DividerItemDecoration.VERTICAL
-            )
-            divider.setDrawable(
-                ContextCompat.getDrawable(
-                    it.recyclerView.context,
-                    R.drawable.line
-                )!!
-            )
-            val mLayoutManager = LinearLayoutManager(activity)
-            it.recyclerView.layoutManager = mLayoutManager
-            it.recyclerView.scheduleLayoutAnimation()
-        }.root
+        return binding
+            .also { setupShippingList(it.recyclerView) }
+            .root
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,16 +51,14 @@ class StudyPlannerFragment : Fragment() {
             TransitionInflater.from(context).inflateTransition(android.R.transition.move)
         sharedElementEnterTransition = transition
         sharedElementReturnTransition = transition
-        postponeEnterTransition()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val text = arguments?.getString("text_big")
-        binding.textView.text = text
-        startPostponedEnterTransition()
+        binding.textView.text = arguments?.getString("text_big")
+        postponeEnterTransition()
         viewModel.shippingProvider.observe(viewLifecycleOwner) {
-            adapter.submitList(it) {
+            adapter.submitList(it){
                 (view.parent as? ViewGroup)?.doOnPreDraw {
                     startPostponedEnterTransition()
                 }
@@ -84,6 +66,16 @@ class StudyPlannerFragment : Fragment() {
         }
     }
 
+    private fun setupShippingList(shippingList: RecyclerView) {
+        shippingList.adapter = adapter
+        shippingList.setHasFixedSize(true)
+        shippingList.scheduleLayoutAnimation()
+        val divider = DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL).apply {
+            val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.line)
+            if (drawable != null) setDrawable(drawable)
+        }
+        shippingList.addItemDecoration(divider)
+    }
 }
 
 
@@ -111,51 +103,31 @@ class StudyPlannerListViewModel @Inject constructor(
 
 
 class StudyPlannerListAdapter(
-
     private val onShippingProviderClicked: (view: SemesterBinding) -> Unit
-) : ListAdapter<StudyPlan, StudyPlannerViewHolder>(IdEqualsDiffCallback { it.info }) {
+) : ListAdapter<StudyPlan, StudyPlannerViewHolder>(IdEqualsDiffCallback { it.id }) {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudyPlannerViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-        return SemesterBinding
-            .inflate(layoutInflater, parent, false)
+        return SemesterBinding.inflate(layoutInflater, parent, false)
             .run { StudyPlannerViewHolder(this, onShippingProviderClicked) }
     }
 
     override fun onBindViewHolder(holder: StudyPlannerViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
-
 }
 
 data class StudyPlan(val info: String, val id: Int)
 
 data class Semester(val info: String, val id: Int)
 
-class IdEqualsDiffCallback<T : Any, R>(
-    private val idFunction: (T) -> R
-) : DiffUtil.ItemCallback<T>() {
-
-    override fun areItemsTheSame(oldItem: T, newItem: T): Boolean {
-        return oldItem::class == newItem::class &&
-                idFunction(oldItem) == idFunction(newItem)
-    }
-
-    @SuppressLint("DiffUtilEquals")
-    override fun areContentsTheSame(oldItem: T, newItem: T): Boolean {
-        return oldItem == newItem
-    }
-}
-
 class StudyPlannerViewHolder(
     val binding: SemesterBinding,
-
     val onShippingProviderClicked: (view: SemesterBinding) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(provider: StudyPlan) {
-        binding.textView.text = "${provider.id}"
         ViewCompat.setTransitionName(binding.textView, "text_small${provider.id}")
         //ViewCompat.setTransitionName(binding.imageView, "image_small${provider.id}")
         binding.root.setOnClickListener {
