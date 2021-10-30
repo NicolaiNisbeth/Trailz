@@ -1,0 +1,53 @@
+
+<!-- drawable/vector_28.xml -->
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200"
+    >
+    <group>
+        <clip-path
+            android:pathData=
+                "M0 40Q0 20 10 20
+                L10 20
+                L190 20Q200 20 200 0
+                L200 0
+                L200 200
+                L0 200Z
+                "
+            />
+            <path
+                android:pathData="M0 0V220H200V0"
+                android:fillType="evenOdd"
+                >
+                <aapt:attr name="android:fillColor">
+                    <gradient
+                        android:type="radial"
+                        android:centerX="100"
+                        android:centerY="300
+"
+                        android:gradientRadius="500"
+                        >
+
+                        <item
+                            android:color="#FAFAFA"
+                            android:offset="0"
+                            />
+
+                        <item
+                            android:color="#F3F3F3"
+                            android:offset="0.468"
+                            />
+
+                        <item
+                            android:color="#E2E2E2"
+                            android:offset="1"
+                            />
+                    </gradient>
+                </aapt:attr>
+            </path>
+        </group>
+</vector>
