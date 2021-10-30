@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.material.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.core.view.ViewCompat
@@ -30,6 +32,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.trailz.databinding.FragmentStudyPlannersBinding
 import com.example.trailz.databinding.StudyPlanlistBinding
 import com.example.trailz.ui.common.IdEqualsDiffCallback
+import com.example.trailz.ui.common.compose.FavoriteButton
+import com.example.trailz.ui.common.themeColor
 
 
 @AndroidEntryPoint
@@ -37,7 +41,10 @@ class StudyPlannersFragment : Fragment() {
 
     private val viewModel: StudyPlanListViewModel by viewModels()
     private val adapter: StudyPlanListAdapter =
-        StudyPlanListAdapter(onShippingProviderClicked = ::openStudyPlan)
+        StudyPlanListAdapter(
+            onShippingProviderClicked = ::openStudyPlan,
+            onFavoriteClicked = { id, isChecked -> viewModel.updateChecked(id, isChecked) }
+        )
 
     @Inject
     lateinit var sharedPrefs: SharedPrefs
@@ -71,6 +78,7 @@ class StudyPlannersFragment : Fragment() {
 
     private fun setupShippingList(shippingList: RecyclerView) {
         shippingList.adapter = adapter
+        shippingList.itemAnimator = null
         shippingList.setHasFixedSize(true)
         shippingList.scheduleLayoutAnimation()
 
@@ -118,18 +126,26 @@ class StudyPlanListViewModel @Inject constructor(
             StudyPlan("13", 12)
         )
     )
+
+    fun updateChecked(id: Int, setChecked: Boolean){
+        shippingProvider.value = shippingProvider.value?.map {
+            if (it.id == id) it.copy(isChecked = setChecked)
+            else it
+        }
+    }
 }
 
 
 class StudyPlanListAdapter(
-    private val onShippingProviderClicked: (view: StudyPlanlistBinding) -> Unit
+    private val onShippingProviderClicked: (view: StudyPlanlistBinding) -> Unit,
+    val onFavoriteClicked: (Int, Boolean) -> Unit
 ) : ListAdapter<StudyPlan, StudyPlanViewHolder>(IdEqualsDiffCallback { it.id }) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudyPlanViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         return StudyPlanlistBinding
             .inflate(layoutInflater, parent, false)
-            .run { StudyPlanViewHolder(this, onShippingProviderClicked) }
+            .run { StudyPlanViewHolder(this, onShippingProviderClicked, onFavoriteClicked) }
     }
 
     override fun onBindViewHolder(holder: StudyPlanViewHolder, position: Int) {
@@ -137,18 +153,31 @@ class StudyPlanListAdapter(
     }
 }
 
-data class StudyPlan(val info: String, val id: Int)
+data class StudyPlan(val info: String, val id: Int, val isChecked: Boolean = false)
 
 class StudyPlanViewHolder(
     val binding: StudyPlanlistBinding,
-    val onShippingProviderClicked: (view: StudyPlanlistBinding) -> Unit
+    val onShippingProviderClicked: (view: StudyPlanlistBinding) -> Unit,
+    val onFavoriteClicked: (Int, Boolean) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
+
+    private val colorChecked = binding.root.context.themeColor(R.attr.colorPrimary)
+    private val colorUnchecked = binding.root.context.themeColor(R.attr.colorOnBackground)
 
     fun bind(provider: StudyPlan) {
         ViewCompat.setTransitionName(binding.textView, "text_small${provider.id}")
         ViewCompat.setTransitionName(binding.imageView, "image_small${provider.id}")
         binding.root.setOnClickListener {
             onShippingProviderClicked(binding)
+        }
+        binding.likesBtn.setContent {
+            FavoriteButton(
+                isChecked = provider.isChecked,
+                colorOnChecked = Color(colorChecked),
+                colorUnChecked = Color(colorUnchecked)
+            ) {
+                onFavoriteClicked(provider.id, !it)
+            }
         }
     }
 }

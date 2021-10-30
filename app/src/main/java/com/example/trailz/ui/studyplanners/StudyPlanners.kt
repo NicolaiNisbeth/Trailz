@@ -134,7 +134,12 @@ fun StudyPlan(
                     modifier = Modifier.padding(bottom = 4.dp).align(Alignment.BottomStart)
                 )
 
-                FavoriteButton(isChecked = checked, modifier = Modifier.align(Alignment.CenterEnd)) {
+                FavoriteButton(
+                    isChecked = checked,
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    colorOnChecked = MaterialTheme.colors.primary,
+                    colorUnChecked = MaterialTheme.colors.onBackground
+                ) {
                     if (checked) onRemove(userId)
                     else onFavorite(userId)
                 }

@@ -21,7 +21,8 @@
             android:transitionName="image_small"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?attr/colorOnBackground" />
 
         <TextView
             android:id="@+id/likesView"
@@ -33,12 +34,11 @@
             app:layout_constraintBottom_toTopOf="@id/textView"
             app:layout_constraintEnd_toStartOf="@id/likesBtn"
             app:layout_constraintStart_toEndOf="@id/imageView"
-            app:layout_constraintTop_toTopOf="@id/imageView"
-            />
+            app:layout_constraintTop_toTopOf="@id/imageView" />
 
         <TextView
             android:id="@+id/textView"
-            style="@style/TextAppearance.MaterialComponents.Headline6"
+            style="@style/TextAppearance.MaterialComponents.Button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Roadmap for Winners"
@@ -46,8 +46,7 @@
             app:layout_constraintBottom_toTopOf="@id/authorView"
             app:layout_constraintEnd_toStartOf="@id/likesBtn"
             app:layout_constraintStart_toStartOf="@id/likesView"
-            app:layout_constraintTop_toBottomOf="@id/likesView"
-            />
+            app:layout_constraintTop_toBottomOf="@id/likesView" />
 
         <TextView
             android:id="@+id/authorView"
@@ -56,7 +55,7 @@
             android:layout_height="wrap_content"
             android:text="Nicolai Nisbeth"
             app:layout_constraintBottom_toTopOf="@id/updatedView"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/likesBtn"
             app:layout_constraintStart_toStartOf="@id/likesView"
             app:layout_constraintTop_toBottomOf="@id/textView" />
 
@@ -66,7 +65,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="02-03-2021"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/imageView"
             app:layout_constraintEnd_toStartOf="@id/likesBtn"
             app:layout_constraintStart_toStartOf="@id/likesView"
             app:layout_constraintTop_toBottomOf="@id/authorView" />
@@ -75,10 +74,11 @@
             android:id="@+id/likesBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="@id/likesView"
+            android:layout_marginHorizontal="8dp"
+            app:layout_constraintBottom_toBottomOf="@id/updatedView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/textView"
-            app:layout_constraintTop_toTopOf="@id/textView" />
+            app:layout_constraintTop_toTopOf="@id/likesView" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

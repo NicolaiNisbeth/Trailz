@@ -22,8 +22,7 @@
     </style>
 
     <!-- the theme applied to the application or activity -->
-    <style name="CustomActionBarTheme"
-        parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="CustomActionBarTheme" parent="Theme.Trailz">
         <item name="android:windowActionBarOverlay">true</item>
         <!-- Support library compatibility -->
         <item name="windowActionBarOverlay">true</item>
