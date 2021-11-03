@@ -11,7 +11,7 @@ interface StudyPlanLocalDataSource {
 
     suspend fun observeStudyPlans(): Flow<List<StudyPlan>>
 
-    suspend fun deleteStudyPlan(id: String)
+    suspend fun deleteStudyPlan(id: String): StudyPlan?
 
     suspend fun createStudyPlan(studyPlan: StudyPlan): String
 

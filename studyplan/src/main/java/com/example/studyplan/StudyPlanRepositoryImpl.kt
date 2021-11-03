@@ -27,13 +27,19 @@ class StudyPlanRepositoryImpl(
     }.flowOn(Dispatchers.IO)
 
     @FlowPreview
-    override suspend fun getStudyPlans() = observeStudyPlans()
+    override suspend fun getStudyPlans() = remoteDataSource.getStudyPlans()
+
+    @FlowPreview
+    override suspend fun observeStudyPlans() = flowOf(
+        refreshBreedsIfStale(true),
+        getStudyPlansFromCache()
+    ).flattenMerge().flowOn(Dispatchers.IO)
 
     fun refreshBreedsIfStale(forced: Boolean = false): Flow<Result<List<StudyPlan>>> = flow {
         emit(Result.loading())
         val networkBreedDataState: Flow<Result<List<StudyPlan>>>
         if (forced) {
-            networkBreedDataState = remoteDataSource.getStudyPlans()
+            networkBreedDataState = remoteDataSource.observeStudyPlans()
             networkBreedDataState.collect {
                 if (it is Result.Success){
                     it.data.forEach { localDataSource.createStudyPlan(it) }
@@ -54,17 +60,13 @@ class StudyPlanRepositoryImpl(
                 }
             }
 
-    @FlowPreview
-    override suspend fun observeStudyPlans() = flowOf(
-        refreshBreedsIfStale(true),
-        getStudyPlansFromCache()
-    ).flattenMerge().flowOn(Dispatchers.IO)
-
     override suspend fun deleteStudyPlan(id: String) = flow<Result<Unit>> {
-        localDataSource.deleteStudyPlan(id)
+        val deletedStudyPlan = localDataSource.deleteStudyPlan(id)
         remoteDataSource.deleteStudyPlan(id).collect {
-            if (it is Result.Success){
-                emit(it)
+            when (it){
+                is Result.Failed -> deletedStudyPlan?.let { localDataSource.createStudyPlan(deletedStudyPlan) }
+                is Result.Loading -> emit(it)
+                is Result.Success -> emit(it)
             }
         }
     }.flowOn(Dispatchers.IO)

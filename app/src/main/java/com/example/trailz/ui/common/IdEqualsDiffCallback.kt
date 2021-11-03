@@ -8,12 +8,11 @@ class IdEqualsDiffCallback<T : Any, R>(
 ) : DiffUtil.ItemCallback<T>() {
 
     override fun areItemsTheSame(oldItem: T, newItem: T): Boolean {
-        return oldItem::class == newItem::class &&
-                idFunction(oldItem) == idFunction(newItem)
+        return false
     }
 
     @SuppressLint("DiffUtilEquals")
     override fun areContentsTheSame(oldItem: T, newItem: T): Boolean {
-        return oldItem == newItem
+        return false
     }
 }

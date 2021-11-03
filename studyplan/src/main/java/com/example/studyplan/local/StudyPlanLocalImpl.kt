@@ -27,9 +27,11 @@ class StudyPlanLocalImpl(
         }
     }
 
-    override suspend fun deleteStudyPlan(id: String) {
+    override suspend fun deleteStudyPlan(id: String): StudyPlan? {
+        val studyPlan = getStudyPlan(id)
         studyPlanDao.delete(id)
         semesterDao.deleteAll(id)
+        return studyPlan
     }
 
     override suspend fun createStudyPlan(studyPlan: StudyPlan): String {

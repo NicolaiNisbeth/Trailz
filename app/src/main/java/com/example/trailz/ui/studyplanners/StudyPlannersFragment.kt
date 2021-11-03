@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.compose.material.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
@@ -14,8 +15,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -29,25 +29,32 @@ import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.base.Result
+import com.example.base.domain.StudyPlan
+import com.example.studyplan.StudyPlanRepository
 import com.example.trailz.databinding.FragmentStudyPlannersBinding
 import com.example.trailz.databinding.StudyPlanlistBinding
 import com.example.trailz.ui.common.IdEqualsDiffCallback
 import com.example.trailz.ui.common.compose.FavoriteButton
 import com.example.trailz.ui.common.themeColor
-
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class StudyPlannersFragment : Fragment() {
 
     @Inject
     lateinit var sharedPrefs: SharedPrefs
-
+    lateinit var binding: FragmentStudyPlannersBinding
     private val viewModel: StudyPlanListViewModel by viewModels()
-    private val adapter: StudyPlanListAdapter =
+    private val adapter: StudyPlanListAdapter by lazy {
         StudyPlanListAdapter(
             onShippingProviderClicked = ::openStudyPlan,
-            onFavoriteClicked = { id, isChecked -> viewModel.updateChecked(id, isChecked) }
+            onFavoriteClicked = viewModel::updateChecked
         )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,19 +69,44 @@ class StudyPlannersFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return FragmentStudyPlannersBinding.inflate(inflater, container, false)
-            .also { setupShippingList(it.recyclerView) }
-            .root
+        binding = FragmentStudyPlannersBinding.inflate(inflater, container, false)
+        return binding.also { setupShippingList(it.recyclerView) }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         postponeEnterTransition()
-        viewModel.shippingProvider.observe(viewLifecycleOwner) {
-            adapter.submitList(it){
-                (view.parent as? ViewGroup)?.doOnPreDraw {
-                    startPostponedEnterTransition()
-                }
+        lifecycleScope.launch {
+            viewModel.studyPlansState.collect {
+                handleData(it.data)
+                handleLoading(it.loading)
+                handleEmpty(it.empty)
+                handleError(it.exception)
+            }
+        }
+
+    }
+
+    private fun handleError(exception: String?) {
+        exception?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun handleEmpty(empty: Boolean) {
+        if (empty) {
+            Toast.makeText(context, "empty screen", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun handleLoading(loading: Boolean) {
+        binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+    }
+
+    private fun handleData(studyPlans: List<StudyPlan>?) {
+        adapter.submitList(studyPlans) {
+            (view?.parent as? ViewGroup)?.doOnPreDraw {
+                startPostponedEnterTransition()
             }
         }
     }
@@ -110,32 +142,54 @@ class StudyPlannersFragment : Fragment() {
     }
 }
 
+data class DataState<out T>(
+    val data: T? = null,
+    val exception: String? = null,
+    val empty: Boolean = false,
+    val loading: Boolean = false
+)
 
 @HiltViewModel
 class StudyPlanListViewModel @Inject constructor(
+    private val repository: StudyPlanRepository
 ) : ViewModel() {
-    val shippingProvider = MutableLiveData(
-        listOf(
-            StudyPlan("1", 0),
-            StudyPlan("2", 1),
-            StudyPlan("3", 2),
-            StudyPlan("4", 3),
-            StudyPlan("5", 4),
-            StudyPlan("6", 5),
-            StudyPlan("7", 6),
-            StudyPlan("8", 7),
-            StudyPlan("9", 8),
-            StudyPlan("10", 9),
-            StudyPlan("11", 10),
-            StudyPlan("12", 11),
-            StudyPlan("13", 12)
-        )
-    )
 
-    fun updateChecked(id: Int, setChecked: Boolean){
-        shippingProvider.value = shippingProvider.value?.map {
-            if (it.id == id) it.copy(isChecked = setChecked)
-            else it
+    private val scope by lazy { viewModelScope }
+    private val _studyPlansState: MutableStateFlow<DataState<List<StudyPlan>>> = MutableStateFlow(
+        DataState(loading = true)
+    )
+    val studyPlansState: MutableStateFlow<DataState<List<StudyPlan>>> = _studyPlansState
+
+    init {
+        observeStudyPlans()
+    }
+
+    private fun observeStudyPlans() {
+        scope.launch {
+            repository.getStudyPlans().collect {
+                when (it) {
+                    is Result.Failed -> _studyPlansState.value =
+                        _studyPlansState.value.copy(exception = it.message)
+                    is Result.Loading -> _studyPlansState.value =
+                        _studyPlansState.value.copy(loading = true)
+                    is Result.Success -> {
+                        _studyPlansState.value = DataState(it.data, empty = it.data.isEmpty())
+                    }
+                }
+            }
+        }
+    }
+
+    fun updateChecked(studyPlan: StudyPlan) {
+        scope.launch {
+            repository.updateStudyPlan(studyPlan.userId, studyPlan).collect {
+                when (it) {
+                    is Result.Failed -> _studyPlansState.value =
+                        _studyPlansState.value.copy(exception = it.message)
+                    is Result.Loading -> _studyPlansState.value =
+                        _studyPlansState.value.copy(loading = true)
+                }
+            }
         }
     }
 }
@@ -143,8 +197,8 @@ class StudyPlanListViewModel @Inject constructor(
 
 class StudyPlanListAdapter(
     private val onShippingProviderClicked: (view: StudyPlanlistBinding) -> Unit,
-    val onFavoriteClicked: (Int, Boolean) -> Unit
-) : ListAdapter<StudyPlan, StudyPlanViewHolder>(IdEqualsDiffCallback { it.id }) {
+    val onFavoriteClicked: (StudyPlan) -> Unit
+) : ListAdapter<StudyPlan, StudyPlanViewHolder>(IdEqualsDiffCallback { it.userId }) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudyPlanViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -158,31 +212,33 @@ class StudyPlanListAdapter(
     }
 }
 
-data class StudyPlan(val info: String, val id: Int, val isChecked: Boolean = false)
-
 class StudyPlanViewHolder(
     val binding: StudyPlanlistBinding,
     val onShippingProviderClicked: (view: StudyPlanlistBinding) -> Unit,
-    val onFavoriteClicked: (Int, Boolean) -> Unit
+    val onFavoriteClicked: (StudyPlan) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
 
     private val colorChecked = binding.root.context.themeColor(R.attr.colorPrimary)
     private val colorUnchecked = binding.root.context.themeColor(R.attr.colorOnBackground)
 
-    fun bind(provider: StudyPlan) {
-        ViewCompat.setTransitionName(binding.textView, "text_small${provider.id}")
-        ViewCompat.setTransitionName(binding.imageView, "image_small${provider.id}")
+    fun bind(studyPlan: StudyPlan) {
         binding.root.setOnClickListener {
             onShippingProviderClicked(binding)
         }
+
+        binding.textView.text = studyPlan.title
+        binding.authorView.text = studyPlan.userId
         binding.likesBtn.setContent {
             FavoriteButton(
-                isChecked = provider.isChecked,
+                isChecked = studyPlan.isChecked,
                 colorOnChecked = Color(colorChecked),
                 colorUnChecked = Color(colorUnchecked)
             ) {
-                onFavoriteClicked(provider.id, !it)
+                onFavoriteClicked(studyPlan)
             }
         }
+
+        ViewCompat.setTransitionName(binding.textView, "text_small${studyPlan.userId}")
+        ViewCompat.setTransitionName(binding.imageView, "image_small${studyPlan.userId}")
     }
 }
