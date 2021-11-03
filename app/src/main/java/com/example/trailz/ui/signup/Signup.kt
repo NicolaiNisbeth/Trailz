@@ -51,7 +51,8 @@ import com.google.accompanist.pager.PagerState
 @Composable
 fun SignUp(
     viewModel: SignupViewModel,
-    navigateUp: () -> Unit
+    navigateUp: () -> Unit,
+    popLogin: () -> Unit
 ) {
     val username by viewModel.username.observeAsState(initial = "")
     val email by viewModel.email.observeAsState(initial = "")
@@ -85,7 +86,8 @@ fun SignUp(
         hasError = hasError,
         isLoading = isLoading,
         onSignup = viewModel::signUp,
-        navigateUp = navigateUp
+        navigateUp = navigateUp,
+        popLogin = popLogin
     )
 }
 
@@ -106,7 +108,8 @@ internal fun SignUp(
     hasError: Boolean,
     isLoading: Boolean,
     onSignup: () -> Unit,
-    navigateUp: () -> Unit
+    navigateUp: () -> Unit,
+    popLogin: () -> Unit
 ){
     val focusManager = LocalFocusManager.current
     var passwordVisibility by remember { mutableStateOf(false) }
@@ -119,7 +122,7 @@ internal fun SignUp(
 
     if (isSignUpSuccess) {
         LocalSoftwareKeyboardController.current?.hide()
-        navigateUp()
+        popLogin()
     }
 
     Scaffold(
@@ -154,22 +157,19 @@ internal fun SignUp(
             }
 
             item {
-                InputFieldFocus { focusModifier ->
-                    InputField(
-                        modifier = focusModifier,
-                        value = username,
-                        onValueChange = onUsernameChange,
-                        label = "Username",
-                        contentDescription = "Username",
-                        isError = hasError,
-                        imeAction = ImeAction.Next,
-                        keyboardType = KeyboardType.Text,
-                        leadingIcon = rememberVectorPainter(Icons.Default.Person),
-                        keyboardActions = KeyboardActions(onNext = {
-                            focusManager.moveFocus(FocusDirection.Down)
-                        })
-                    )
-                }
+                InputField(
+                    value = username,
+                    onValueChange = onUsernameChange,
+                    label = "Username",
+                    contentDescription = "Username",
+                    isError = hasError,
+                    imeAction = ImeAction.Next,
+                    keyboardType = KeyboardType.Text,
+                    leadingIcon = rememberVectorPainter(Icons.Default.Person),
+                    keyboardActions = KeyboardActions(onNext = {
+                        focusManager.moveFocus(FocusDirection.Down)
+                    })
+                )
 
                 InputField(
                     value = email,

@@ -42,6 +42,7 @@ class ProfileFragment : Fragment() {
     private lateinit var onLanguageListener: ChangeLanguageListener
     private lateinit var onSettingsListener: OpenSettingsListener
     private lateinit var changeAnimationListener: ChangeAnimationListener
+    private lateinit var logoutListener: LogoutListener
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -49,6 +50,7 @@ class ProfileFragment : Fragment() {
             onLanguageListener = context as ChangeLanguageListener
             onSettingsListener = context as OpenSettingsListener
             changeAnimationListener = context as ChangeAnimationListener
+            logoutListener = context as LogoutListener
         } catch (e: Error) {
             throw IllegalStateException("Activity must implement $onLanguageListener")
         }
@@ -83,13 +85,12 @@ class ProfileFragment : Fragment() {
                     viewModel = viewModel,
                     appliedCountry = appliedCountry,
                     isDarkTheme = sharedPrefs.isDarkTheme,
-                    signIn = ::signIn,
-                    signUp = ::signUp,
                     rateApp = ::openGooglePlay,
                     toggleTheme = ::toggleTheme,
-                    navigateUp = { findNavController().navigateUp() },
                     onChangeLanguage = onLanguageListener::onChangeLanguage,
-                    settings = onSettingsListener::onOpenSettingsListener
+                    settings = onSettingsListener::onOpenSettingsListener,
+                    navigateUp = { findNavController().navigateUp() },
+                    logout = logoutListener::onLogout
                 )
             }
         }
@@ -118,7 +119,6 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        findNavController().navigate(ProfileFragmentDirections.actionProfileToSignin())
     }
 
     private fun signUp(){
@@ -131,6 +131,5 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        findNavController().navigate(ProfileFragmentDirections.actionProfileToSignup())
     }
 }

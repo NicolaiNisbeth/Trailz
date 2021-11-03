@@ -21,9 +21,7 @@ data class ProfileUiState(
     val user: User? = null,
     val isLoading: Boolean = false,
     val error: String? = null
-) {
-    val isLoggedIn = user != null
-}
+)
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
@@ -34,10 +32,6 @@ class ProfileViewModel @Inject constructor(
     private val _state = MutableLiveData<ProfileUiState>()
     val state: LiveData<ProfileUiState> = _state
 
-    fun logout(){
-        sharedPrefs.loggedInId = null
-        _state.value = ProfileUiState()
-    }
 
     fun getUser(userId: String?){
         if (userId.isNullOrBlank()) {

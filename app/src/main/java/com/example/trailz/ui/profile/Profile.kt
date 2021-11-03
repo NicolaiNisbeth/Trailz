@@ -40,8 +40,7 @@ fun Profile(
     onChangeLanguage: (String) -> Unit,
     navigateUp: () -> Unit,
     toggleTheme: (Boolean) -> Unit,
-    signIn: () -> Unit,
-    signUp: () -> Unit,
+    logout: () -> Unit,
     rateApp: () -> Unit,
     settings: () -> Unit
 ) {
@@ -60,9 +59,7 @@ fun Profile(
         onChangeLanguage = onChangeLanguage,
         navigateUp = navigateUp,
         toggleTheme = toggleTheme,
-        signIn = signIn,
-        signUp = signUp,
-        logout = viewModel::logout,
+        logout = logout,
         rateApp = rateApp,
         settings = settings
     )
@@ -80,8 +77,6 @@ fun Profile(
     onChangeLanguage: (String) -> Unit,
     navigateUp: () -> Unit,
     toggleTheme: (Boolean) -> Unit,
-    signIn: () -> Unit,
-    signUp: () -> Unit,
     logout: () -> Unit,
     rateApp: () -> Unit,
     settings: () -> Unit
@@ -124,8 +119,7 @@ fun Profile(
             Box(Modifier.fillMaxSize()) {
                 when {
                     state.isLoading -> {}
-                    state.isLoggedIn -> LoggedInView(state.user!!, isDarkTheme, logout, rateApp, settings, toggleTheme)
-                    else -> LoggedOutView(isDarkTheme, signUp, signIn, rateApp, settings, toggleTheme)
+                    else -> LoggedInView(state.user!!, isDarkTheme, logout, rateApp, settings, toggleTheme)
                 }
             }
         }

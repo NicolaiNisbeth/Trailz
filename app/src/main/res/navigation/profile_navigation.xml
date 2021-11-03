@@ -5,19 +5,10 @@
     android:id="@+id/profile_navigation"
     app:startDestination="@id/profileFragment">
 
-    <include app:graph="@navigation/signin_navigation" />
-    <include app:graph="@navigation/signup_navigation" />
-
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.example.trailz.ui.profile.ProfileFragment"
         tools:layout="@layout/fragment_profile">
-        <action
-            android:id="@+id/action_profile_to_signin"
-            app:destination="@id/signin_navigation" />
-        <action
-            android:id="@+id/action_profile_to_signup"
-            app:destination="@id/signup_navigation" />
     </fragment>
 
 </navigation>

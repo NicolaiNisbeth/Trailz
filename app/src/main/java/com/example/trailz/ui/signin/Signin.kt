@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -41,7 +42,8 @@ import com.example.trailz.ui.common.compose.InputFieldFocus
 @Composable
 fun SignIn(
     viewModel: SigninViewModel,
-    navigateUp: () -> Unit
+    onNavigateUp: () -> Unit,
+    onSignUp: () -> Unit
 ) {
     val email by viewModel.email.observeAsState(initial = "")
     val password by viewModel.password.observeAsState(initial = "")
@@ -49,7 +51,10 @@ fun SignIn(
     val isLoading by viewModel.loading.observeAsState(initial = false)
     val isSigninSuccess by viewModel.signinSuccess.observeAsState(initial = false)
 
-    SideEffect { if (isSigninSuccess) navigateUp() }
+    if (isSigninSuccess) {
+        LocalSoftwareKeyboardController.current?.hide()
+        onNavigateUp()
+    }
 
     SignIn(
         email = email,
@@ -59,7 +64,7 @@ fun SignIn(
         isLoading = isLoading,
         hasError = hasError,
         onSignin = viewModel::signin,
-        navigateUp = navigateUp
+        onSignUp = onSignUp
     )
 }
 
@@ -73,117 +78,94 @@ internal fun SignIn(
     isLoading: Boolean,
     hasError: Boolean,
     onSignin: () -> Unit,
-    navigateUp: () -> Unit
-){
+    onSignUp: () -> Unit
+) {
     val focusManager = LocalFocusManager.current
     var passwordVisibility by remember { mutableStateOf(false) }
 
-    val (passwordIcon, passwordTransformation) = if (passwordVisibility){
+    val (passwordIcon, passwordTransformation) = if (passwordVisibility) {
         Icons.Filled.Visibility to VisualTransformation.None
     } else {
         Icons.Filled.VisibilityOff to PasswordVisualTransformation()
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = "Sign In") },
-                backgroundColor = MaterialTheme.colors.background,
-                navigationIcon = {
-                    IconButton(onClick = navigateUp) {
-                        Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = null)
-                    }
-                },
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        item {
+            Text(
+                text = "Welcome Back",
+                style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
+            )
+            Text(
+                text = "We have missed you, Let's start by Sign In!",
+                style = MaterialTheme.typography.caption,
             )
         }
-    ) {
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-        ) {
-            item {
+
+        item {
+            InputField(
+                value = email,
+                onValueChange = onEmailChange,
+                label = "Email address",
+                contentDescription = "Email address",
+                isError = hasError,
+                imeAction = ImeAction.Next,
+                keyboardType = KeyboardType.Email,
+                leadingIcon = rememberVectorPainter(Icons.Default.Email),
+                keyboardActions = KeyboardActions(onNext = {
+                    focusManager.moveFocus(FocusDirection.Down)
+                })
+            )
+
+            InputField(
+                value = password,
+                onValueChange = onPasswordChange,
+                label = "password",
+                contentDescription = "password",
+                isError = hasError,
+                imeAction = ImeAction.Done,
+                keyboardType = KeyboardType.Password,
+                leadingIcon = rememberVectorPainter(Icons.Default.VpnKey),
+                trailingIcon = rememberVectorPainter(passwordIcon),
+                visualTransformation = passwordTransformation,
+                onTrailingIconClicked = { passwordVisibility = !passwordVisibility },
+                keyboardActions = KeyboardActions(onDone = {
+                    focusManager.clearFocus()
+                    onSignin()
+                })
+            )
+        }
+
+        item {
+            Button(
+                onClick = onSignin,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateContentSize(tween())
+                    .height(50.dp)
+                    .clip(CircleShape)
+            ) {
+                Text(text = if (isLoading) "Loading..." else "Log In")
+            }
+        }
+
+        item { DividerWithText(text = R.string.login_divider) }
+
+        item {
+            OutlinedButton(
+                onClick = onSignUp, modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
                 Text(
-                    text = "Welcome Back",
-                    style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
+                    text = "Sign up",
+                    style = MaterialTheme.typography.h6.copy(fontSize = 14.sp),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
-                Text(
-                    text = "We have missed you, Let's start by Sign In!",
-                    style = MaterialTheme.typography.caption,
-                )
-            }
-
-            item {
-                InputFieldFocus { focusModifier ->
-                    InputField(
-                        modifier = focusModifier,
-                        value = email,
-                        onValueChange = onEmailChange,
-                        label = "Email address",
-                        contentDescription = "Email address",
-                        isError = hasError,
-                        imeAction = ImeAction.Next,
-                        keyboardType = KeyboardType.Email,
-                        leadingIcon = rememberVectorPainter(Icons.Default.Email),
-                        keyboardActions = KeyboardActions(onNext = {
-                            focusManager.moveFocus(FocusDirection.Down)
-                        })
-                    )
-                }
-
-                InputField(
-                    value = password,
-                    onValueChange = onPasswordChange,
-                    label = "password",
-                    contentDescription = "password",
-                    isError = hasError,
-                    imeAction = ImeAction.Done,
-                    keyboardType = KeyboardType.Password,
-                    leadingIcon = rememberVectorPainter(Icons.Default.VpnKey),
-                    trailingIcon = rememberVectorPainter(passwordIcon),
-                    visualTransformation = passwordTransformation,
-                    onTrailingIconClicked = { passwordVisibility = !passwordVisibility },
-                    keyboardActions = KeyboardActions(onDone = {
-                        focusManager.clearFocus()
-                        onSignin()
-                    })
-                )
-            }
-
-            item {
-                Button(
-                    onClick = onSignin,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .animateContentSize(tween())
-                        .height(50.dp)
-                        .clip(CircleShape)
-                ) {
-                    Text(text = if (isLoading) "Loading..." else "Log In")
-                }
-            }
-
-            item { DividerWithText(text = R.string.alternative_title) }
-
-            item {
-                OutlinedButton(
-                    onClick = { }, modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Facebook,
-                        contentDescription = null
-                    )
-                    Text(
-                        text = "Sign in with Facebook",
-                        style = MaterialTheme.typography.h6.copy(fontSize = 14.sp),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
             }
         }
     }

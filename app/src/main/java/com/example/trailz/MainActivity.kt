@@ -1,6 +1,7 @@
 package com.example.trailz
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Point
 import android.os.Bundle
@@ -27,10 +28,11 @@ import android.view.View
 import android.view.Window
 import android.view.WindowInsets
 import androidx.appcompat.app.AppCompatDelegate
+import com.example.trailz.ui.login.LoginActivity
 
 
 @AndroidEntryPoint
-class MainActivity : BaseActivity() {
+class MainActivity : BaseActivity(), LogoutListener {
 
     @Inject
     lateinit var application: TrailzApplication
@@ -79,6 +81,15 @@ class MainActivity : BaseActivity() {
             favoriteBadge.number = it
         }
     }
+
+    override fun onLogout() {
+        startActivity(Intent(this, LoginActivity::class.java))
+        finish()
+    }
+}
+
+interface LogoutListener {
+    fun onLogout()
 }
 
 @HiltViewModel

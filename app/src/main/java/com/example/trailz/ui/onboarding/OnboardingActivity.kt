@@ -8,6 +8,7 @@ import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.example.trailz.BaseActivity
 import com.example.trailz.MainActivity
+import com.example.trailz.ui.login.LoginActivity
 import com.google.accompanist.pager.ExperimentalPagerApi
 
 class OnboardingActivity: BaseActivity() {
@@ -23,7 +24,7 @@ class OnboardingActivity: BaseActivity() {
         PreferenceManager.getDefaultSharedPreferences(this)
             .edit { putBoolean(COMPLETED_ONBOARDING_PREF, true) }
 
-        startActivity(Intent(this, MainActivity::class.java))
+        startActivity(Intent(this, LoginActivity::class.java))
         finish()
     }
 

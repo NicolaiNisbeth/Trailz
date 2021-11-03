@@ -7,6 +7,7 @@ import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
+import com.example.trailz.ui.login.LoginActivity
 import com.example.trailz.ui.onboarding.OnboardingActivity
 import com.example.trailz.ui.onboarding.OnboardingActivity.Companion.COMPLETED_ONBOARDING_PREF
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,7 +25,7 @@ class App : BaseActivity() {
         val completedOnboarding = PreferenceManager.getDefaultSharedPreferences(this)
             .getBoolean(COMPLETED_ONBOARDING_PREF, false)
 
-        val destination = if (completedOnboarding) MainActivity::class.java
+        val destination = if (completedOnboarding) LoginActivity::class.java
         else OnboardingActivity::class.java
 
         startActivity(Intent(this, destination))
