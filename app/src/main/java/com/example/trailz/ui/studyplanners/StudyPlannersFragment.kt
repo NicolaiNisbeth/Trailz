@@ -5,8 +5,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnPreDraw
@@ -33,6 +44,7 @@ import com.example.trailz.databinding.StudyPlanlistBinding
 import com.example.trailz.ui.common.IdEqualsDiffCallback
 import com.example.trailz.ui.common.compose.FavoriteButton
 import com.example.trailz.ui.common.themeColor
+import com.google.android.material.composethemeadapter.MdcTheme
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -66,7 +78,26 @@ class StudyPlannersFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentStudyPlannersBinding.inflate(inflater, container, false)
-        return binding.also { setupShippingList(it.recyclerView) }.root
+        return binding.also {
+            setupShippingList(it.recyclerView)
+            setupToolbar(it.toolbarView)
+        }.root
+    }
+
+    private fun setupToolbar(toolbarView: ComposeView) {
+        toolbarView.setContent {
+            MdcTheme {
+                TopAppBar(
+                    title = { Text(text = "Study Plans") },
+                    backgroundColor = MaterialTheme.colors.background,
+                    actions = {
+                        IconButton(onClick = { /*TODO*/ }) {
+                            Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                        }
+                    }
+                )
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -162,10 +193,10 @@ class StudyPlanListViewModel @Inject constructor(
         observeStudyPlans()
     }
 
-    fun observeStudyPlans() {
+    private fun observeStudyPlans() {
         scope.launch {
-            val studyPlansFlow = studyPlanRepository.observeStudyPlans()
-            val favoritesFlow = favoriteRepository.observeFavoriteBy(sharedPrefs.loggedInId!!)
+            val studyPlansFlow = studyPlanRepository.getStudyPlans()
+            val favoritesFlow = favoriteRepository.getFavoritesBy(sharedPrefs.loggedInId!!)
             studyPlansFlow.combine(favoritesFlow){ studyPlansRes, favoritesRes ->
                 if (studyPlansRes is Result.Loading || favoritesRes is Result.Loading){
                     _studyPlansState.value = _studyPlansState.value.copy(loading = true)
@@ -191,11 +222,23 @@ class StudyPlanListViewModel @Inject constructor(
 
     fun updateChecked(studyPlanId: String, isChecked: Boolean) {
         scope.launch {
+            flipLocally(studyPlanId, isChecked)
             val userId = sharedPrefs.loggedInId!!
             val flow = if (isChecked) favoriteRepository.removeFromFavorite(studyPlanId, userId)
             else favoriteRepository.addToFavorite(studyPlanId, userId)
             flow.collect()
         }
+    }
+
+    private fun flipLocally(studyPlanId: String, checked: Boolean) {
+        _studyPlansState.value = _studyPlansState.value.copy(
+            data = _studyPlansState.value.data?.run {
+                map {
+                    if (it.userId == studyPlanId) it.copy(isChecked = checked.not())
+                    else it
+                }
+            }
+        )
     }
 }
 

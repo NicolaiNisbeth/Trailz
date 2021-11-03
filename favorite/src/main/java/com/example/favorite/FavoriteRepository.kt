@@ -8,6 +8,8 @@ interface FavoriteRepository {
 
     fun observeFavoriteBy(userId: String): Flow<Result<Favorite>>
 
+    fun getFavoritesBy(userId: String): Flow<Result<Favorite>>
+
     fun addToFavorite(favoritedId: String, userId: String): Flow<Result<Unit>>
 
     fun removeFromFavorite(favoritedId: String, userId: String): Flow<Result<Unit>>
