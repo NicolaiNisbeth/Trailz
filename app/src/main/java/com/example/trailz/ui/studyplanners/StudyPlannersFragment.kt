@@ -1,6 +1,5 @@
 package com.example.trailz.ui.studyplanners
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,8 +7,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.compose.material.*
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
-import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnPreDraw
@@ -18,7 +15,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -28,9 +24,9 @@ import com.example.trailz.inject.SharedPrefs
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.base.Result
 import com.example.base.domain.StudyPlan
+import com.example.favorite.FavoriteRepository
 import com.example.studyplan.StudyPlanRepository
 import com.example.trailz.databinding.FragmentStudyPlannersBinding
 import com.example.trailz.databinding.StudyPlanlistBinding
@@ -38,7 +34,6 @@ import com.example.trailz.ui.common.IdEqualsDiffCallback
 import com.example.trailz.ui.common.compose.FavoriteButton
 import com.example.trailz.ui.common.themeColor
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -52,7 +47,9 @@ class StudyPlannersFragment : Fragment() {
     private val adapter: StudyPlanListAdapter by lazy {
         StudyPlanListAdapter(
             onShippingProviderClicked = ::openStudyPlan,
-            onFavoriteClicked = viewModel::updateChecked
+            onFavoriteClicked = { id, isChecked ->
+                viewModel.updateChecked(id, isChecked, sharedPrefs.loggedInId)
+            }
         )
     }
 
@@ -151,10 +148,11 @@ data class DataState<out T>(
 
 @HiltViewModel
 class StudyPlanListViewModel @Inject constructor(
-    private val repository: StudyPlanRepository
+    private val studyPlanRepository: StudyPlanRepository,
+    private val favoriteRepository: FavoriteRepository
 ) : ViewModel() {
 
-    private val scope by lazy { viewModelScope }
+    private val scope = viewModelScope
     private val _studyPlansState: MutableStateFlow<DataState<List<StudyPlan>>> = MutableStateFlow(
         DataState(loading = true)
     )
@@ -164,9 +162,9 @@ class StudyPlanListViewModel @Inject constructor(
         observeStudyPlans()
     }
 
-    private fun observeStudyPlans() {
+    fun observeStudyPlans() {
         scope.launch {
-            repository.getStudyPlans().collect {
+            studyPlanRepository.observeStudyPlans().collect {
                 when (it) {
                     is Result.Failed -> _studyPlansState.value =
                         _studyPlansState.value.copy(exception = it.message)
@@ -180,14 +178,13 @@ class StudyPlanListViewModel @Inject constructor(
         }
     }
 
-    fun updateChecked(studyPlan: StudyPlan) {
+    fun updateChecked(studyPlanId: String, isChecked: Boolean, userId: String?) {
         scope.launch {
-            repository.updateStudyPlan(studyPlan.userId, studyPlan).collect {
-                when (it) {
-                    is Result.Failed -> _studyPlansState.value =
-                        _studyPlansState.value.copy(exception = it.message)
-                    is Result.Loading -> _studyPlansState.value =
-                        _studyPlansState.value.copy(loading = true)
+            val flow = if (isChecked) favoriteRepository.removeFromFavorite(studyPlanId, userId)
+            else favoriteRepository.addToFavorite(studyPlanId, userId)
+            flow.collect {
+                when (it){
+                    is Result.Failed -> {}
                 }
             }
         }
@@ -197,7 +194,7 @@ class StudyPlanListViewModel @Inject constructor(
 
 class StudyPlanListAdapter(
     private val onShippingProviderClicked: (view: StudyPlanlistBinding) -> Unit,
-    val onFavoriteClicked: (StudyPlan) -> Unit
+    val onFavoriteClicked: (String, Boolean) -> Unit
 ) : ListAdapter<StudyPlan, StudyPlanViewHolder>(IdEqualsDiffCallback { it.userId }) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudyPlanViewHolder {
@@ -215,7 +212,7 @@ class StudyPlanListAdapter(
 class StudyPlanViewHolder(
     val binding: StudyPlanlistBinding,
     val onShippingProviderClicked: (view: StudyPlanlistBinding) -> Unit,
-    val onFavoriteClicked: (StudyPlan) -> Unit
+    val onFavoriteClicked: (String, Boolean) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
 
     private val colorChecked = binding.root.context.themeColor(R.attr.colorPrimary)
@@ -234,7 +231,7 @@ class StudyPlanViewHolder(
                 colorOnChecked = Color(colorChecked),
                 colorUnChecked = Color(colorUnchecked)
             ) {
-                onFavoriteClicked(studyPlan)
+                onFavoriteClicked(studyPlan.userId, studyPlan.isChecked)
             }
         }
 

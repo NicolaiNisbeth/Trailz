@@ -17,5 +17,8 @@ abstract class SemesterDao {
     abstract suspend fun insertElseUpdateSemester(semester: SemesterEntity): Long
 
     @Query("DELETE FROM semesterentity WHERE studyPlanCreatorId = :creatorId")
-    abstract suspend fun deleteAll(creatorId: String)
+    abstract suspend fun deleteAllWith(creatorId: String)
+
+    @Query("DELETE FROM semesterentity")
+    abstract suspend fun deleteAll()
 }

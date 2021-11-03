@@ -30,7 +30,7 @@ class StudyPlanLocalImpl(
     override suspend fun deleteStudyPlan(id: String): StudyPlan? {
         val studyPlan = getStudyPlan(id)
         studyPlanDao.delete(id)
-        semesterDao.deleteAll(id)
+        semesterDao.deleteAllWith(id)
         return studyPlan
     }
 

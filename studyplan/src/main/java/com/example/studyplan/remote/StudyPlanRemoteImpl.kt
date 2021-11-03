@@ -19,7 +19,6 @@ class StudyPlanRemoteImpl: StudyPlanRemoteDataSource {
     }
 
     override suspend fun getStudyPlan(id: String) = flow<Result<StudyPlan>> {
-        emit(Result.loading())
         val document = collection.document(id).get().await()
         val studyPlan = document.toObject(StudyPlan::class.java)
         if (studyPlan != null){
@@ -33,7 +32,6 @@ class StudyPlanRemoteImpl: StudyPlanRemoteDataSource {
     }
 
     override suspend fun getStudyPlans()= flow<Result<List<StudyPlan>>> {
-        emit(Result.loading())
         val documents = collection.get().await()
         val studyPlans = documents.toObjects(StudyPlan::class.java)
         emit(Result.success(studyPlans))
@@ -44,8 +42,6 @@ class StudyPlanRemoteImpl: StudyPlanRemoteDataSource {
 
     @ExperimentalCoroutinesApi
     override suspend fun observeStudyPlans() = callbackFlow<Result<List<StudyPlan>>> {
-        trySend(Result.loading())
-
         val listener = collection.addSnapshotListener { documents, error ->
             documents?.let {
                 val studyPlans = it.toObjects(StudyPlan::class.java)
@@ -61,7 +57,6 @@ class StudyPlanRemoteImpl: StudyPlanRemoteDataSource {
     }
 
     override suspend fun deleteStudyPlan(id: String) = flow<Result<Unit>> {
-        emit(Result.Loading())
         collection.document(id).delete().await()
         emit(Result.success(Unit))
     }.catch {
@@ -70,7 +65,6 @@ class StudyPlanRemoteImpl: StudyPlanRemoteDataSource {
     }
 
     override suspend fun createStudyPlan(studyPlan: StudyPlan) = flow<Result<Unit>> {
-        emit(Result.Loading())
         collection.document(studyPlan.userId).set(studyPlan).await()
         emit(Result.Success(Unit))
     }.catch {
@@ -79,7 +73,6 @@ class StudyPlanRemoteImpl: StudyPlanRemoteDataSource {
     }
 
     override suspend fun updateStudyPlan(id: String, studyPlan: StudyPlan)= flow<Result<Unit>> {
-        emit(Result.loading())
         collection.document(id).set(studyPlan).await()
         emit(Result.Success(Unit))
     }.catch {

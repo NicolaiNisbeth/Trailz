@@ -15,4 +15,6 @@ abstract class CourseDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract fun insertElseIgnoreCourse(course: CourseEntity): Long
 
+    @Query("DELETE FROM courseentity")
+    abstract suspend fun deleteAll()
 }

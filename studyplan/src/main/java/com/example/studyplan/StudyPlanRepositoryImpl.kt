@@ -7,7 +7,6 @@ import com.example.studyplan.remote.StudyPlanRemoteDataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
-
 class StudyPlanRepositoryImpl(
     private val localDataSource: StudyPlanLocalDataSource,
     private val remoteDataSource: StudyPlanRemoteDataSource
@@ -43,22 +42,15 @@ class StudyPlanRepositoryImpl(
             networkBreedDataState.collect {
                 if (it is Result.Success){
                     it.data.forEach { localDataSource.createStudyPlan(it) }
-                } else {
-                    networkBreedDataState.collect { emit(it) }
                 }
             }
         }
     }
 
-    private suspend fun getStudyPlansFromCache(): Flow<Result<List<StudyPlan>>> =
-        localDataSource.observeStudyPlans()
-            .mapNotNull {
-                if (it.isEmpty()){
-                    null
-                } else {
-                    Result.success(it)
-                }
-            }
+    private suspend fun getStudyPlansFromCache(): Flow<Result<List<StudyPlan>>> = flow {
+        emit(Result.success(localDataSource.getStudyPlans().sortedBy { it.title }))
+    }.flowOn(Dispatchers.IO)
+
 
     override suspend fun deleteStudyPlan(id: String) = flow<Result<Unit>> {
         val deletedStudyPlan = localDataSource.deleteStudyPlan(id)

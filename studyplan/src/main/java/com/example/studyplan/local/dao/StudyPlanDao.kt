@@ -32,4 +32,7 @@ abstract class StudyPlanDao {
     @Query("SELECT * FROM studyplanentity WHERE studyPlanId = :userId")
     abstract fun studyPlan(userId: String): StudyPlanWithSemestersAndCourses?
 
+    @Query("DELETE FROM studyplanentity")
+    abstract suspend fun deleteAll()
+
 }
