@@ -29,7 +29,6 @@ import com.example.trailz.ui.mystudyplan.CourseItemEdit
 import com.example.trailz.ui.mystudyplan.CourseItemSave
 import com.example.trailz.ui.mystudyplan.SemesterItemEdit
 import com.example.trailz.ui.mystudyplan.SemesterItemSave
-import com.example.trailz.ui.studyplanners.StudyPlan
 import java.text.SimpleDateFormat
 import java.util.*
 

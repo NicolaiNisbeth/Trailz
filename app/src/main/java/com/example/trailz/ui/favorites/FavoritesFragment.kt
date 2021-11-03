@@ -59,7 +59,7 @@ class FavoritesFragment : Fragment() {
             MdcTheme {
                 Favorites(
                     viewModel = viewModel,
-                    userId = sharedPrefs.loggedInId,
+                    userId = sharedPrefs.loggedInId!!,
                     onStudyPlan = ::openStudyPlan,
                     onProfile = ::openProfile,
                     onFindFavorite = ::openStudyPlanners

@@ -33,8 +33,7 @@ import com.example.trailz.databinding.StudyPlanlistBinding
 import com.example.trailz.ui.common.IdEqualsDiffCallback
 import com.example.trailz.ui.common.compose.FavoriteButton
 import com.example.trailz.ui.common.themeColor
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -48,7 +47,7 @@ class StudyPlannersFragment : Fragment() {
         StudyPlanListAdapter(
             onShippingProviderClicked = ::openStudyPlan,
             onFavoriteClicked = { id, isChecked ->
-                viewModel.updateChecked(id, isChecked, sharedPrefs.loggedInId)
+                viewModel.updateChecked(id, isChecked)
             }
         )
     }
@@ -149,7 +148,8 @@ data class DataState<out T>(
 @HiltViewModel
 class StudyPlanListViewModel @Inject constructor(
     private val studyPlanRepository: StudyPlanRepository,
-    private val favoriteRepository: FavoriteRepository
+    private val favoriteRepository: FavoriteRepository,
+    private val sharedPrefs: SharedPrefs
 ) : ViewModel() {
 
     private val scope = viewModelScope
@@ -164,29 +164,37 @@ class StudyPlanListViewModel @Inject constructor(
 
     fun observeStudyPlans() {
         scope.launch {
-            studyPlanRepository.observeStudyPlans().collect {
-                when (it) {
-                    is Result.Failed -> _studyPlansState.value =
-                        _studyPlansState.value.copy(exception = it.message)
-                    is Result.Loading -> _studyPlansState.value =
-                        _studyPlansState.value.copy(loading = true)
-                    is Result.Success -> {
-                        _studyPlansState.value = DataState(it.data, empty = it.data.isEmpty())
+            val studyPlansFlow = studyPlanRepository.observeStudyPlans()
+            val favoritesFlow = favoriteRepository.observeFavoriteBy(sharedPrefs.loggedInId!!)
+            studyPlansFlow.combine(favoritesFlow){ studyPlansRes, favoritesRes ->
+                if (studyPlansRes is Result.Loading || favoritesRes is Result.Loading){
+                    _studyPlansState.value = _studyPlansState.value.copy(loading = true)
+                } else if (studyPlansRes is Result.Failed){
+                    _studyPlansState.value = _studyPlansState.value.copy(exception = "failed loading study plans")
+                } else if(studyPlansRes is Result.Success && favoritesRes is Result.Success){
+                    val favorites = favoritesRes.data.followedUserIds.toHashSet()
+                    val studyPlans = studyPlansRes.data.map {
+                        it.copy(isChecked = favorites.contains(it.userId))
                     }
+                    _studyPlansState.value = DataState(studyPlans, empty = studyPlans.isEmpty())
+
+                } else if (studyPlansRes is Result.Success && favoritesRes is Result.Failed){
+                    val studyPlans = studyPlansRes.data
+                    _studyPlansState.value = DataState(studyPlans, empty = studyPlans.isEmpty())
                 }
-            }
+                else {
+                    _studyPlansState.value = _studyPlansState.value.copy(empty = true)
+                }
+            }.conflate().collect()
         }
     }
 
-    fun updateChecked(studyPlanId: String, isChecked: Boolean, userId: String?) {
+    fun updateChecked(studyPlanId: String, isChecked: Boolean) {
         scope.launch {
+            val userId = sharedPrefs.loggedInId!!
             val flow = if (isChecked) favoriteRepository.removeFromFavorite(studyPlanId, userId)
             else favoriteRepository.addToFavorite(studyPlanId, userId)
-            flow.collect {
-                when (it){
-                    is Result.Failed -> {}
-                }
-            }
+            flow.collect()
         }
     }
 }

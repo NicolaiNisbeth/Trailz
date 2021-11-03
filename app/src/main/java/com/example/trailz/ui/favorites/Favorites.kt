@@ -20,14 +20,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Favorite
 import com.example.trailz.ui.studyplanners.StudyPlan
-import com.example.trailz.ui.studyplanners.StudyPlans
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
 @Composable
 fun Favorites(
     viewModel: FavoritesViewModel,
-    userId: String?,
+    userId: String,
     onStudyPlan: (String) -> Unit,
     onProfile: () -> Unit,
     onFindFavorite: () -> Unit

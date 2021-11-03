@@ -29,6 +29,7 @@ import android.view.Window
 import android.view.WindowInsets
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.trailz.ui.login.LoginActivity
+import kotlinx.coroutines.flow.MutableStateFlow
 
 
 @AndroidEntryPoint
@@ -49,19 +50,6 @@ class MainActivity : BaseActivity(), LogoutListener {
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
-        /* FIXME: vi må lige rydde op i det her snask
-        val w: Window = window
-        w.setFlags(
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-        )
-        this.window.apply {
-            clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-            addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            statusBarColor = Color.TRANSPARENT
-        }
-         */
         val bottomNavigationView = DataBindingUtil
             .setContentView<ActivityMainBinding>(this, R.layout.activity_main)
             .navView
@@ -76,9 +64,10 @@ class MainActivity : BaseActivity(), LogoutListener {
             backgroundColor = colorSecondary
             badgeTextColor = colorOnSecondary
         }
-        viewModel.count.observe(this) {
-            favoriteBadge.isVisible = it > 0
-            favoriteBadge.number = it
+        lifecycleScope.launchWhenStarted {
+            viewModel.count.collect {
+                favoriteBadge.number = it
+            }
         }
     }
 
@@ -98,12 +87,12 @@ class MainActivityViewModel @Inject constructor(
     private val sharedPref: SharedPrefs
 ): ViewModel(){
 
-    private val _count = MutableLiveData(0)
-    val count: LiveData<Int> = _count
+    private val _count = MutableStateFlow(0)
+    val count: MutableStateFlow<Int> = _count
 
     init {
         viewModelScope.launch {
-            repository.observeFavoriteBy(sharedPref.loggedInId).collect {
+            repository.observeFavoriteBy(sharedPref.loggedInId!!).collect {
                 when (it){
                     is Result.Failed -> { }
                     is Result.Loading -> { }

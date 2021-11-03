@@ -49,7 +49,7 @@ class FavoritesViewModel @Inject constructor(
         }
     }
 
-    fun addToFavorite(favoritedId: String, userId: String?){
+    fun addToFavorite(favoritedId: String, userId: String){
         viewModelScope.launch {
             repository.addToFavorite(favoritedId, userId).collect {
                 when (it){
@@ -66,7 +66,7 @@ class FavoritesViewModel @Inject constructor(
         }
     }
 
-    fun removeFromFavorite(favoritedId: String, userId: String?){
+    fun removeFromFavorite(favoritedId: String, userId: String){
         viewModelScope.launch {
             repository.removeFromFavorite(favoritedId, userId).collect {
                 when (it){

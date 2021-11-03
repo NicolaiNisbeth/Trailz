@@ -38,7 +38,7 @@ class MyStudyPlanViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            repository.getStudyPlan(sharedPrefs.loggedInId).collect {
+            repository.getStudyPlan(sharedPrefs.loggedInId!!).collect {
                 when(it){
                     is Result.Failed -> { inEditMode.value = true; _isLoading.value = false }
                     is Result.Loading -> _isLoading.value = false

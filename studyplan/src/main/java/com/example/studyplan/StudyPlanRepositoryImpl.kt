@@ -12,27 +12,19 @@ class StudyPlanRepositoryImpl(
     private val remoteDataSource: StudyPlanRemoteDataSource
 ): StudyPlanRepository {
 
-    override suspend fun getStudyPlan(id: String?): Flow<Result<StudyPlan>> = if (id != null){
-        remoteDataSource.getStudyPlan(id)
-    } else {
-        flow {
-            val studyPlan = localDataSource.getStudyPlan()
-            if (studyPlan != null){
-                emit(Result.success<StudyPlan>(studyPlan))
-            } else {
-                emit(Result.failed<StudyPlan>(message = "user with id=$id has no studyplan"))
-            }
-        }
+    override suspend fun getStudyPlan(id: String): Flow<Result<StudyPlan>> = flow {
+        emit(Result.loading())
+        remoteDataSource.getStudyPlan(id).collect(::emit)
     }.flowOn(Dispatchers.IO)
 
     @FlowPreview
     override suspend fun getStudyPlans() = remoteDataSource.getStudyPlans()
 
     @FlowPreview
-    override suspend fun observeStudyPlans() = flowOf(
-        refreshBreedsIfStale(true),
-        getStudyPlansFromCache()
-    ).flattenMerge().flowOn(Dispatchers.IO)
+    override suspend fun observeStudyPlans() = flow {
+        emit(Result.loading())
+        remoteDataSource.observeStudyPlans().collect(::emit)
+    }
 
     fun refreshBreedsIfStale(forced: Boolean = false): Flow<Result<List<StudyPlan>>> = flow {
         emit(Result.loading())
@@ -53,31 +45,17 @@ class StudyPlanRepositoryImpl(
 
 
     override suspend fun deleteStudyPlan(id: String) = flow<Result<Unit>> {
-        val deletedStudyPlan = localDataSource.deleteStudyPlan(id)
-        remoteDataSource.deleteStudyPlan(id).collect {
-            when (it){
-                is Result.Failed -> deletedStudyPlan?.let { localDataSource.createStudyPlan(deletedStudyPlan) }
-                is Result.Loading -> emit(it)
-                is Result.Success -> emit(it)
-            }
-        }
+        emit(Result.loading())
+        remoteDataSource.deleteStudyPlan(id).collect(::emit)
     }.flowOn(Dispatchers.IO)
 
     override suspend fun createStudyPlan(studyPlan: StudyPlan) = flow<Result<Unit>> {
-        localDataSource.createStudyPlan(studyPlan)
-        remoteDataSource.createStudyPlan(studyPlan).collect {
-            if (it is Result.Success){
-                emit(it)
-            }
-        }
+        emit(Result.loading())
+        remoteDataSource.createStudyPlan(studyPlan).collect(::emit)
     }.flowOn(Dispatchers.IO)
 
     override suspend fun updateStudyPlan(id: String, studyPlan: StudyPlan) = flow<Result<Unit>> {
-        localDataSource.updateStudyPlan(id, studyPlan)
-        remoteDataSource.updateStudyPlan(id, studyPlan).collect {
-            if (it is Result.Success){
-                emit(it)
-            }
-        }
+        emit(Result.loading())
+        remoteDataSource.updateStudyPlan(id, studyPlan).collect(::emit)
     }.flowOn(Dispatchers.IO)
 }
