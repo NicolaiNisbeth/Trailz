@@ -8,16 +8,15 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Semester
-import com.example.base.domain.StudyPlan
 import com.example.trailz.ui.common.compose.ExpandableCard
 import com.example.trailz.ui.common.compose.FavoriteButton
 import com.example.trailz.ui.studyplanners.DataState
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
@@ -39,7 +38,8 @@ fun Favorites(
         onFindFavorite = onFindFavorite,
         onUpdateFavorite = { favoriteId, isChecked ->
             viewModel.updateFavorite(favoriteId, userId, isChecked)
-        }
+        },
+        onExpandClicked = { viewModel.updateExpanded(it) }
     )
 }
 
@@ -47,11 +47,12 @@ fun Favorites(
 @ExperimentalMaterialApi
 @Composable
 fun Favorites(
-    state: DataState<List<StudyPlan>>,
+    state: DataState<FavoritesData>,
     onUpdateFavorite: (String, Boolean) -> Unit,
     onStudyPlan: (String) -> Unit,
     onProfile: () -> Unit,
-    onFindFavorite: () -> Unit
+    onFindFavorite: () -> Unit,
+    onExpandClicked: (String) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -78,7 +79,8 @@ fun Favorites(
             StudyPlansScreen(
                 studyPlans = it,
                 onUpdateFavorite = onUpdateFavorite,
-                onStudyPlan = onStudyPlan
+                onStudyPlan = onStudyPlan,
+                onExpandClicked = onExpandClicked
             )
         }
     }
@@ -88,19 +90,16 @@ fun Favorites(
 @ExperimentalMaterialApi
 @Composable
 fun StudyPlansScreen(
-    studyPlans: List<StudyPlan>,
+    studyPlans: FavoritesData,
     onUpdateFavorite: (String, Boolean) -> Unit,
-    onStudyPlan: (String) -> Unit
+    onStudyPlan: (String) -> Unit,
+    onExpandClicked: (String) -> Unit
 ) {
-    val expandedIds = remember{
-        studyPlans.map { it.userId to false }.toMutableStateMap()
-    }
-
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        studyPlans.forEach {
+        studyPlans.studyPlans.forEach {
             item {
                 StudyPlan(
                     id = it.userId,
@@ -109,9 +108,9 @@ fun StudyPlansScreen(
                     semesters = it.semesters,
                     likes = "123 Likes",
                     lastUpdated = "02-03-2020",
-                    isExpanded = expandedIds[it.userId] ?: false,
+                    isExpanded = studyPlans.expandedPlans[it.userId] ?: false,
                     isChecked = true,
-                    onExpandClicked = { expandedIds[it.userId] = expandedIds[it.userId]?.not() ?: false },
+                    onExpandClicked = { onExpandClicked(it.userId) },
                     onUpdateFavorite = onUpdateFavorite,
                     onStudyPlan = onStudyPlan
                 )
@@ -138,7 +137,7 @@ fun StudyPlan(
 ){
     ExpandableCard(
         modifier = modifier.clickable { onStudyPlan(id) },
-        expanded = isExpanded,
+        isExpanded = isExpanded,
         fixedContent = { arrowRotationDegree ->
             val paddingModifier = Modifier.padding(horizontal = 12.dp)
             Text(text = likes, style = MaterialTheme.typography.overline, modifier = paddingModifier.padding(top = 16.dp))
@@ -150,7 +149,9 @@ fun StudyPlan(
                     isChecked = isChecked,
                     colorOnChecked = MaterialTheme.colors.primary,
                     colorUnChecked = MaterialTheme.colors.onBackground,
-                    onClick = { onUpdateFavorite(id, it) }
+                    onClick = {
+                        onUpdateFavorite(id, it)
+                    }
                 )
                 if (semesters.any { it.courses.any { it.title.isNotBlank() } }){
                     IconButton(

@@ -1,7 +1,5 @@
 package com.example.trailz.ui.favorites
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.base.Result
@@ -12,11 +10,14 @@ import com.example.trailz.inject.SharedPrefs
 import com.example.trailz.ui.common.mapAsync
 import com.example.trailz.ui.studyplanners.DataState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+data class FavoritesData(
+    val studyPlans: List<StudyPlan>,
+    val expandedPlans: Map<String, Boolean> = studyPlans.associate { it.userId to false }
+)
 
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
@@ -26,10 +27,10 @@ class FavoritesViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val scope = viewModelScope
-    private val _state: MutableStateFlow<DataState<List<StudyPlan>>> = MutableStateFlow(
+    private val _state: MutableStateFlow<DataState<FavoritesData>> = MutableStateFlow(
         DataState(isLoading = true)
     )
-    val state: MutableStateFlow<DataState<List<StudyPlan>>> = _state
+    val state: MutableStateFlow<DataState<FavoritesData>> = _state
 
     init {
         observeFavorites()
@@ -56,7 +57,7 @@ class FavoritesViewModel @Inject constructor(
                 }
                 studyPlanFlows.forEach { it.toCollection(studyPlans) }
             }
-            _state.value = DataState(studyPlans, isEmpty = studyPlans.isEmpty())
+            _state.value = DataState(FavoritesData(studyPlans), isEmpty = studyPlans.isEmpty())
         }
     }
 
@@ -76,12 +77,28 @@ class FavoritesViewModel @Inject constructor(
         }
     }
 
+    fun updateExpanded(studyPlanId: String){
+        val data = _state.value.data ?: return
+        val state = data.copy(
+            expandedPlans = data.expandedPlans.toMutableMap().apply {
+                this[studyPlanId] = this[studyPlanId]?.not() ?: false
+            }
+        )
+        _state.value = _state.value.copy(
+            data = state,
+            isEmpty = state.studyPlans.isEmpty()
+        )
+    }
+
     private fun flipLocally(favoriteId: String) {
-        val studyPlans = _state.value.data ?: return
-        val minusFavorited = studyPlans.filterNot { it.userId == favoriteId }
+        val data = _state.value.data ?: return
+        val minusFavorited = data.copy(
+            studyPlans = data.studyPlans.filterNot { it.userId == favoriteId },
+            expandedPlans = data.expandedPlans.minus(favoriteId)
+        )
         _state.value = _state.value.copy(
             data = minusFavorited,
-            isEmpty = minusFavorited.isEmpty()
+            isEmpty = minusFavorited.studyPlans.isEmpty()
         )
     }
 }
