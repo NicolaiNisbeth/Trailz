@@ -5,6 +5,8 @@
     app:startDestination="@id/studyPlannerFragment">
 
     <include app:graph="@navigation/marketplace_navigation" />
+    <include app:graph="@navigation/profile_navigation" />
+
     <argument
         android:name="ownerId"
         app:argType="string"
@@ -13,6 +15,11 @@
     <fragment
         android:id="@+id/studyPlannerFragment"
         android:name="com.example.trailz.ui.studyplanner.StudyPlannerFragment">
+
+        <action
+            android:id="@+id/action_study_planner_to_profile"
+            app:destination="@+id/profile_navigation"
+            />
 
         <action
             android:id="@+id/action_study_planner_to_marketplace"

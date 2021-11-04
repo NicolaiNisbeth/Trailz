@@ -2,10 +2,7 @@ package com.example.trailz.ui.mystudyplan
 
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.base.Result
 import com.example.base.domain.Course
 import com.example.base.domain.Semester
@@ -21,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MyStudyPlanViewModel @Inject constructor(
     private val repository: StudyPlanRepository,
-    private val sharedPrefs: SharedPrefs
+    private val sharedPrefs: SharedPrefs,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _savedStudyPlan = MutableLiveData<StudyPlan>()
@@ -38,7 +36,13 @@ class MyStudyPlanViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            repository.getStudyPlan(sharedPrefs.loggedInId!!).collect {
+            val k = savedStateHandle.get<String>("ownerId")
+            val ownerId = if (k != null){
+                k
+            } else {
+                sharedPrefs.loggedInId
+            }
+            repository.getStudyPlan(ownerId).collect {
                 when(it){
                     is Result.Failed -> { inEditMode.value = true; _isLoading.value = false }
                     is Result.Loading -> _isLoading.value = false

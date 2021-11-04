@@ -19,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.*
 import androidx.transition.TransitionInflater
 import com.example.trailz.R
+import com.example.trailz.databinding.FragmentMyStudyPlanBinding
 import com.example.trailz.databinding.FragmentStudyplanLargeBinding
 import com.example.trailz.databinding.SemesterBinding
 import com.example.trailz.ui.common.IdEqualsDiffCallback
@@ -44,10 +45,34 @@ class StudyPlannerFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val binding = FragmentMyStudyPlanBinding.inflate(inflater, container, false)
+        setupComposeView(binding.composeViewMyStudyPlan)
+        return binding.root
+        /*
         binding = FragmentStudyplanLargeBinding.inflate(inflater, container, false)
         return binding
             .also { setupStudyPlan(it.studyplan) }
             .root
+
+         */
+    }
+
+    @ExperimentalFoundationApi
+    @ExperimentalComposeUiApi
+    private fun setupComposeView(composeViewMyStudyPlan: ComposeView) {
+        composeViewMyStudyPlan.setContent {
+            MdcTheme {
+                StudyPlanner(
+                    viewModel = viewModel,
+                    navigateUp = { findNavController().navigateUp() },
+                    onProfile = ::openProfile
+                )
+            }
+        }
+    }
+
+    private fun openProfile() {
+        findNavController().navigate(R.id.action_study_planner_to_profile)
     }
 
     @ExperimentalFoundationApi
@@ -62,7 +87,7 @@ class StudyPlannerFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        postponeEnterTransition()
+        //postponeEnterTransition()
         TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
             .run {
@@ -73,10 +98,10 @@ class StudyPlannerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.textView.text = arguments?.getString("text_big")
-        val resource = arguments?.getInt("image_big")
-        if (resource != null) binding.imageView.setImageResource(resource)
-        startPostponedEnterTransition()
+        //binding.textView.text = arguments?.getString("text_big")
+        //val resource = arguments?.getInt("image_big")
+        //if (resource != null) binding.imageView.setImageResource(resource)
+        //startPostponedEnterTransition()
         /*
         viewModel.shippingProvider.observe(viewLifecycleOwner) {
             adapter.submitList(it)

@@ -147,6 +147,7 @@ class StudyPlannersFragment : Fragment() {
         val args = Bundle().apply {
             putInt("image_big", R.drawable.ic_launcher_foreground) // FIXME: cheating
             putString("text_big", view.textView.text.toString())
+            putString("ownerId", view.authorView.text.toString())
         }
         val extra = FragmentNavigatorExtras(
             view.imageView to "image_big",
@@ -172,7 +173,7 @@ data class DataState<out T>(
 class StudyPlanListViewModel @Inject constructor(
     private val studyPlanRepository: StudyPlanRepository,
     private val favoriteRepository: FavoriteRepository,
-    private val sharedPrefs: SharedPrefs
+    private val sharedPrefs: SharedPrefs,
 ) : ViewModel() {
 
     private val scope = viewModelScope
