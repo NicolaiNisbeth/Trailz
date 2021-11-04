@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
@@ -41,6 +42,7 @@ class FavoritesFragment : Fragment() {
         }
     }
 
+    @ExperimentalAnimationApi
     @ExperimentalMaterialApi
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,6 +54,7 @@ class FavoritesFragment : Fragment() {
         return binding.root
     }
 
+    @ExperimentalAnimationApi
     @ExperimentalMaterialApi
     private fun setupComposeView(composeViewFavorites: ComposeView) {
         composeViewFavorites.setContent {

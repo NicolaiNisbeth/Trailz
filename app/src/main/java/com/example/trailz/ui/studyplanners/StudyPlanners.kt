@@ -17,16 +17,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Favorite
+import com.example.base.domain.Semester
 import com.example.base.domain.StudyPlan
 import com.example.trailz.R
 import com.example.trailz.ui.common.compose.FavoriteButton
 
 @ExperimentalMaterialApi
 @Composable
-fun StudyPlan(
+internal fun StudyPlan(
     modifier: Modifier = Modifier,
     userId: String,
     title: String,
+    semesters: List<Semester>,
     checked: Boolean,
     onUpdateFavorite: (String, Boolean) -> Unit,
     onStudyPlan: (String) -> Unit
@@ -36,21 +38,10 @@ fun StudyPlan(
         elevation = 4.dp,
         onClick = { onStudyPlan(userId) }
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            val imageModifier = Modifier
-                .heightIn(max = 180.dp)
-                .fillMaxWidth()
-                .clip(shape = MaterialTheme.shapes.medium)
-
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_background),
-                contentDescription = null,
-                modifier = imageModifier,
-                contentScale = ContentScale.Crop
-            )
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(text = "123 likes", style = MaterialTheme.typography.overline)
+            Text(text = title, style = MaterialTheme.typography.button)
+            Text(text = userId, style = MaterialTheme.typography.body2)
 
             Spacer(Modifier.height(16.dp))
 
@@ -58,13 +49,17 @@ fun StudyPlan(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.padding(bottom = 6.dp).align(Alignment.TopStart)
+                    modifier = Modifier
+                        .padding(bottom = 6.dp)
+                        .align(Alignment.TopStart)
                 )
 
                 Text(
                     text = userId,
                     style = MaterialTheme.typography.subtitle2,
-                    modifier = Modifier.padding(bottom = 4.dp).align(Alignment.BottomStart)
+                    modifier = Modifier
+                        .padding(bottom = 4.dp)
+                        .align(Alignment.BottomStart)
                 )
 
                 FavoriteButton(
@@ -77,7 +72,6 @@ fun StudyPlan(
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
 
         }
     }
