@@ -47,7 +47,6 @@ class FavoritesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        sharedPrefs.loggedInId?.let { viewModel.initObserveFavoriteBy(it) }
         val binding = FragmentFavoritesBinding.inflate(inflater, container, false)
         setupComposeView(binding.composeViewFavorites)
         return binding.root

@@ -28,8 +28,7 @@ fun StudyPlan(
     userId: String,
     title: String,
     checked: Boolean,
-    onFavorite: (String) -> Unit,
-    onRemove: (String) -> Unit,
+    onUpdateFavorite: (String, Boolean) -> Unit,
     onStudyPlan: (String) -> Unit
 ) {
     Card(
@@ -74,8 +73,7 @@ fun StudyPlan(
                     colorOnChecked = MaterialTheme.colors.primary,
                     colorUnChecked = MaterialTheme.colors.onBackground
                 ) {
-                    if (checked) onRemove(userId)
-                    else onFavorite(userId)
+                    onUpdateFavorite(userId, it)
                 }
             }
 

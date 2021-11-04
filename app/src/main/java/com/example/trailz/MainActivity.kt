@@ -41,8 +41,6 @@ class MainActivity : BaseActivity(), LogoutListener {
     @Inject
     lateinit var prefs: SharedPrefs
 
-    val viewModel: MainActivityViewModel by viewModels()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (prefs.isDarkTheme) {
@@ -57,18 +55,6 @@ class MainActivity : BaseActivity(), LogoutListener {
         bottomNavigationView.setupWithNavController(
             findNavController(R.id.nav_host_fragment_activity_main)
         )
-
-        val colorSecondary = themeColor(R.attr.colorSecondary)
-        val colorOnSecondary = themeColor(R.attr.colorOnSecondary)
-        val favoriteBadge = bottomNavigationView.getOrCreateBadge(R.id.favorites_navigation).apply {
-            backgroundColor = colorSecondary
-            badgeTextColor = colorOnSecondary
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.count.collect {
-                favoriteBadge.number = it
-            }
-        }
     }
 
     override fun onLogout() {
@@ -81,26 +67,3 @@ interface LogoutListener {
     fun onLogout()
 }
 
-@HiltViewModel
-class MainActivityViewModel @Inject constructor(
-    private val repository: FavoriteRepository,
-    private val sharedPref: SharedPrefs
-): ViewModel(){
-
-    private val _count = MutableStateFlow(0)
-    val count: MutableStateFlow<Int> = _count
-
-    init {
-        viewModelScope.launch {
-            repository.observeFavoriteBy(sharedPref.loggedInId!!).collect {
-                when (it){
-                    is Result.Failed -> { }
-                    is Result.Loading -> { }
-                    is Result.Success -> {
-                        _count.value = it.data.followedUserIds.count()
-                    }
-                }
-            }
-        }
-    }
-}

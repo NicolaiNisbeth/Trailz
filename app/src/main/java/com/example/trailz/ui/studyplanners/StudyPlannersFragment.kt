@@ -5,19 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.height
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnPreDraw
@@ -106,8 +98,8 @@ class StudyPlannersFragment : Fragment() {
         lifecycleScope.launch {
             viewModel.studyPlansState.collect {
                 handleData(it.data)
-                handleLoading(it.loading)
-                handleEmpty(it.empty)
+                handleLoading(it.isLoading)
+                handleEmpty(it.isEmpty)
                 handleError(it.exception)
             }
         }
@@ -172,8 +164,8 @@ class StudyPlannersFragment : Fragment() {
 data class DataState<out T>(
     val data: T? = null,
     val exception: String? = null,
-    val empty: Boolean = false,
-    val loading: Boolean = false
+    val isEmpty: Boolean = false,
+    val isLoading: Boolean = false
 )
 
 @HiltViewModel
@@ -185,7 +177,7 @@ class StudyPlanListViewModel @Inject constructor(
 
     private val scope = viewModelScope
     private val _studyPlansState: MutableStateFlow<DataState<List<StudyPlan>>> = MutableStateFlow(
-        DataState(loading = true)
+        DataState(isLoading = true)
     )
     val studyPlansState: MutableStateFlow<DataState<List<StudyPlan>>> = _studyPlansState
 
@@ -199,7 +191,7 @@ class StudyPlanListViewModel @Inject constructor(
             val favoritesFlow = favoriteRepository.getFavoritesBy(sharedPrefs.loggedInId!!)
             studyPlansFlow.combine(favoritesFlow){ studyPlansRes, favoritesRes ->
                 if (studyPlansRes is Result.Loading || favoritesRes is Result.Loading){
-                    _studyPlansState.value = _studyPlansState.value.copy(loading = true)
+                    _studyPlansState.value = _studyPlansState.value.copy(isLoading = true)
                 } else if (studyPlansRes is Result.Failed){
                     _studyPlansState.value = _studyPlansState.value.copy(exception = "failed loading study plans")
                 } else if(studyPlansRes is Result.Success && favoritesRes is Result.Success){
@@ -207,14 +199,14 @@ class StudyPlanListViewModel @Inject constructor(
                     val studyPlans = studyPlansRes.data.map {
                         it.copy(isChecked = favorites.contains(it.userId))
                     }
-                    _studyPlansState.value = DataState(studyPlans, empty = studyPlans.isEmpty())
+                    _studyPlansState.value = DataState(studyPlans, isEmpty = studyPlans.isEmpty())
 
                 } else if (studyPlansRes is Result.Success && favoritesRes is Result.Failed){
                     val studyPlans = studyPlansRes.data
-                    _studyPlansState.value = DataState(studyPlans, empty = studyPlans.isEmpty())
+                    _studyPlansState.value = DataState(studyPlans, isEmpty = studyPlans.isEmpty())
                 }
                 else {
-                    _studyPlansState.value = _studyPlansState.value.copy(empty = true)
+                    _studyPlansState.value = _studyPlansState.value.copy(isEmpty = true)
                 }
             }.conflate().collect()
         }

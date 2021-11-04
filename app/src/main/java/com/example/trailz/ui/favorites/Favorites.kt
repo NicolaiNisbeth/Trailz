@@ -1,26 +1,22 @@
 package com.example.trailz.ui.favorites
 
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.base.domain.Favorite
+import com.example.base.domain.StudyPlan
+import com.example.trailz.ui.studyplanners.DataState
 import com.example.trailz.ui.studyplanners.StudyPlan
-import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
 @Composable
@@ -32,28 +28,24 @@ fun Favorites(
     onFindFavorite: () -> Unit
 ) {
 
-    val favorites by viewModel.favorite.observeAsState(initial = Favorite())
-
-    val isLoading by viewModel.isLoading.observeAsState(initial = true)
+    val state by viewModel.state.collectAsState(DataState(isLoading = true))
 
     Favorites(
-        favorite = favorites,
-        isLoading = isLoading,
-        onFavorite = { viewModel.addToFavorite(it, userId) },
-        onRemove = { viewModel.removeFromFavorite(it, userId) },
+        state = state,
         onStudyPlan = onStudyPlan,
         onProfile = onProfile,
-        onFindFavorite = onFindFavorite
+        onFindFavorite = onFindFavorite,
+        onUpdateFavorite = { favoriteId, isChecked ->
+            viewModel.updateFavorite(favoriteId, userId, isChecked)
+        }
     )
 }
 
 @ExperimentalMaterialApi
 @Composable
 fun Favorites(
-    favorite: Favorite,
-    isLoading: Boolean,
-    onFavorite: (String) -> Unit,
-    onRemove: (String) -> Unit,
+    state: DataState<List<StudyPlan>>,
+    onUpdateFavorite: (String, Boolean) -> Unit,
     onStudyPlan: (String) -> Unit,
     onProfile: () -> Unit,
     onFindFavorite: () -> Unit
@@ -71,41 +63,71 @@ fun Favorites(
             )
         }
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ){
-            LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ){
-                favorite.followedUserIds.forEach {
-                    item {
-                        StudyPlan(
-                            userId = it,
-                            title = it,
-                            checked = true,
-                            onFavorite = onFavorite,
-                            onRemove = onRemove,
-                            onStudyPlan = onStudyPlan
-                        )
-                    }
-                }
-            }
-            if (!isLoading && favorite.followedUserIds.isEmpty()){
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = null)
-                    Text(text = "You have no favorites yet!")
-                    Button(onClick = onFindFavorite) {
-                        Text(text = "Find your favorite")
-                    }
-                }
-            }
+        if (state.isEmpty) {
+            EmptyScreen(onFindFavorite)
+        }
 
+        if (state.isLoading) {
+            LoadingScreen()
+        }
+
+        state.data?.let {
+            StudyPlansScreen(
+                studyPlans = it,
+                onUpdateFavorite = onUpdateFavorite,
+                onStudyPlan = onStudyPlan
+            )
         }
     }
+}
 
+@ExperimentalMaterialApi
+@Composable
+fun StudyPlansScreen(
+    studyPlans: List<StudyPlan>,
+    onUpdateFavorite: (String, Boolean) -> Unit,
+    onStudyPlan: (String) -> Unit
+) {
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        for (studyPlan in studyPlans) {
+            item {
+                StudyPlan(
+                    userId = studyPlan.userId,
+                    title = studyPlan.title,
+                    checked = true,
+                    onUpdateFavorite = onUpdateFavorite,
+                    onStudyPlan = onStudyPlan
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun LoadingScreen() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+fun EmptyScreen(onFindFavorite: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = null)
+        Text(text = "You have no favorites yet!")
+        Button(onClick = onFindFavorite) {
+            Text(text = "Find your favorite")
+        }
+    }
 }

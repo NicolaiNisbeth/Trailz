@@ -7,8 +7,8 @@ import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 class SharedPrefs(
     private val context: Context
 ) {
-    var loggedInId: String?
-        get() = getDefaultSharedPreferences(context).getString("in_memory_user_id", null)
+    var loggedInId: String
+        get() = getDefaultSharedPreferences(context).getString("in_memory_user_id", null) ?: throw IllegalStateException()
         set(value) = getDefaultSharedPreferences(context).edit { putString("in_memory_user_id", value) }
 
     var languagePreference: String?
