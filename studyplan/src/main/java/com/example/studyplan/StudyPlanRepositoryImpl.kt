@@ -7,6 +7,10 @@ import com.example.studyplan.remote.StudyPlanRemoteDataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.util.*
+
 class StudyPlanRepositoryImpl(
     private val localDataSource: StudyPlanLocalDataSource,
     private val remoteDataSource: StudyPlanRemoteDataSource
@@ -50,8 +54,12 @@ class StudyPlanRepositoryImpl(
     }.flowOn(Dispatchers.IO)
 
     override suspend fun createStudyPlan(studyPlan: StudyPlan) = flow<Result<Unit>> {
+        val simpleDateFormat= SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+        val currentDT: String = simpleDateFormat.format(Date())
+
+        val studyPlanDate = studyPlan.copy(updated = currentDT)
         emit(Result.loading())
-        remoteDataSource.createStudyPlan(studyPlan).collect(::emit)
+        remoteDataSource.createStudyPlan(studyPlanDate).collect(::emit)
     }.flowOn(Dispatchers.IO)
 
     override suspend fun updateStudyPlan(id: String, studyPlan: StudyPlan) = flow<Result<Unit>> {

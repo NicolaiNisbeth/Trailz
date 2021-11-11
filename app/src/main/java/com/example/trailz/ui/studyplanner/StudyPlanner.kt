@@ -47,7 +47,7 @@ fun StudyPlanner(
 @ExperimentalFoundationApi
 @Composable
 fun StudyPlanner(
-    header: Pair<String, String>,
+    header: Triple<String, String, String>,
     semesterToCourses: Map<Int, List<Course>>,
     isAnyCollapsed: Boolean,
     toggleAllCollapsed: (Boolean) -> Unit,
@@ -78,7 +78,7 @@ fun StudyPlanner(
             Header(
                 title = header.second,
                 owner = header.first,
-                updatedLast = "Updated: $date"
+                updatedLast = "Updated: ${header.third}"
             )
             SemesterList(
                 semesterToCourses = semesterToCourses,

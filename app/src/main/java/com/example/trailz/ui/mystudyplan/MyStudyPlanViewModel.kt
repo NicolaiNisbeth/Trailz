@@ -15,6 +15,9 @@ import com.example.trailz.ui.common.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,7 +39,7 @@ class MyStudyPlanViewModel @Inject constructor(
 
     private var collapsedSemesters = mutableStateMapOf<Int, Boolean>()
     var semesterToCourses = mutableStateMapOf<Int, List<Course>>()
-    var header = mutableStateOf(ownerId to "")
+    var header = mutableStateOf(Triple(ownerId, "", ""))
     var inEditMode = mutableStateOf(false)
 
     init {
@@ -47,7 +50,8 @@ class MyStudyPlanViewModel @Inject constructor(
                     is Result.Failed -> {
                         inEditMode.value = true
                         _isLoading.value = false
-                        header.value = ownerId to "Click me!"
+                        val date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+                        header.value = Triple(ownerId, "Click me!", date)
                     }
                     is Result.Success -> {
                         val studyPlan = it.data
@@ -55,7 +59,7 @@ class MyStudyPlanViewModel @Inject constructor(
                         studyPlan.semesters.forEach { expandSemester(it.order) }
                         _savedStudyPlan.value = studyPlan
                         _isLoading.value = false
-                        header.value = ownerId to studyPlan.title
+                        header.value = Triple(ownerId, studyPlan.title, studyPlan.updated)
                     }
                 }
             }
@@ -141,6 +145,7 @@ class MyStudyPlanViewModel @Inject constructor(
             title = header.value.second,
             semesters = semesterToCourses.map { Semester(it.key, it.value) }
         )
+
         if (isStudyPlanModified(studyPlan)) {
             viewModelScope.launch {
                 repository.createStudyPlan(studyPlan).collect {

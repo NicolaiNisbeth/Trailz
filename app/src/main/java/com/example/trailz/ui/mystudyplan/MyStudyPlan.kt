@@ -77,7 +77,7 @@ fun MyStudyPlan(
 @ExperimentalFoundationApi
 @Composable
 fun MyStudyPlan(
-    header: Pair<String, String>,
+    header: Triple<String, String, String>,
     semesterToCourses: Map<Int, List<Course>>,
     inEditMode: Boolean,
     isLoading: Boolean,
@@ -100,7 +100,6 @@ fun MyStudyPlan(
     navigateUp: () -> Unit
 
 ) {
-    val date = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(Date())
     val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
 
@@ -148,7 +147,7 @@ fun MyStudyPlan(
                 HeaderEdit(
                     title = header.second,
                     owner = header.first,
-                    updatedLast = "Updated: $date",
+                    updatedLast = "Updated: ${header.third}",
                     onTitleChange = editStudyPlanTitle
                 )
                 SemesterListEdit(
@@ -164,7 +163,7 @@ fun MyStudyPlan(
                 Header(
                     title = header.second,
                     owner = header.first,
-                    updatedLast = "Updated: $date"
+                    updatedLast = "Updated: ${header.third}"
                 )
                 SemesterList(
                     semesterToCourses = semesterToCourses,

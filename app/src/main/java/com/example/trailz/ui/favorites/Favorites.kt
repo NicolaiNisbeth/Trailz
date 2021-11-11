@@ -107,7 +107,7 @@ fun StudyPlansScreen(
                     title = it.title,
                     semesters = it.semesters,
                     likes = "123 Likes",
-                    lastUpdated = "02-03-2020",
+                    lastUpdated = it.updated,
                     isExpanded = studyPlans.expandedPlans[it.userId] ?: false,
                     isChecked = true,
                     onExpandClicked = { onExpandClicked(it.userId) },
