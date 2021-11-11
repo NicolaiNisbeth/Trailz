@@ -215,8 +215,7 @@ class StudyPlanListViewModel @Inject constructor(
         scope.launch {
             if (isChecked) {
                 favoriteRepository.removeFromFavorite(studyPlanId, sharedPrefs.loggedInId)
-            }
-            else {
+            } else {
                 favoriteRepository.addToFavorite(studyPlanId, sharedPrefs.loggedInId)
             }.collect()
         }
