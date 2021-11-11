@@ -103,7 +103,7 @@ fun StudyPlansScreen(
             item {
                 StudyPlan(
                     id = it.userId,
-                    username = it.userId,
+                    username = it.username,
                     title = it.title,
                     semesters = it.semesters,
                     likes = "${it.likes} likes",

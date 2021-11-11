@@ -29,6 +29,7 @@ import com.example.trailz.ui.common.Event
 import com.example.trailz.ui.common.compose.InputFieldDialog
 import com.example.trailz.ui.common.compose.InputFieldFocus
 import com.example.trailz.ui.common.compose.TextButtonV2
+import com.example.trailz.ui.studyplanners.DataState
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -43,17 +44,11 @@ fun MyStudyPlan(
 ) {
 
     val semesterToCourses = viewModel.semesterToCourses
-    val inEditMode by viewModel.inEditMode
-    val isLoading by viewModel.isLoading.observeAsState(initial = true)
-    val isUpdated by viewModel.isUpdated.observeAsState()
-    val header by viewModel.header
+    val state by viewModel.state.collectAsState(DataState(isLoading = true))
 
     MyStudyPlan(
-        header = header,
+        state = state,
         semesterToCourses = semesterToCourses,
-        inEditMode = inEditMode,
-        isLoading = isLoading,
-        isUpdated = isUpdated,
         isAnyCollapsed = viewModel::isAnyCollapsed,
         toggleAllCollapsed = viewModel::toggleAllSemesters,
         changeEditMode = viewModel::changeEditMode,
@@ -77,11 +72,8 @@ fun MyStudyPlan(
 @ExperimentalFoundationApi
 @Composable
 fun MyStudyPlan(
-    header: Triple<String, String, String>,
+    state: DataState<MyStudyPlanData>,
     semesterToCourses: Map<Int, List<Course>>,
-    inEditMode: Boolean,
-    isLoading: Boolean,
-    isUpdated: Event<Boolean>?,
     isAnyCollapsed: () -> Boolean,
     toggleAllCollapsed: (Boolean) -> Unit,
     changeEditMode: (Boolean) -> Unit,
@@ -98,7 +90,6 @@ fun MyStudyPlan(
     onProfile: () -> Unit,
     editStudyPlanTitle: (String) -> Unit,
     navigateUp: () -> Unit
-
 ) {
     val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
@@ -110,20 +101,22 @@ fun MyStudyPlan(
                 title = { Text(text = "My Plan") },
                 backgroundColor = MaterialTheme.colors.background,
                 actions = {
-                    if (inEditMode) {
-                        EditActionBar(
-                            onProfile = onProfile,
-                            addSemester = addSemester,
-                            saveStudyPlan = saveStudyPlan,
-                            changeEditMode = changeEditMode
-                        )
-                    } else {
-                        ActionBar(
-                            isAnyCollapsed = isAnyCollapsed(),
-                            toggleAllCollapsed = toggleAllCollapsed,
-                            onProfile = onProfile,
-                            changeEditMode = changeEditMode
-                        )
+                    state.data?.let {
+                        if (it.inEditMode) {
+                            EditActionBar(
+                                onProfile = onProfile,
+                                addSemester = addSemester,
+                                saveStudyPlan = saveStudyPlan,
+                                changeEditMode = changeEditMode
+                            )
+                        } else {
+                            ActionBar(
+                                isAnyCollapsed = isAnyCollapsed(),
+                                toggleAllCollapsed = toggleAllCollapsed,
+                                onProfile = onProfile,
+                                changeEditMode = changeEditMode
+                            )
+                        }
                     }
                 }
             )
@@ -136,41 +129,43 @@ fun MyStudyPlan(
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
-            isUpdated?.contentIfNotHandled()?.let {
-                coroutineScope.launch {
-                    scaffoldState.snackbarHostState.showSnackbar(
-                        message = if (it) "Saved" else "Failed to save!"
+            state.data?.let {
+                it.isUpdated?.contentIfNotHandled()?.let {
+                    coroutineScope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(
+                            message = if (it) "Saved" else "Failed to save!"
+                        )
+                    }
+                }
+                if (it.inEditMode) {
+                    HeaderEdit(
+                        title = it.title,
+                        owner = it.username,
+                        updatedLast = "Updated: ${it.updatedLast}",
+                        onTitleChange = editStudyPlanTitle
+                    )
+                    SemesterListEdit(
+                        semesterToCourses = semesterToCourses,
+                        isSemesterCollapsed = isSemesterCollapsed,
+                        removeCourse = removeCourse,
+                        removeSemester = removeSemester,
+                        editSemester = editSemester,
+                        replaceCourseAt = replaceCourseAt,
+                        addCourse = addCourse
+                    )
+                } else {
+                    Header(
+                        title = it.title,
+                        owner = it.username,
+                        updatedLast = "Updated: ${it.updatedLast}"
+                    )
+                    SemesterList(
+                        semesterToCourses = semesterToCourses,
+                        isSemesterCollapsed = isSemesterCollapsed,
+                        expandSemester = expandSemester,
+                        collapseSemester = collapseSemester
                     )
                 }
-            }
-            if (inEditMode) {
-                HeaderEdit(
-                    title = header.second,
-                    owner = header.first,
-                    updatedLast = "Updated: ${header.third}",
-                    onTitleChange = editStudyPlanTitle
-                )
-                SemesterListEdit(
-                    semesterToCourses = semesterToCourses,
-                    isSemesterCollapsed = isSemesterCollapsed,
-                    removeCourse = removeCourse,
-                    removeSemester = removeSemester,
-                    editSemester = editSemester,
-                    replaceCourseAt = replaceCourseAt,
-                    addCourse = addCourse
-                )
-            } else {
-                Header(
-                    title = header.second,
-                    owner = header.first,
-                    updatedLast = "Updated: ${header.third}"
-                )
-                SemesterList(
-                    semesterToCourses = semesterToCourses,
-                    isSemesterCollapsed = isSemesterCollapsed,
-                    expandSemester = expandSemester,
-                    collapseSemester = collapseSemester
-                )
             }
         }
     }

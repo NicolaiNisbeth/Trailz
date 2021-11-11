@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
 import com.example.trailz.ui.common.Event
 import com.example.trailz.ui.mystudyplan.*
+import com.example.trailz.ui.studyplanners.DataState
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -30,9 +31,9 @@ fun StudyPlanner(
     navigateUp: () -> Unit
 ) {
     val semesterToCourses = viewModel.semesterToCourses
-    val header by viewModel.header
+    val state by viewModel.state.collectAsState(DataState(isLoading = true))
     StudyPlanner(
-        header = header,
+        state = state,
         semesterToCourses = semesterToCourses,
         isAnyCollapsed = viewModel.isAnyCollapsed(),
         toggleAllCollapsed = viewModel::toggleAllSemesters,
@@ -47,7 +48,7 @@ fun StudyPlanner(
 @ExperimentalFoundationApi
 @Composable
 fun StudyPlanner(
-    header: Triple<String, String, String>,
+    state: DataState<MyStudyPlanData>,
     semesterToCourses: Map<Int, List<Course>>,
     isAnyCollapsed: Boolean,
     toggleAllCollapsed: (Boolean) -> Unit,
@@ -57,7 +58,6 @@ fun StudyPlanner(
     onProfile: () -> Unit,
     navigateUp: () -> Unit
 ) {
-    val date = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(Date())
     Scaffold(
         topBar = {
             Toolbar(
@@ -68,24 +68,26 @@ fun StudyPlanner(
             )
         }
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxSize()
-        ) {
-            Header(
-                title = header.second,
-                owner = header.first,
-                updatedLast = "Updated: ${header.third}"
-            )
-            SemesterList(
-                semesterToCourses = semesterToCourses,
-                isSemesterCollapsed = isSemesterCollapsed,
-                expandSemester = expandSemester,
-                collapseSemester = collapseSemester
-            )
+        state.data?.let {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxSize()
+            ) {
+                Header(
+                    title = it.title,
+                    owner = it.username,
+                    updatedLast = "Updated: ${it.updatedLast}"
+                )
+                SemesterList(
+                    semesterToCourses = semesterToCourses,
+                    isSemesterCollapsed = isSemesterCollapsed,
+                    expandSemester = expandSemester,
+                    collapseSemester = collapseSemester
+                )
+            }
         }
     }
 }
