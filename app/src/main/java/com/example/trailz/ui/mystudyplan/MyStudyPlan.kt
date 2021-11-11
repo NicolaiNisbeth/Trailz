@@ -140,7 +140,7 @@ fun MyStudyPlan(
             isUpdated?.contentIfNotHandled()?.let {
                 coroutineScope.launch {
                     scaffoldState.snackbarHostState.showSnackbar(
-                        message = if (it) "Updated" else "Failed to update!"
+                        message = if (it) "Saved" else "Failed to save!"
                     )
                 }
             }

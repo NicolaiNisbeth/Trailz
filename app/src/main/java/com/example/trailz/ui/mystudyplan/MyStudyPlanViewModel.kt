@@ -23,6 +23,8 @@ class MyStudyPlanViewModel @Inject constructor(
     private val sharedPrefs: SharedPrefs,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+    private val ownerId = savedStateHandle.get<String>("ownerId")
+        ?: sharedPrefs.loggedInId
 
     private val _savedStudyPlan = MutableLiveData<StudyPlan>()
 
@@ -34,45 +36,55 @@ class MyStudyPlanViewModel @Inject constructor(
 
     private var collapsedSemesters = mutableStateMapOf<Int, Boolean>()
     var semesterToCourses = mutableStateMapOf<Int, List<Course>>()
-    var header = mutableStateOf("" to "")
+    var header = mutableStateOf(ownerId to "")
     var inEditMode = mutableStateOf(false)
 
     init {
         viewModelScope.launch {
-            val ownerId = savedStateHandle.get<String>("ownerId") ?: sharedPrefs.loggedInId
             repository.getStudyPlan(ownerId).collect {
-                when(it){
-                    is Result.Failed -> { inEditMode.value = true; _isLoading.value = false }
+                when (it) {
                     is Result.Loading -> _isLoading.value = false
+                    is Result.Failed -> {
+                        inEditMode.value = true
+                        _isLoading.value = false
+                        header.value = ownerId to "Click me!"
+                    }
                     is Result.Success -> {
                         val studyPlan = it.data
-                        header.value = studyPlan.userId to studyPlan.title
                         studyPlan.semesters.forEach { addSemester(it.order, it.courses) }
                         studyPlan.semesters.forEach { expandSemester(it.order) }
                         _savedStudyPlan.value = studyPlan
                         _isLoading.value = false
+                        header.value = ownerId to studyPlan.title
                     }
                 }
             }
         }
     }
 
-    private fun isStudyPlanModified(unsavedStudyPlan: StudyPlan) = unsavedStudyPlan != _savedStudyPlan.value
+    private fun isStudyPlanModified(unsavedStudyPlan: StudyPlan) =
+        unsavedStudyPlan != _savedStudyPlan.value
 
-    fun changeEditMode(edit: Boolean){
+    fun changeEditMode(edit: Boolean) {
         inEditMode.value = edit
     }
 
     fun isSemesterCollapsed(semesterId: Int) = collapsedSemesters[semesterId] ?: false
 
-    fun collapseSemester(semesterId: Int) { collapsedSemesters[semesterId] = true }
+    fun collapseSemester(semesterId: Int) {
+        collapsedSemesters[semesterId] = true
+    }
 
-    fun expandSemester(semesterID: Int) { collapsedSemesters[semesterID] = false }
+    fun expandSemester(semesterID: Int) {
+        collapsedSemesters[semesterID] = false
+    }
 
     fun isAnyCollapsed() = collapsedSemesters.any { it.value }
 
-    fun toggleAllSemesters(allCollapsed: Boolean){
-        semesterToCourses.keys.forEach { if (allCollapsed) expandSemester(it) else collapseSemester(it) }
+    fun toggleAllSemesters(allCollapsed: Boolean) {
+        semesterToCourses.keys.forEach {
+            if (allCollapsed) expandSemester(it) else collapseSemester(it)
+        }
     }
 
     fun addSemester(semesterId: Int? = null, courses: List<Course> = emptyList()) {
@@ -86,17 +98,17 @@ class MyStudyPlanViewModel @Inject constructor(
         collapsedSemesters.remove(semesterId)
     }
 
-    fun editSemester(id: Int, newTitle: String){
+    fun editSemester(id: Int, newTitle: String) {
         val title = newTitle.toIntOrNull() ?: return
         val isTitleUnique = semesterToCourses[title] == null
-        if (isTitleUnique){
+        if (isTitleUnique) {
             semesterToCourses[title] = semesterToCourses[id] ?: emptyList()
             removeSemester(id)
         }
     }
 
     fun addCourse(course: Course, semesterId: Int) {
-        if (course.title.isNotBlank()){
+        if (course.title.isNotBlank()) {
             semesterToCourses[semesterId] = semesterToCourses[semesterId]
                 ?.plus(course)
                 ?: emptyList()
@@ -109,8 +121,8 @@ class MyStudyPlanViewModel @Inject constructor(
             ?: emptyList()
     }
 
-    fun replaceCourseAt(index: Int, semesterId: Int, course: Course){
-        if (course.title.isNotBlank()){
+    fun replaceCourseAt(index: Int, semesterId: Int, course: Course) {
+        if (course.title.isNotBlank()) {
             semesterToCourses[semesterId]?.toMutableList()?.let {
                 it[index] = course
                 semesterToCourses[semesterId] = it
@@ -118,22 +130,25 @@ class MyStudyPlanViewModel @Inject constructor(
         }
     }
 
-    fun editStudyPlanTitle(newTitle: String){
+    fun editStudyPlanTitle(newTitle: String) {
         header.value = header.value.copy(second = newTitle)
     }
 
-    fun saveStudyPlan(){
+    fun saveStudyPlan() {
         val userId = sharedPrefs.loggedInId
         val studyPlan = StudyPlan(
             userId = userId,
             title = header.value.second,
             semesters = semesterToCourses.map { Semester(it.key, it.value) }
         )
-        if (isStudyPlanModified(studyPlan)){
+        if (isStudyPlanModified(studyPlan)) {
             viewModelScope.launch {
                 repository.createStudyPlan(studyPlan).collect {
-                    when (it){
-                        is Result.Failed -> { _isLoading.value = false; _isUpdated.value = Event(false) }
+                    when (it) {
+                        is Result.Failed -> {
+                            _isLoading.value = false
+                            _isUpdated.value = Event(false)
+                        }
                         is Result.Loading -> _isLoading.value = true
                         is Result.Success -> {
                             _isLoading.value = false
