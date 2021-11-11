@@ -16,6 +16,10 @@ class StudyPlanRepositoryImpl(
     private val remoteDataSource: StudyPlanRemoteDataSource
 ): StudyPlanRepository {
 
+    override suspend fun observeStudyPlan(id: String): Flow<Result<StudyPlan>> = flow {
+        remoteDataSource.observeStudyPlan(id).collect(::emit)
+    }.flowOn(Dispatchers.IO)
+
     override suspend fun getStudyPlan(id: String): Flow<Result<StudyPlan>> = flow {
         emit(Result.loading())
         remoteDataSource.getStudyPlan(id).collect(::emit)

@@ -58,6 +58,9 @@ class FavoriteRepositoryImpl : FavoriteRepository {
     }
 
     override fun addToFavorite(favoritedId: String, userId: String) = flow<Result<Unit>> {
+        val favoritedStudyPlan = FirebaseFirestore.getInstance().collection("/studyplans").document(favoritedId)
+        favoritedStudyPlan.update("likes", FieldValue.increment(1)).await()
+
         val documentReference = collection.document(userId)
         val favorite = documentReference.get()
             .await()
@@ -80,6 +83,9 @@ class FavoriteRepositoryImpl : FavoriteRepository {
     }.flowOn(Dispatchers.IO)
 
     override fun removeFromFavorite(favoritedId: String, userId: String) = flow<Result<Unit>> {
+        val favoritedStudyPlan = FirebaseFirestore.getInstance().collection("/studyplans").document(favoritedId)
+        favoritedStudyPlan.update("likes", FieldValue.increment(-1)).await()
+
         val documentReference = collection.document(userId)
         val favorite = documentReference.get()
             .await()

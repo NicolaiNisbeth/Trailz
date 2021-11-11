@@ -70,7 +70,6 @@ class ProfileFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewModel.getUser(sharedPrefs.loggedInId)
         val binding = FragmentProfileBinding.inflate(inflater, container, false)
         setupComposeView(binding.composeViewProfile)
         return binding.root

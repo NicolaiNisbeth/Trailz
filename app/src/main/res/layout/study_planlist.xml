@@ -29,44 +29,44 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="123 likes"
             app:layout_constraintBottom_toTopOf="@id/textView"
             app:layout_constraintEnd_toStartOf="@id/likesBtn"
             app:layout_constraintStart_toEndOf="@id/imageView"
-            app:layout_constraintTop_toTopOf="@id/imageView" />
+            app:layout_constraintTop_toTopOf="@id/imageView"
+            tools:text="123 likes" />
 
         <TextView
             android:id="@+id/textView"
             style="@style/TextAppearance.MaterialComponents.Button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            tools:text="Roadmap for Winners"
             app:layout_constraintBottom_toTopOf="@id/authorView"
             app:layout_constraintEnd_toStartOf="@id/likesBtn"
             app:layout_constraintStart_toStartOf="@id/likesView"
-            app:layout_constraintTop_toBottomOf="@id/likesView" />
+            app:layout_constraintTop_toBottomOf="@id/likesView"
+            tools:text="Roadmap for Winners" />
 
         <TextView
             android:id="@+id/authorView"
             style="@style/TextAppearance.MaterialComponents.Body2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            tools:text="Nicolai Nisbeth"
             app:layout_constraintBottom_toTopOf="@id/updatedView"
             app:layout_constraintEnd_toStartOf="@id/likesBtn"
             app:layout_constraintStart_toStartOf="@id/likesView"
-            app:layout_constraintTop_toBottomOf="@id/textView" />
+            app:layout_constraintTop_toBottomOf="@id/textView"
+            tools:text="Nicolai Nisbeth" />
 
         <TextView
             android:id="@+id/updatedView"
             style="@style/TextAppearance.MaterialComponents.Caption"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            tools:text="02-03-2021"
             app:layout_constraintBottom_toBottomOf="@id/imageView"
             app:layout_constraintEnd_toStartOf="@id/likesBtn"
             app:layout_constraintStart_toStartOf="@id/likesView"
-            app:layout_constraintTop_toBottomOf="@id/authorView" />
+            app:layout_constraintTop_toBottomOf="@id/authorView"
+            tools:text="02-03-2021" />
 
         <androidx.compose.ui.platform.ComposeView
             android:id="@+id/likesBtn"

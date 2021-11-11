@@ -270,6 +270,7 @@ class StudyPlanViewHolder(
         binding.textView.text = studyPlan.title
         binding.authorView.text = studyPlan.userId
         binding.updatedView.text = studyPlan.updated
+        binding.likesView.text = "${studyPlan.likes} likes"
         binding.likesBtn.setContent {
             FavoriteButton(
                 isChecked = studyPlan.isChecked,

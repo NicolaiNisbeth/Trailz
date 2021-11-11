@@ -18,6 +18,23 @@ class StudyPlanRemoteImpl: StudyPlanRemoteDataSource {
         FirebaseFirestore.getInstance().collection(collectionPath)
     }
 
+    @ExperimentalCoroutinesApi
+    override suspend fun observeStudyPlan(id: String)= callbackFlow<Result<StudyPlan>> {
+        val listener = collection.document(id).addSnapshotListener { document, error ->
+            document?.let {
+                val studyPlan = it.toObject(StudyPlan::class.java)
+                if (studyPlan != null)
+                    trySend(Result.success(studyPlan))
+            }
+            error?.let {
+                trySend(Result.failed(it.message.toString()))
+                Log.d(TAG, it.message.toString())
+            }
+        }
+
+        awaitClose { listener.remove() }
+    }
+
     override suspend fun getStudyPlan(id: String) = flow<Result<StudyPlan>> {
         val document = collection.document(id).get().await()
         val studyPlan = document.toObject(StudyPlan::class.java)

@@ -26,7 +26,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.trailz.R
 import com.example.trailz.language.LanguageConfig
 import com.example.trailz.ui.common.compose.RatingBar
+import com.example.trailz.ui.favorites.LoadingScreen
 import com.example.trailz.ui.signup.User
+import com.example.trailz.ui.studyplanners.DataState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -48,7 +50,7 @@ fun Profile(
     val modalBottomSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
     )
-    val uiState by viewModel.state.observeAsState(initial = ProfileUiState(isLoading = true))
+    val uiState by viewModel.state.observeAsState(initial = DataState(isLoading = true))
 
     Profile(
         state = uiState,
@@ -69,7 +71,7 @@ fun Profile(
 @ExperimentalMaterialApi
 @Composable
 fun Profile(
-    state: ProfileUiState,
+    state: DataState<ProfileData>,
     coroutineScope: CoroutineScope,
     isDarkTheme: Boolean,
     modalBottomSheetState: ModalBottomSheetState,
@@ -116,11 +118,21 @@ fun Profile(
                         .padding(16.dp), onChangeLanguage, appliedCountry)
             }
         ) {
-            Box(Modifier.fillMaxSize()) {
-                when {
-                    state.isLoading -> {}
-                    else -> LoggedInView(state.user!!, isDarkTheme, logout, rateApp, settings, toggleTheme)
-                }
+            if (state.isLoading){
+                LoadingScreen()
+            }
+
+            val data = state.data
+            if (data != null){
+                LoggedInView(
+                    user = data.user,
+                    likes = data.likes,
+                    isDarkTheme = isDarkTheme,
+                    logout = logout,
+                    rateApp = rateApp,
+                    settings = settings,
+                    toggleTheme = toggleTheme
+                )
             }
         }
     }
@@ -171,6 +183,7 @@ fun LanguageView(
 @Composable
 fun LoggedInView(
     user: com.example.base.domain.User,
+    likes: Long,
     isDarkTheme: Boolean,
     logout: () -> Unit,
     rateApp: () -> Unit,
@@ -183,16 +196,32 @@ fun LoggedInView(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.LightGray.copy(alpha = 0.1f))
-            .padding(vertical = 30.dp, horizontal = 16.dp)
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .background(Color.LightGray.copy(alpha = 0.1f))
+                .padding(vertical = 20.dp, horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = "Velkommen ${user.username}",
-                style = MaterialTheme.typography.h4.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.Center
             )
+            Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "$likes",
+                    style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "Likes",
+                    style = MaterialTheme.typography.subtitle2,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
 
         Text(
@@ -217,8 +246,6 @@ fun LoggedInView(
                 Text(text = user.email, color = MaterialTheme.colors.primary, textAlign = TextAlign.Center)
             }
 
-            Divider(Modifier.height(1.dp), color = MaterialTheme.colors.onSurface.copy(0.1f))
-
             Row(Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
@@ -226,8 +253,6 @@ fun LoggedInView(
                 Text(text = "Password", textAlign = TextAlign.Center)
                 Text(text = "****", color = MaterialTheme.colors.primary, textAlign = TextAlign.Center, style = MaterialTheme.typography.h5)
             }
-
-            Divider(Modifier.height(1.dp), color = MaterialTheme.colors.onSurface.copy(0.1f))
 
             Row(Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -368,12 +393,15 @@ fun LoginHeader(
                 bottom.linkTo(spacer.top)
             }
         )
-        Spacer(Modifier.height(16.dp).constrainAs(spacer){
-            start.linkTo(parent.start)
-            end.linkTo(parent.end)
-            bottom.linkTo(signInBtn.top)
-            top.linkTo(description.bottom)
-        })
+        Spacer(
+            Modifier
+                .height(16.dp)
+                .constrainAs(spacer) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(signInBtn.top)
+                    top.linkTo(description.bottom)
+                })
         Button(
             onClick = onSignIn,
             modifier = Modifier.constrainAs(signInBtn){

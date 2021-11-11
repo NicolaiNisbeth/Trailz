@@ -106,7 +106,7 @@ fun StudyPlansScreen(
                     username = it.userId,
                     title = it.title,
                     semesters = it.semesters,
-                    likes = "123 Likes",
+                    likes = "${it.likes} likes",
                     lastUpdated = it.updated,
                     isExpanded = studyPlans.expandedPlans[it.userId] ?: false,
                     isChecked = true,

@@ -5,6 +5,9 @@ import com.example.base.domain.StudyPlan
 import kotlinx.coroutines.flow.Flow
 
 interface StudyPlanRemoteDataSource {
+
+    suspend fun observeStudyPlan(id: String): Flow<Result<StudyPlan>>
+
     suspend fun getStudyPlan(id: String): Flow<Result<StudyPlan>>
 
     suspend fun getStudyPlans(): Flow<Result<List<StudyPlan>>>
