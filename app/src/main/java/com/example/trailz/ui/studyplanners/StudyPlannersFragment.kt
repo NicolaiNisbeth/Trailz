@@ -69,6 +69,9 @@ class StudyPlannersFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        if (viewModel.studyPlansState.value.data == null){
+            viewModel.observeStudyPlans()
+        }
         binding = FragmentStudyPlannersBinding.inflate(inflater, container, false)
         return binding.also {
             setupShippingList(it.recyclerView)
@@ -182,11 +185,7 @@ class StudyPlanListViewModel @Inject constructor(
     )
     val studyPlansState: MutableStateFlow<DataState<List<StudyPlan>>> = _studyPlansState
 
-    init {
-        observeStudyPlans()
-    }
-
-    private fun observeStudyPlans() {
+    fun observeStudyPlans() {
         scope.launch {
             val studyPlansFlow = studyPlanRepository.getStudyPlans()
             val favoritesFlow = favoriteRepository.getFavoritesBy(sharedPrefs.loggedInId)
@@ -227,7 +226,7 @@ class StudyPlanListViewModel @Inject constructor(
         _studyPlansState.value = _studyPlansState.value.copy(
             data = _studyPlansState.value.data?.run {
                 map {
-                    if (it.userId == studyPlanId) it.copy(isChecked = checked.not())
+                    if (it.userId == studyPlanId) it.copy(isChecked = checked.not(), likes = if (checked) it.likes.minus(1) else it.likes.plus(1) )
                     else it
                 }
             }

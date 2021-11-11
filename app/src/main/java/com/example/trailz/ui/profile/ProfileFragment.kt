@@ -56,13 +56,6 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enterTransition = MaterialFadeThrough().apply {
-            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-        }
-    }
-
     @ExperimentalComposeUiApi
     @ExperimentalMaterialApi
     override fun onCreateView(
@@ -88,7 +81,7 @@ class ProfileFragment : Fragment() {
                     toggleTheme = ::toggleTheme,
                     onChangeLanguage = onLanguageListener::onChangeLanguage,
                     settings = onSettingsListener::onOpenSettingsListener,
-                    navigateUp = { findNavController().navigateUp() },
+                    navigateUp = findNavController()::navigateUp,
                     logout = logoutListener::onLogout
                 )
             }
@@ -106,29 +99,5 @@ class ProfileFragment : Fragment() {
 
     private fun openGooglePlay(){
         Toast.makeText(requireContext(), "Not available yet...", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun signIn(){
-        changeAnimationListener.applyAnimationChanges {
-            exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true).apply {
-                duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-            }
-            reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false).apply {
-                duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-            }
-        }
-
-    }
-
-    private fun signUp(){
-        changeAnimationListener.applyAnimationChanges {
-            exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true).apply {
-                duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-            }
-            reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false).apply {
-                duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-            }
-        }
-
     }
 }

@@ -55,6 +55,9 @@ class MainActivity : BaseActivity(), LogoutListener {
         bottomNavigationView.setupWithNavController(
             findNavController(R.id.nav_host_fragment_activity_main)
         )
+        bottomNavigationView.setOnItemReselectedListener {
+            /* to avoid recreating fragment when fragment is reselected */
+        }
     }
 
     override fun onLogout() {
