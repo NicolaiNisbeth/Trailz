@@ -61,7 +61,7 @@ class FavoritesFragment : Fragment() {
             MdcTheme {
                 Favorites(
                     viewModel = viewModel,
-                    userId = sharedPrefs.loggedInId!!,
+                    userId = sharedPrefs.loggedInId,
                     onStudyPlan = ::openStudyPlan,
                     onProfile = ::openProfile,
                     onFindFavorite = ::openStudyPlanners
@@ -76,11 +76,6 @@ class FavoritesFragment : Fragment() {
     }
 
     private fun openProfile(){
-        changeAnimationListener.applyAnimationChanges {
-            exitTransition = MaterialFadeThrough().apply {
-                duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-            }
-        }
         findNavController().navigate(R.id.action_favorites_to_profile)
     }
 

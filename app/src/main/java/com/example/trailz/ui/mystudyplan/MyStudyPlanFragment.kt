@@ -58,7 +58,7 @@ class MyStudyPlanFragment: Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val binding = FragmentMyStudyPlanBinding.inflate(inflater, container, false)
         setupComposeView(binding.composeViewMyStudyPlan)
         return binding.root
@@ -77,11 +77,6 @@ class MyStudyPlanFragment: Fragment() {
     }
 
     private fun openProfile() {
-        changeAnimationListener.applyAnimationChanges {
-            exitTransition = MaterialFadeThrough().apply {
-                duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-            }
-        }
         findNavController().navigate(R.id.action_my_study_plan_to_profile)
     }
 }
