@@ -61,6 +61,7 @@ class MainActivity : BaseActivity(), LogoutListener {
     }
 
     override fun onLogout() {
+        sharedPrefs.loggedInId = null
         startActivity(Intent(this, LoginActivity::class.java))
         finish()
     }

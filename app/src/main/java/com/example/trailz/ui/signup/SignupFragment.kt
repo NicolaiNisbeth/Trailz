@@ -10,28 +10,18 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.example.trailz.R
 import com.example.trailz.databinding.FragmentSignUpBinding
+import com.example.trailz.inject.SharedPrefs
 import com.example.trailz.ui.login.LoginListener
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.android.material.composethemeadapter.MdcTheme
-import com.google.android.material.transition.platform.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SignupFragment: Fragment() {
 
     private val viewModel: SignupViewModel by viewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true).apply {
-            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-        }
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false).apply {
-            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-        }
-    }
 
     private lateinit var loginListener: LoginListener
 

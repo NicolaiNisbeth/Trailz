@@ -41,7 +41,7 @@ class FavoritesViewModel @Inject constructor(
             _state.value = _state.value.copy(isLoading = true)
 
             // get the users favorites
-            val favoriteFlow = favoriteRepository.getFavoritesBy(prefs.loggedInId)
+            val favoriteFlow = favoriteRepository.getFavoritesBy(prefs.loggedInId!!)
             val favoriteIds = favoriteFlow.mapNotNull {
                 if (it is Result.Success) it.data.followedUserIds else null
             }

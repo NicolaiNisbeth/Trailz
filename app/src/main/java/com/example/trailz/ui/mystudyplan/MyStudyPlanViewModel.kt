@@ -48,8 +48,8 @@ class MyStudyPlanViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val userFlow = userRepository.getUserBy(ownerId)
-            val studyPlanFlow = studyPlanRepository.getStudyPlan(ownerId)
+            val userFlow = userRepository.getUserBy(ownerId!!)
+            val studyPlanFlow = studyPlanRepository.getStudyPlan(ownerId!!)
             studyPlanFlow.combine(userFlow) { studyPlanRes, userRes ->
                 when {
                     studyPlanRes is Result.Success && userRes is Result.Success -> handleSuccess(
@@ -71,7 +71,7 @@ class MyStudyPlanViewModel @Inject constructor(
 
     private fun handleNoStudyPlanner(user: User) {
         val data = MyStudyPlanData(
-            ownerId = ownerId,
+            ownerId = ownerId!!,
             username = user.username,
             title = "Click me!",
             updatedLast = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date()),
@@ -82,7 +82,7 @@ class MyStudyPlanViewModel @Inject constructor(
 
     private fun handleSuccess(studyPlan: StudyPlan) {
         val data = MyStudyPlanData(
-            ownerId = ownerId,
+            ownerId = ownerId!!,
             username = studyPlan.username,
             title = studyPlan.title,
             likes = studyPlan.likes,
@@ -169,7 +169,7 @@ class MyStudyPlanViewModel @Inject constructor(
     fun saveStudyPlan() {
         val unsavedStudyPlan = state.value.data
         val studyPlan = StudyPlan(
-            userId = sharedPrefs.loggedInId,
+            userId = sharedPrefs.loggedInId!!,
             username = unsavedStudyPlan?.username ?: "",
             title = unsavedStudyPlan?.title ?: "",
             likes = unsavedStudyPlan?.likes ?: 0,

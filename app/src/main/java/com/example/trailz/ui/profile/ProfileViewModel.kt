@@ -34,8 +34,8 @@ class ProfileViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val userFlow = userRepository.getUserBy(sharedPrefs.loggedInId)
-            val studyPlanFlow = studyPlan.observeStudyPlan(sharedPrefs.loggedInId)
+            val userFlow = userRepository.getUserBy(sharedPrefs.loggedInId!!)
+            val studyPlanFlow = studyPlan.observeStudyPlan(sharedPrefs.loggedInId!!)
             userFlow.combine(studyPlanFlow){ userRes, studyPlanRes ->
                  when {
                     userRes is Result.Success && studyPlanRes is Result.Success -> {
