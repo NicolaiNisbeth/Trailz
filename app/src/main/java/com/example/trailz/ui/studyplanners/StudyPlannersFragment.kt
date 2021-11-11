@@ -12,16 +12,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.core.view.ViewCompat
-import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.TransitionInflater
 import com.example.trailz.R
 import com.example.trailz.inject.SharedPrefs
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,7 +30,6 @@ import com.example.favorite.FavoriteRepository
 import com.example.studyplan.StudyPlanRepository
 import com.example.trailz.databinding.FragmentStudyPlannersBinding
 import com.example.trailz.databinding.StudyPlanlistBinding
-import com.example.trailz.ui.common.IdEqualsDiffCallback
 import com.example.trailz.ui.common.compose.FavoriteButton
 import com.example.trailz.ui.common.themeColor
 import com.google.android.material.composethemeadapter.MdcTheme
@@ -47,20 +43,16 @@ class StudyPlannersFragment : Fragment() {
     lateinit var sharedPrefs: SharedPrefs
     lateinit var binding: FragmentStudyPlannersBinding
     private val viewModel: StudyPlanListViewModel by viewModels()
-    private val adapter: StudyPlanListAdapter by lazy {
-        StudyPlanListAdapter(
-            onShippingProviderClicked = ::openStudyPlan,
-            onFavoriteClicked = { id, isChecked ->
-                viewModel.updateChecked(id, isChecked)
-            }
-        )
-    }
+    private var adapter: StudyPlanListAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        /*
         exitTransition = TransitionInflater
             .from(requireContext())
             .inflateTransition(R.transition.fade)
+
+         */
     }
 
     @ExperimentalMaterialApi
@@ -69,12 +61,8 @@ class StudyPlannersFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        if (viewModel.studyPlansState.value.data == null){
-            viewModel.observeStudyPlans()
-        }
         binding = FragmentStudyPlannersBinding.inflate(inflater, container, false)
         return binding.also {
-            setupShippingList(it.recyclerView)
             setupToolbar(it.toolbarView)
         }.root
     }
@@ -97,7 +85,7 @@ class StudyPlannersFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        postponeEnterTransition()
+        //postponeEnterTransition()
         lifecycleScope.launch {
             viewModel.studyPlansState.collect {
                 handleData(it.data)
@@ -106,7 +94,6 @@ class StudyPlannersFragment : Fragment() {
                 handleError(it.exception)
             }
         }
-
     }
 
     private fun handleError(exception: String?) {
@@ -126,10 +113,18 @@ class StudyPlannersFragment : Fragment() {
     }
 
     private fun handleData(studyPlans: List<StudyPlan>?) {
-        adapter.submitList(studyPlans) {
-            (view?.parent as? ViewGroup)?.doOnPreDraw {
-                startPostponedEnterTransition()
-            }
+        val items = studyPlans?.toMutableList() ?: mutableListOf()
+        if (binding.recyclerView.adapter == null) {
+            adapter = StudyPlanListAdapter(
+                items = items,
+                onShippingProviderClicked = ::openStudyPlan,
+                onFavoriteClicked = { id, isChecked ->
+                    viewModel.updateChecked(id, isChecked)
+                }
+            )
+            setupShippingList(binding.recyclerView)
+        } else {
+            adapter?.updateItems(items)
         }
     }
 
@@ -146,11 +141,11 @@ class StudyPlannersFragment : Fragment() {
         )
     }
 
-    private fun openStudyPlan(view: StudyPlanlistBinding) {
+    private fun openStudyPlan(view: StudyPlanlistBinding, userId: String) {
         val args = Bundle().apply {
             putInt("image_big", R.drawable.ic_launcher_foreground) // FIXME: cheating
             putString("text_big", view.textView.text.toString())
-            putString("ownerId", view.authorView.text.toString())
+            putString("ownerId", userId)
         }
         val extra = FragmentNavigatorExtras(
             view.imageView to "image_big",
@@ -185,27 +180,31 @@ class StudyPlanListViewModel @Inject constructor(
     )
     val studyPlansState: MutableStateFlow<DataState<List<StudyPlan>>> = _studyPlansState
 
-    fun observeStudyPlans() {
+    init {
+        observeStudyPlans()
+    }
+
+    private fun observeStudyPlans() {
         scope.launch {
             val studyPlansFlow = studyPlanRepository.getStudyPlans()
             val favoritesFlow = favoriteRepository.getFavoritesBy(sharedPrefs.loggedInId)
-            studyPlansFlow.combine(favoritesFlow){ studyPlansRes, favoritesRes ->
-                if (studyPlansRes is Result.Loading || favoritesRes is Result.Loading){
+            studyPlansFlow.combine(favoritesFlow) { studyPlansRes, favoritesRes ->
+                if (studyPlansRes is Result.Loading || favoritesRes is Result.Loading) {
                     _studyPlansState.value = _studyPlansState.value.copy(isLoading = true)
-                } else if (studyPlansRes is Result.Failed){
-                    _studyPlansState.value = _studyPlansState.value.copy(exception = "failed loading study plans")
-                } else if(studyPlansRes is Result.Success && favoritesRes is Result.Success){
+                } else if (studyPlansRes is Result.Failed) {
+                    _studyPlansState.value =
+                        _studyPlansState.value.copy(exception = "failed loading study plans")
+                } else if (studyPlansRes is Result.Success && favoritesRes is Result.Success) {
                     val favorites = favoritesRes.data.followedUserIds.toHashSet()
                     val studyPlans = studyPlansRes.data.map {
                         it.copy(isChecked = favorites.contains(it.userId))
                     }
                     _studyPlansState.value = DataState(studyPlans, isEmpty = studyPlans.isEmpty())
 
-                } else if (studyPlansRes is Result.Success && favoritesRes is Result.Failed){
+                } else if (studyPlansRes is Result.Success && favoritesRes is Result.Failed) {
                     val studyPlans = studyPlansRes.data
                     _studyPlansState.value = DataState(studyPlans, isEmpty = studyPlans.isEmpty())
-                }
-                else {
+                } else {
                     _studyPlansState.value = _studyPlansState.value.copy(isEmpty = true)
                 }
             }.conflate().collect()
@@ -214,56 +213,73 @@ class StudyPlanListViewModel @Inject constructor(
 
     fun updateChecked(studyPlanId: String, isChecked: Boolean) {
         scope.launch {
-            flipLocally(studyPlanId, isChecked)
-            val userId = sharedPrefs.loggedInId
-            val flow = if (isChecked) favoriteRepository.removeFromFavorite(studyPlanId, userId)
-            else favoriteRepository.addToFavorite(studyPlanId, userId)
-            flow.collect()
-        }
-    }
-
-    private fun flipLocally(studyPlanId: String, checked: Boolean) {
-        _studyPlansState.value = _studyPlansState.value.copy(
-            data = _studyPlansState.value.data?.run {
-                map {
-                    if (it.userId == studyPlanId) it.copy(isChecked = checked.not(), likes = if (checked) it.likes.minus(1) else it.likes.plus(1) )
-                    else it
-                }
+            if (isChecked) {
+                favoriteRepository.removeFromFavorite(studyPlanId, sharedPrefs.loggedInId)
             }
-        )
+            else {
+                favoriteRepository.addToFavorite(studyPlanId, sharedPrefs.loggedInId)
+            }.collect()
+        }
     }
 }
 
 
 class StudyPlanListAdapter(
-    private val onShippingProviderClicked: (view: StudyPlanlistBinding) -> Unit,
+    private var items: MutableList<StudyPlan>,
+    private val onShippingProviderClicked: (view: StudyPlanlistBinding, userId: String) -> Unit,
     val onFavoriteClicked: (String, Boolean) -> Unit
-) : ListAdapter<StudyPlan, StudyPlanViewHolder>(IdEqualsDiffCallback { it.userId }) {
+) : RecyclerView.Adapter<StudyPlanViewHolder>() {
+
+    override fun getItemCount() = items.count()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudyPlanViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         return StudyPlanlistBinding
             .inflate(layoutInflater, parent, false)
-            .run { StudyPlanViewHolder(this, onShippingProviderClicked, onFavoriteClicked) }
+            .run {
+                StudyPlanViewHolder(
+                    binding = this,
+                    onShippingProviderClicked = onShippingProviderClicked,
+                    onFavoriteClicked = { id, isFavorited, position ->
+                        onFavoriteClicked(id, isFavorited)
+                        updateFavorite(isFavorited, position)
+                    }
+                )
+            }
     }
 
     override fun onBindViewHolder(holder: StudyPlanViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(items[position], position)
+    }
+
+    private fun updateFavorite(isFavorited: Boolean, position: Int) {
+        val item = items[position]
+        val likes = item.likes
+        items[position] = item.copy(
+            isChecked = isFavorited.not(),
+            likes = if (isFavorited.not()) likes.minus(1) else likes.plus(1)
+        )
+        notifyItemChanged(position)
+    }
+
+    fun updateItems(studyPlans: List<StudyPlan>) {
+        items = studyPlans.toMutableList()
+        notifyDataSetChanged()
     }
 }
 
 class StudyPlanViewHolder(
     val binding: StudyPlanlistBinding,
-    val onShippingProviderClicked: (view: StudyPlanlistBinding) -> Unit,
-    val onFavoriteClicked: (String, Boolean) -> Unit
+    val onShippingProviderClicked: (view: StudyPlanlistBinding, userId: String) -> Unit,
+    val onFavoriteClicked: (String, Boolean, Int) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
 
     private val colorChecked = binding.root.context.themeColor(R.attr.colorPrimary)
     private val colorUnchecked = binding.root.context.themeColor(R.attr.colorOnBackground)
 
-    fun bind(studyPlan: StudyPlan) {
+    fun bind(studyPlan: StudyPlan, position: Int) {
         binding.root.setOnClickListener {
-            onShippingProviderClicked(binding)
+            onShippingProviderClicked(binding, studyPlan.userId)
         }
 
         binding.textView.text = studyPlan.title
@@ -276,7 +292,7 @@ class StudyPlanViewHolder(
                 colorOnChecked = Color(colorChecked),
                 colorUnChecked = Color(colorUnchecked)
             ) {
-                onFavoriteClicked(studyPlan.userId, studyPlan.isChecked)
+                onFavoriteClicked(studyPlan.userId, studyPlan.isChecked, position)
             }
         }
 
