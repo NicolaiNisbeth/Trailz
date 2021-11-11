@@ -189,7 +189,7 @@ class StudyPlanListViewModel @Inject constructor(
     private fun observeStudyPlans() {
         scope.launch {
             val studyPlansFlow = studyPlanRepository.getStudyPlans()
-            val favoritesFlow = favoriteRepository.getFavoritesBy(sharedPrefs.loggedInId!!)
+            val favoritesFlow = favoriteRepository.getFavoritesBy(sharedPrefs.loggedInId)
             studyPlansFlow.combine(favoritesFlow){ studyPlansRes, favoritesRes ->
                 if (studyPlansRes is Result.Loading || favoritesRes is Result.Loading){
                     _studyPlansState.value = _studyPlansState.value.copy(isLoading = true)
@@ -216,7 +216,7 @@ class StudyPlanListViewModel @Inject constructor(
     fun updateChecked(studyPlanId: String, isChecked: Boolean) {
         scope.launch {
             flipLocally(studyPlanId, isChecked)
-            val userId = sharedPrefs.loggedInId!!
+            val userId = sharedPrefs.loggedInId
             val flow = if (isChecked) favoriteRepository.removeFromFavorite(studyPlanId, userId)
             else favoriteRepository.addToFavorite(studyPlanId, userId)
             flow.collect()

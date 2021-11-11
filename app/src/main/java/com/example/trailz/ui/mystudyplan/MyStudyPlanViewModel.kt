@@ -1,7 +1,9 @@
 package com.example.trailz.ui.mystudyplan
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.*
 import com.example.base.Result
 import com.example.base.domain.Course
@@ -32,22 +34,19 @@ class MyStudyPlanViewModel @Inject constructor(
 
     private var collapsedSemesters = mutableStateMapOf<Int, Boolean>()
     var semesterToCourses = mutableStateMapOf<Int, List<Course>>()
+    var header = mutableStateOf("" to "")
     var inEditMode = mutableStateOf(false)
 
     init {
         viewModelScope.launch {
-            val k = savedStateHandle.get<String>("ownerId")
-            val ownerId = if (k != null){
-                k
-            } else {
-                sharedPrefs.loggedInId
-            }
+            val ownerId = savedStateHandle.get<String>("ownerId") ?: sharedPrefs.loggedInId
             repository.getStudyPlan(ownerId).collect {
                 when(it){
                     is Result.Failed -> { inEditMode.value = true; _isLoading.value = false }
                     is Result.Loading -> _isLoading.value = false
                     is Result.Success -> {
                         val studyPlan = it.data
+                        header.value = studyPlan.userId to studyPlan.title
                         studyPlan.semesters.forEach { addSemester(it.order, it.courses) }
                         studyPlan.semesters.forEach { expandSemester(it.order) }
                         _savedStudyPlan.value = studyPlan
@@ -119,11 +118,15 @@ class MyStudyPlanViewModel @Inject constructor(
         }
     }
 
+    fun editStudyPlanTitle(newTitle: String){
+        header.value = header.value.copy(second = newTitle)
+    }
+
     fun saveStudyPlan(){
-        val userId = sharedPrefs.loggedInId ?: "-1"
+        val userId = sharedPrefs.loggedInId
         val studyPlan = StudyPlan(
             userId = userId,
-            title = userId,
+            title = header.value.second,
             semesters = semesterToCourses.map { Semester(it.key, it.value) }
         )
         if (isStudyPlanModified(studyPlan)){

@@ -46,8 +46,10 @@ fun MyStudyPlan(
     val inEditMode by viewModel.inEditMode
     val isLoading by viewModel.isLoading.observeAsState(initial = true)
     val isUpdated by viewModel.isUpdated.observeAsState()
+    val header by viewModel.header
 
     MyStudyPlan(
+        header = header,
         semesterToCourses = semesterToCourses,
         inEditMode = inEditMode,
         isLoading = isLoading,
@@ -66,7 +68,8 @@ fun MyStudyPlan(
         replaceCourseAt = viewModel::replaceCourseAt,
         saveStudyPlan = viewModel::saveStudyPlan,
         onProfile = onProfile,
-        navigateUp = navigateUp
+        navigateUp = navigateUp,
+        editStudyPlanTitle = viewModel::editStudyPlanTitle
     )
 }
 
@@ -74,6 +77,7 @@ fun MyStudyPlan(
 @ExperimentalFoundationApi
 @Composable
 fun MyStudyPlan(
+    header: Pair<String, String>,
     semesterToCourses: Map<Int, List<Course>>,
     inEditMode: Boolean,
     isLoading: Boolean,
@@ -92,6 +96,7 @@ fun MyStudyPlan(
     removeCourse: (Course, Int) -> Unit,
     saveStudyPlan: () -> Unit,
     onProfile: () -> Unit,
+    editStudyPlanTitle: (String) -> Unit,
     navigateUp: () -> Unit
 
 ) {
@@ -139,12 +144,13 @@ fun MyStudyPlan(
                     )
                 }
             }
-            Header(
-                title = "Roadmap for Winners",
-                owner = "Nicolai Wolter Hjort Nisbeth",
-                updatedLast = "Updated: $date"
-            )
             if (inEditMode) {
+                HeaderEdit(
+                    title = header.second,
+                    owner = header.first,
+                    updatedLast = "Updated: $date",
+                    onTitleChange = editStudyPlanTitle
+                )
                 SemesterListEdit(
                     semesterToCourses = semesterToCourses,
                     isSemesterCollapsed = isSemesterCollapsed,
@@ -155,6 +161,11 @@ fun MyStudyPlan(
                     addCourse = addCourse
                 )
             } else {
+                Header(
+                    title = header.second,
+                    owner = header.first,
+                    updatedLast = "Updated: $date"
+                )
                 SemesterList(
                     semesterToCourses = semesterToCourses,
                     isSemesterCollapsed = isSemesterCollapsed,
@@ -288,6 +299,55 @@ fun Header(title: String, owner: String, updatedLast: String) {
     Text(title, style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold))
     Text(owner, style = MaterialTheme.typography.caption)
     Text(updatedLast, style = MaterialTheme.typography.overline)
+}
+
+@ExperimentalComposeUiApi
+@Composable
+fun HeaderEdit(
+    title: String,
+    owner: String,
+    updatedLast: String,
+    onTitleChange: (String) -> Unit
+) {
+    var openDialog by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val submitNameChange: (String) -> Unit = {
+        focusManager.clearFocus()
+        onTitleChange(it)
+        openDialog = false
+    }
+
+    Text(
+        modifier = Modifier.clickable { openDialog = true },
+        text = title,
+        style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold)
+    )
+
+    Text(owner, style = MaterialTheme.typography.caption)
+    Text(updatedLast, style = MaterialTheme.typography.overline)
+
+    if (openDialog) {
+        InputFieldDialog(
+            title = "Study Plan Title",
+            confirmTitle = "Confirm",
+            dismissTitle = "Dismiss",
+            onConfirm = submitNameChange,
+            onDismiss = { openDialog = false }
+        ) { value, onValueChange ->
+            InputFieldFocus { focusModifier ->
+                TextField(
+                    modifier = focusModifier,
+                    value = value,
+                    onValueChange = onValueChange,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Done,
+                        keyboardType = KeyboardType.Text
+                    ),
+                    keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
+                )
+            }
+        }
+    }
 }
 
 @Composable

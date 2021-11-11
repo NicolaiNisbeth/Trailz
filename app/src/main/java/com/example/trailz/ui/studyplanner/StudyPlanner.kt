@@ -30,7 +30,9 @@ fun StudyPlanner(
     navigateUp: () -> Unit
 ) {
     val semesterToCourses = viewModel.semesterToCourses
+    val header by viewModel.header
     StudyPlanner(
+        header = header,
         semesterToCourses = semesterToCourses,
         isAnyCollapsed = viewModel.isAnyCollapsed(),
         toggleAllCollapsed = viewModel::toggleAllSemesters,
@@ -45,6 +47,7 @@ fun StudyPlanner(
 @ExperimentalFoundationApi
 @Composable
 fun StudyPlanner(
+    header: Pair<String, String>,
     semesterToCourses: Map<Int, List<Course>>,
     isAnyCollapsed: Boolean,
     toggleAllCollapsed: (Boolean) -> Unit,
@@ -73,8 +76,8 @@ fun StudyPlanner(
                 .fillMaxSize()
         ) {
             Header(
-                title = "Roadmap for Winners",
-                owner = "Nicolai Wolter Hjort Nisbeth",
+                title = header.second,
+                owner = header.first,
                 updatedLast = "Updated: $date"
             )
             SemesterList(
