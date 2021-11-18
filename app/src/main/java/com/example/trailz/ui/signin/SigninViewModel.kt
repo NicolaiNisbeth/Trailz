@@ -7,12 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.base.Result
 import com.example.trailz.inject.SharedPrefs
 import com.example.trailz.ui.common.compose.invalidInput
-import com.example.trailz.ui.signup.BecomeUserUseCase
-import com.example.trailz.ui.signup.User
 import com.example.user.UserRepository
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -24,10 +19,10 @@ class SigninViewModel @Inject constructor(
     private val sharedPrefs: SharedPrefs
 ): ViewModel() {
 
-    private val _email = MutableLiveData<String>()
+    private val _email = MutableLiveData<String>("s175565@win.dtu.dk")
     val email: LiveData<String> = _email
 
-    private val _password = MutableLiveData<String>()
+    private val _password = MutableLiveData<String>("nicolai")
     val password: LiveData<String> = _password
 
     private val _loading = MutableLiveData<Boolean>()
@@ -58,7 +53,10 @@ class SigninViewModel @Inject constructor(
         viewModelScope.launch {
             repository.signIn(email!!, password!!).collect {
                 when (it){
-                    is Result.Failed -> _error.value = true
+                    is Result.Failed -> {
+                        _error.value = true
+                        _loading.value = false
+                    }
                     is Result.Loading -> _loading.value = true
                     is Result.Success -> {
                         _signinSuccess.value = true

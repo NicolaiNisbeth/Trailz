@@ -11,18 +11,13 @@
 
         <action
             android:id="@+id/action_signin_to_signup"
-            app:destination="@id/signupFragment"
-
-            />
+            app:destination="@id/signupFragment" />
 
     </fragment>
 
     <fragment
         android:id="@+id/signupFragment"
-        android:name="com.example.trailz.ui.signup.SignupFragment"
-        >
-    </fragment>
-
+        android:name="com.example.trailz.ui.signup.SignupFragment" />
 
 
 </navigation>

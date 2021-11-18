@@ -17,17 +17,10 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class OnboardingActivity: BaseActivity() {
-    @Inject
-    lateinit var prefs: SharedPrefs
 
     @ExperimentalPagerApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (prefs.isDarkTheme) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
         setContent {
             Onboarding(finishOnboarding = ::navigateUp)
         }

@@ -13,9 +13,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class App : BaseActivity() {
 
-    @Inject
-    lateinit var prefs: SharedPrefs
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val completedOnboarding = PreferenceManager.getDefaultSharedPreferences(this)

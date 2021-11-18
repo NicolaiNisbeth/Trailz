@@ -10,47 +10,29 @@ import kotlinx.coroutines.flow.*
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.util.*
-
 class StudyPlanRepositoryImpl(
     private val localDataSource: StudyPlanLocalDataSource,
     private val remoteDataSource: StudyPlanRemoteDataSource
 ): StudyPlanRepository {
 
-    override suspend fun observeStudyPlan(id: String): Flow<Result<StudyPlan>> = flow {
-        remoteDataSource.observeStudyPlan(id).collect(::emit)
-    }.flowOn(Dispatchers.IO)
-
-    override suspend fun getStudyPlan(id: String): Flow<Result<StudyPlan>> = flow {
-        emit(Result.loading())
-        remoteDataSource.getStudyPlan(id).collect(::emit)
-    }.flowOn(Dispatchers.IO)
-
-    @FlowPreview
-    override suspend fun getStudyPlans() = remoteDataSource.getStudyPlans()
-
-    @FlowPreview
-    override suspend fun observeStudyPlans() = flow {
-        emit(Result.loading())
-        remoteDataSource.observeStudyPlans().collect(::emit)
-    }
-
-    fun refreshBreedsIfStale(forced: Boolean = false): Flow<Result<List<StudyPlan>>> = flow {
-        emit(Result.loading())
-        val networkBreedDataState: Flow<Result<List<StudyPlan>>>
-        if (forced) {
-            networkBreedDataState = remoteDataSource.observeStudyPlans()
-            networkBreedDataState.collect {
-                if (it is Result.Success){
-                    it.data.forEach { localDataSource.createStudyPlan(it) }
-                }
+    override suspend fun observeStudyPlan(id: String) = remoteDataSource.observeStudyPlan(id)
+        .onStart {
+            val localeStudyPlan = localDataSource.getStudyPlan(id)
+            if (localeStudyPlan != null){
+                emit(Result.success(localeStudyPlan))
             }
-        }
-    }
+        }.flowOn(Dispatchers.IO)
 
-    private suspend fun getStudyPlansFromCache(): Flow<Result<List<StudyPlan>>> = flow {
-        emit(Result.success(localDataSource.getStudyPlans().sortedBy { it.title }))
-    }.flowOn(Dispatchers.IO)
+    override suspend fun getStudyPlan(id: String) = remoteDataSource.getStudyPlan(id)
+        .onStart {
+            val localeStudyPlan = localDataSource.getStudyPlan(id)
+            if (localeStudyPlan != null)
+                emit(Result.Success(localeStudyPlan))
+        }.flowOn(Dispatchers.IO)
 
+    override suspend fun getStudyPlans() = remoteDataSource.getStudyPlans()
+        .onStart { refreshBreedsIfStale(true).collect(::emit) }
+        .flowOn(Dispatchers.IO)
 
     override suspend fun deleteStudyPlan(id: String) = flow<Result<Unit>> {
         emit(Result.loading())
@@ -58,11 +40,10 @@ class StudyPlanRepositoryImpl(
     }.flowOn(Dispatchers.IO)
 
     override suspend fun createStudyPlan(studyPlan: StudyPlan) = flow<Result<Unit>> {
+        emit(Result.loading())
         val simpleDateFormat= SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
         val currentDT: String = simpleDateFormat.format(Date())
-
         val studyPlanDate = studyPlan.copy(updated = currentDT)
-        emit(Result.loading())
         remoteDataSource.createStudyPlan(studyPlanDate).collect(::emit)
     }.flowOn(Dispatchers.IO)
 
@@ -70,4 +51,30 @@ class StudyPlanRepositoryImpl(
         emit(Result.loading())
         remoteDataSource.updateStudyPlan(id, studyPlan).collect(::emit)
     }.flowOn(Dispatchers.IO)
+
+    override suspend fun updateStudyPlanFavorite(id: String, isFavorite: Boolean)  = flow<Unit> {
+        localDataSource.updateStudyPlanFavorite(id, isFavorite)
+    }.flowOn(Dispatchers.Default)
+
+    fun refreshBreedsIfStale(forced: Boolean = false): Flow<Result<List<StudyPlan>>> = flow {
+        emit(Result.loading())
+
+        val localeStudyPlans = localDataSource.getStudyPlans()
+        emit(Result.success(localeStudyPlans))
+
+        if (forced) {
+            val networkBreedDataState = remoteDataSource.getStudyPlans()
+            networkBreedDataState.collect {
+                when (it){
+                    is Result.Failed -> emit(Result.failed<List<StudyPlan>>("Opps something went wrong!"))
+                    is Result.Loading -> {}
+                    is Result.Success -> it.data.forEach { studyPlan ->
+                        localDataSource.createStudyPlan(studyPlan)
+                    }
+                }
+            }
+        }
+        val newLocaleStudyPlans = localDataSource.getStudyPlans()
+        emit(Result.success(newLocaleStudyPlans))
+    }
 }

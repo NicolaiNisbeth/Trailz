@@ -11,24 +11,20 @@ import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.HorizontalAlignmentLine
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.example.trailz.R
 import com.example.trailz.language.LanguageConfig
+import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.compose.RatingBar
 import com.example.trailz.ui.favorites.LoadingScreen
-import com.example.trailz.ui.signup.User
-import com.example.trailz.ui.studyplanners.DataState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

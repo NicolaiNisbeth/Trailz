@@ -8,7 +8,7 @@ import com.example.base.Result
 import com.example.base.domain.User
 import com.example.studyplan.StudyPlanRepository
 import com.example.trailz.inject.SharedPrefs
-import com.example.trailz.ui.studyplanners.DataState
+import com.example.trailz.ui.common.DataState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

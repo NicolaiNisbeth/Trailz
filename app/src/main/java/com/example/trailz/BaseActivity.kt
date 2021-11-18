@@ -5,8 +5,10 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.example.trailz.inject.SharedPrefs
@@ -15,21 +17,27 @@ import com.google.android.material.transition.platform.MaterialSharedAxis
 import java.util.*
 import javax.inject.Inject
 
-open class BaseActivity: AppCompatActivity(), ChangeLanguageListener, OpenSettingsListener, ChangeAnimationListener {
+open class BaseActivity: AppCompatActivity(), ChangeLanguageListener, OpenSettingsListener {
 
     @Inject
     lateinit var sharedPrefs: SharedPrefs
 
-    val currentNavigationFragment: Fragment?
-        get() = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main)
-            ?.childFragmentManager
-            ?.fragments
-            ?.first()
+    @Inject
+    lateinit var prefs: SharedPrefs
 
     override fun attachBaseContext(context: Context) {
         val country = PreferenceManager.getDefaultSharedPreferences(context)
             .getString("in_memory_language_preference", "en") ?: "en"
         super.attachBaseContext(setLocale(context, Locale(country)))
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (prefs.isDarkTheme) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
     }
 
     private fun setLocale(context: Context, locale: Locale): Context {
@@ -68,10 +76,6 @@ open class BaseActivity: AppCompatActivity(), ChangeLanguageListener, OpenSettin
         intent.data = Uri.fromParts("package", packageName, null)
         startActivity(intent)
     }
-
-    override fun applyAnimationChanges(animations: () -> Unit) {
-        currentNavigationFragment?.apply { animations() }
-    }
 }
 
 fun interface ChangeLanguageListener {
@@ -80,8 +84,4 @@ fun interface ChangeLanguageListener {
 
 fun interface OpenSettingsListener {
     fun onOpenSettingsListener()
-}
-
-fun interface ChangeAnimationListener {
-    fun applyAnimationChanges(animations: () -> Unit)
 }

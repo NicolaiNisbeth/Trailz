@@ -1,38 +1,31 @@
-package com.example.trailz.ui.studyplanner
+package com.example.trailz.ui.studyplan
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
-import com.example.trailz.ui.common.Event
-import com.example.trailz.ui.mystudyplan.*
-import com.example.trailz.ui.studyplanners.DataState
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
+import com.example.trailz.ui.common.DataState
+import com.example.trailz.ui.studyplan.common.Header
+import com.example.trailz.ui.studyplan.common.SemesterList
 
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 @Composable
-fun StudyPlanner(
+fun StudyPlan(
     viewModel: MyStudyPlanViewModel,
     onProfile: () -> Unit,
     navigateUp: () -> Unit
 ) {
     val semesterToCourses = viewModel.semesterToCourses
     val state by viewModel.state.collectAsState(DataState(isLoading = true))
-    StudyPlanner(
+    StudyPlan(
         state = state,
         semesterToCourses = semesterToCourses,
         isAnyCollapsed = viewModel.isAnyCollapsed(),
@@ -47,7 +40,7 @@ fun StudyPlanner(
 
 @ExperimentalFoundationApi
 @Composable
-fun StudyPlanner(
+private fun StudyPlan(
     state: DataState<MyStudyPlanData>,
     semesterToCourses: Map<Int, List<Course>>,
     isAnyCollapsed: Boolean,
@@ -93,7 +86,7 @@ fun StudyPlanner(
 }
 
 @Composable
-fun Toolbar(
+private fun Toolbar(
     isAnyCollapsed: Boolean,
     navigateUp: () -> Unit,
     onProfile: () -> Unit,

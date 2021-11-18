@@ -28,7 +28,7 @@ fun FavoriteButton(
     IconToggleButton(
         modifier = modifier,
         checked = isChecked,
-        onCheckedChange = { onClick(isChecked) }
+        onCheckedChange = onClick
     ) {
         val transition = updateTransition(isChecked, label = "Checked indicator")
 

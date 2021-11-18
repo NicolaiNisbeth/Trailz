@@ -1,9 +1,7 @@
 package com.example.studyplan.local.dao
 
 import androidx.room.*
-import com.example.base.domain.StudyPlan
 import com.example.studyplan.local.entity.StudyPlanEntity
-import com.example.studyplan.local.entity.StudyPlanWithSemestersAndCourses
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -11,13 +9,11 @@ abstract class StudyPlanDao {
 
     companion object { const val FAILED = -1L }
 
-    @Transaction
     @Query("SELECT * FROM studyplanentity")
-    abstract fun observeStudyPlans(): Flow<List<StudyPlanWithSemestersAndCourses>>
+    abstract fun observeStudyPlans(): Flow<List<StudyPlanEntity>>
 
-    @Transaction
     @Query("SELECT * FROM studyplanentity")
-    abstract fun studyPlans(): List<StudyPlanWithSemestersAndCourses>
+    abstract fun studyPlans(): List<StudyPlanEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertElseUpdateStudyPlan(studyPlan: StudyPlanEntity): Long
@@ -28,9 +24,11 @@ abstract class StudyPlanDao {
     @Query("DELETE FROM studyplanentity WHERE studyPlanId = :id")
     abstract suspend fun delete(id: String)
 
-    @Transaction
     @Query("SELECT * FROM studyplanentity WHERE studyPlanId = :userId")
-    abstract fun studyPlan(userId: String): StudyPlanWithSemestersAndCourses?
+    abstract fun studyPlan(userId: String): List<StudyPlanEntity?>
+
+    @Query("UPDATE studyplanentity SET isFavorite = :isFavorite where studyPlanId = :studyPlanId")
+    abstract fun updateStudyPlanFavorite(studyPlanId: String, isFavorite: Boolean)
 
     @Query("DELETE FROM studyplanentity")
     abstract suspend fun deleteAll()

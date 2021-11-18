@@ -13,10 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Semester
+import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.compose.ExpandableCard
 import com.example.trailz.ui.common.compose.FavoriteButton
-import com.example.trailz.ui.studyplanners.DataState
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
@@ -47,7 +46,7 @@ fun Favorites(
 @ExperimentalMaterialApi
 @Composable
 fun Favorites(
-    state: DataState<FavoritesData>,
+    state: DataState<StudyPlansUiModel>,
     onUpdateFavorite: (String, Boolean) -> Unit,
     onStudyPlan: (String) -> Unit,
     onProfile: () -> Unit,
@@ -90,7 +89,7 @@ fun Favorites(
 @ExperimentalMaterialApi
 @Composable
 fun StudyPlansScreen(
-    studyPlans: FavoritesData,
+    studyPlans: StudyPlansUiModel,
     onUpdateFavorite: (String, Boolean) -> Unit,
     onStudyPlan: (String) -> Unit,
     onExpandClicked: (String) -> Unit
@@ -109,7 +108,7 @@ fun StudyPlansScreen(
                     likes = "${it.likes} likes",
                     lastUpdated = it.updated,
                     isExpanded = studyPlans.expandedPlans[it.userId] ?: false,
-                    isChecked = true,
+                    isChecked = it.isFavorite,
                     onExpandClicked = { onExpandClicked(it.userId) },
                     onUpdateFavorite = onUpdateFavorite,
                     onStudyPlan = onStudyPlan

@@ -7,14 +7,14 @@ import com.example.base.domain.StudyPlan
 import com.example.favorite.FavoriteRepository
 import com.example.studyplan.StudyPlanRepository
 import com.example.trailz.inject.SharedPrefs
+import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.mapAsync
-import com.example.trailz.ui.studyplanners.DataState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class FavoritesData(
+data class StudyPlansUiModel(
     val studyPlans: List<StudyPlan>,
     val expandedPlans: Map<String, Boolean> = studyPlans.associate { it.userId to false }
 )
@@ -27,10 +27,10 @@ class FavoritesViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val scope = viewModelScope
-    private val _state: MutableStateFlow<DataState<FavoritesData>> = MutableStateFlow(
+    private val _state: MutableStateFlow<DataState<StudyPlansUiModel>> = MutableStateFlow(
         DataState(isLoading = true)
     )
-    val state: MutableStateFlow<DataState<FavoritesData>> = _state
+    val state: MutableStateFlow<DataState<StudyPlansUiModel>> = _state
 
     init {
         observeFavorites()
@@ -52,22 +52,23 @@ class FavoritesViewModel @Inject constructor(
                 // run N remote calls concurrently and await all
                  val studyPlanFlows = it.mapAsync {
                     studyPlanRepository.getStudyPlan(it).mapNotNull {
-                        if (it is Result.Success) it.data else null
+                        if (it is Result.Success)
+                            it.data.copy(isFavorite = true)
+                        else
+                            null
                     }
                 }
                 studyPlanFlows.forEach { it.toCollection(studyPlans) }
             }
-            _state.value = DataState(FavoritesData(studyPlans), isEmpty = studyPlans.isEmpty())
+            _state.value = DataState(StudyPlansUiModel(studyPlans.filter { it.isFavorite }), isEmpty = studyPlans.isEmpty())
         }
     }
 
     fun updateFavorite(favoriteId: String, userId: String, isFavorite: Boolean){
         flipLocally(favoriteId)
-        val result = if (isFavorite) favoriteRepository.removeFromFavorite(favoriteId, userId)
-        else favoriteRepository.addToFavorite(favoriteId, userId)
-
         scope.launch {
-            result.collect {
+            studyPlanRepository.updateStudyPlanFavorite(userId, isFavorite).collect()
+            favoriteRepository.removeFromFavorite(favoriteId, userId).collect {
                 when (it){
                     is Result.Failed -> _state.value = _state.value.copy(exception = it.message)
                     is Result.Loading -> _state.value = _state.value.copy(isLoading = true)

@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/signUpContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:transitionGroup="true">
+        android:layout_height="match_parent">
 
         <androidx.compose.ui.platform.ComposeView
-            android:id="@+id/composeViewSignUp"
+            android:id="@+id/composeViewStudyPlans"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 </layout>

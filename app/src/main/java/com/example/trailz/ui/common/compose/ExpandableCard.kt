@@ -11,10 +11,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-val EXPAND_ANIMATION_DURATION = 200
-val FADE_IN_ANIMATION_DURATION = 200
-val FADE_OUT_ANIMATION_DURATION = 200
-val COLLAPSE_ANIMATION_DURATION = 200
+private val EXPAND_ANIMATION_DURATION = 200
+private val FADE_IN_ANIMATION_DURATION = 200
+private val FADE_OUT_ANIMATION_DURATION = 200
+private val COLLAPSE_ANIMATION_DURATION = 200
 
 @ExperimentalAnimationApi
 @SuppressLint("UnusedTransitionTargetStateParameter")
@@ -36,7 +36,7 @@ fun ExpandableCard(
 
     val cardElevation by transition.animateDp(
         transitionSpec = { tween(durationMillis = EXPAND_ANIMATION_DURATION) },
-        targetValueByState = { if (isExpanded) 24.dp else 4.dp },
+        targetValueByState = { if (isExpanded) 8.dp else 4.dp },
         label = "cardElevation"
     )
 

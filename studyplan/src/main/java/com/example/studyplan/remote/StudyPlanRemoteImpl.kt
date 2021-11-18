@@ -25,6 +25,8 @@ class StudyPlanRemoteImpl: StudyPlanRemoteDataSource {
                 val studyPlan = it.toObject(StudyPlan::class.java)
                 if (studyPlan != null)
                     trySend(Result.success(studyPlan))
+                else
+                    trySend(Result.failed("No studyPlan with id=$id was found!"))
             }
             error?.let {
                 trySend(Result.failed(it.message.toString()))

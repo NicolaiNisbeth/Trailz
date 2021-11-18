@@ -11,14 +11,10 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.example.trailz.ChangeAnimationListener
 import com.example.trailz.R
 import com.example.trailz.databinding.FragmentFavoritesBinding
 import com.example.trailz.inject.SharedPrefs
-import com.example.trailz.ui.studyplanners.StudyPlannersFragmentDirections
 import com.google.android.material.composethemeadapter.MdcTheme
-import com.google.android.material.transition.platform.MaterialFadeThrough
-import com.google.android.material.transition.platform.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.IllegalStateException
 import javax.inject.Inject
@@ -30,17 +26,6 @@ class FavoritesFragment : Fragment() {
 
     @Inject
     lateinit var sharedPrefs: SharedPrefs
-
-    private lateinit var changeAnimationListener: ChangeAnimationListener
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        try {
-            changeAnimationListener = context as ChangeAnimationListener
-        } catch (e: Error) {
-            throw IllegalStateException("Activity must implement $changeAnimationListener")
-        }
-    }
 
     @ExperimentalAnimationApi
     @ExperimentalMaterialApi

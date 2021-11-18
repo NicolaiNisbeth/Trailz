@@ -7,5 +7,5 @@ data class StudyPlan(
     val updated: String = "",
     val likes: Long = 0,
     val semesters: List<Semester> = emptyList(),
-    val isChecked: Boolean = false
+    val isFavorite: Boolean = false
 )

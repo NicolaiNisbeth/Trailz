@@ -204,37 +204,6 @@ internal fun SignUp(
                 )
             }
 
-            /*
-            item {
-                HorizontalPager(
-                    modifier = Modifier.fillMaxWidth(),
-                    state = pagerState.apply {
-                        /*
-                        // listen on page changes
-                        LaunchedEffect(this) {
-                            snapshotFlow { currentPage }.collect { index ->
-                                if (studyPaths.isNotEmpty()){
-                                    onStudyPathChange(studyPaths[index])
-                                }
-                            }
-                        }
-
-                         */
-                    },
-                ) { page ->
-                    PagerItem(
-                        modifier = Modifier
-                            .height(150.dp)
-                            .fillMaxWidth(0.5f),
-                        item = studyPaths[page],
-                        pageOffset = calculateCurrentOffsetForPage(page).absoluteValue
-
-                    )
-                }
-            }
-
-             */
-
             item {
                 Button(
                     modifier = Modifier
@@ -247,54 +216,6 @@ internal fun SignUp(
                     Text(text = if (isLoading) "Loading..." else "Sign up")
                 }
             }
-        }
-    }
-}
-
-@SuppressLint("RestrictedApi")
-@Composable
-internal fun PagerItem(
-    modifier: Modifier,
-    item: String,
-    pageOffset: Float
-) {
-    Card(
-        elevation = 0.dp,
-        modifier = modifier
-            .graphicsLayer {
-                AnimationUtils
-                    .lerp(
-                        0.85f,
-                        1f,
-                        1f - pageOffset.coerceIn(0f, 1f)
-                    ).also { scale ->
-                        scaleX = scale
-                        scaleY = scale
-                    }
-
-                alpha = AnimationUtils.lerp(
-                    0.5f,
-                    1f,
-                    1f - pageOffset.coerceIn(0f, 1f)
-                )
-            }
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Icon(
-                modifier = Modifier.fillMaxSize(0.8f),
-                painter = rememberVectorPainter(image = Icons.Default.FlutterDash),
-                contentDescription = "study path image"
-            )
-            Text(
-                modifier = Modifier,
-                text = item,
-                style = MaterialTheme.typography.subtitle1.copy(fontWeight = FontWeight.Bold),
-                textAlign = TextAlign.Center,
-            )
         }
     }
 }

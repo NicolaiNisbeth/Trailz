@@ -2,47 +2,33 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/favorites_navigation"
-    app:startDestination="@id/favoritesFragment">
+    android:id="@+id/study_plans_navigation"
+    app:startDestination="@id/studyPlansFragment">
 
     <include app:graph="@navigation/study_plan_navigation" />
     <include app:graph="@navigation/profile_navigation" />
 
     <fragment
-        android:id="@+id/favoritesFragment"
-        android:name="com.example.trailz.ui.favorites.FavoritesFragment"
-        tools:layout="@layout/fragment_favorites">
-
+        android:id="@+id/studyPlansFragment"
+        android:name="com.example.trailz.ui.studyplans.StudyPlansFragment"
+        tools:layout="@layout/fragment_study_plans">
         <action
-            android:id="@+id/action_favorites_to_study_planner"
+            android:id="@+id/action_study_plans_to_study_plan"
             app:destination="@id/study_plan_navigation"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out">
-
             <argument
                 android:name="ownerId"
                 app:argType="string" />
-
         </action>
-
         <action
-            android:id="@+id/action_favorites_to_profile"
+            android:id="@+id/action_study_plans_to_profile"
             app:destination="@id/profile_navigation"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
-
-        <action
-            android:id="@+id/action_favorites_to_study_planners"
-            app:destination="@id/study_plans_navigation"
-            app:enterAnim="@anim/fade_in"
-            app:exitAnim="@anim/fade_out"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/fade_out" />
-
     </fragment>
-
 </navigation>

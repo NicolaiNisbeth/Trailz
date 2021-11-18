@@ -41,7 +41,6 @@ class ProfileFragment : Fragment() {
 
     private lateinit var onLanguageListener: ChangeLanguageListener
     private lateinit var onSettingsListener: OpenSettingsListener
-    private lateinit var changeAnimationListener: ChangeAnimationListener
     private lateinit var logoutListener: LogoutListener
 
     override fun onAttach(context: Context) {
@@ -49,7 +48,6 @@ class ProfileFragment : Fragment() {
         try {
             onLanguageListener = context as ChangeLanguageListener
             onSettingsListener = context as OpenSettingsListener
-            changeAnimationListener = context as ChangeAnimationListener
             logoutListener = context as LogoutListener
         } catch (e: Error) {
             throw IllegalStateException("Activity must implement $onLanguageListener")

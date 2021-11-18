@@ -1,4 +1,4 @@
-package com.example.trailz.ui.mystudyplan
+package com.example.trailz.ui.studyplan
 
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.*
@@ -9,8 +9,8 @@ import com.example.base.domain.StudyPlan
 import com.example.base.domain.User
 import com.example.studyplan.StudyPlanRepository
 import com.example.trailz.inject.SharedPrefs
+import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.Event
-import com.example.trailz.ui.studyplanners.DataState
 import com.example.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -49,7 +49,7 @@ class MyStudyPlanViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val userFlow = userRepository.getUserBy(ownerId!!)
-            val studyPlanFlow = studyPlanRepository.getStudyPlan(ownerId!!)
+            val studyPlanFlow = studyPlanRepository.getStudyPlan(ownerId)
             studyPlanFlow.combine(userFlow) { studyPlanRes, userRes ->
                 when {
                     studyPlanRes is Result.Success && userRes is Result.Success -> handleSuccess(

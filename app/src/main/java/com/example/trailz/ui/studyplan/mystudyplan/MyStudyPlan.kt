@@ -1,4 +1,4 @@
-package com.example.trailz.ui.mystudyplan
+package com.example.trailz.ui.studyplan.mystudyplan
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -11,7 +11,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -25,14 +25,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
-import com.example.trailz.ui.common.Event
+import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.compose.InputFieldDialog
 import com.example.trailz.ui.common.compose.InputFieldFocus
 import com.example.trailz.ui.common.compose.TextButtonV2
-import com.example.trailz.ui.studyplanners.DataState
+import com.example.trailz.ui.studyplan.MyStudyPlanData
+import com.example.trailz.ui.studyplan.MyStudyPlanViewModel
+import com.example.trailz.ui.studyplan.common.Header
+import com.example.trailz.ui.studyplan.common.SemesterList
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
 
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
@@ -49,6 +50,8 @@ fun MyStudyPlan(
     MyStudyPlan(
         state = state,
         semesterToCourses = semesterToCourses,
+        onProfile = onProfile,
+        navigateUp = navigateUp,
         isAnyCollapsed = viewModel::isAnyCollapsed,
         toggleAllCollapsed = viewModel::toggleAllSemesters,
         changeEditMode = viewModel::changeEditMode,
@@ -62,8 +65,6 @@ fun MyStudyPlan(
         removeCourse = viewModel::removeCourse,
         replaceCourseAt = viewModel::replaceCourseAt,
         saveStudyPlan = viewModel::saveStudyPlan,
-        onProfile = onProfile,
-        navigateUp = navigateUp,
         editStudyPlanTitle = viewModel::editStudyPlanTitle
     )
 }
@@ -71,7 +72,7 @@ fun MyStudyPlan(
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 @Composable
-fun MyStudyPlan(
+private fun MyStudyPlan(
     state: DataState<MyStudyPlanData>,
     semesterToCourses: Map<Int, List<Course>>,
     isAnyCollapsed: () -> Boolean,
@@ -93,6 +94,14 @@ fun MyStudyPlan(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
+
+    state.data?.isUpdated?.contentIfNotHandled()?.let {
+        coroutineScope.launch {
+            scaffoldState.snackbarHostState.showSnackbar(
+                message = if (it) "Saved" else "Failed to save!"
+            )
+        }
+    }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -130,13 +139,6 @@ fun MyStudyPlan(
                 .fillMaxSize()
         ) {
             state.data?.let {
-                it.isUpdated?.contentIfNotHandled()?.let {
-                    coroutineScope.launch {
-                        scaffoldState.snackbarHostState.showSnackbar(
-                            message = if (it) "Saved" else "Failed to save!"
-                        )
-                    }
-                }
                 if (it.inEditMode) {
                     HeaderEdit(
                         title = it.title,
@@ -174,7 +176,7 @@ fun MyStudyPlan(
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 @Composable
-fun SemesterListEdit(
+private fun SemesterListEdit(
     semesterToCourses: Map<Int, List<Course>>,
     isSemesterCollapsed: (Int) -> Boolean,
     removeCourse: (Course, Int) -> Unit,
@@ -184,8 +186,8 @@ fun SemesterListEdit(
     addCourse: (Course, Int) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var openDialog by remember { mutableStateOf(false) }
-    var newTitleSemester by remember { mutableStateOf(-1) }
+    var openDialog by rememberSaveable { mutableStateOf(false) }
+    var newTitleSemester by rememberSaveable { mutableStateOf(-1) }
 
     val submitNameChange: (String) -> Unit = {
         focusManager.clearFocus()
@@ -256,45 +258,6 @@ fun SemesterListEdit(
     }
 }
 
-@ExperimentalFoundationApi
-@Composable
-fun SemesterList(
-    semesterToCourses: Map<Int, List<Course>>,
-    isSemesterCollapsed: (Int) -> Boolean,
-    expandSemester: (Int) -> Unit,
-    collapseSemester: (Int) -> Unit
-) {
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        semesterToCourses.toSortedMap().forEach { (semester, courses) ->
-            val isCollapsed = isSemesterCollapsed(semester)
-            stickyHeader {
-                SemesterItem(
-                    title = "$semester",
-                    isCollapsed = isCollapsed,
-                    color = MaterialTheme.colors.primary,
-                    isCollapsedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowDown),
-                    isExpandedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowUp),
-                    onClick = {
-                        if (isCollapsed) expandSemester(semester) else collapseSemester(semester)
-                    }
-                )
-            }
-            if (!isCollapsed) {
-                courses.forEach {
-                    item { CourseItem(title = it.title) }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun Header(title: String, owner: String, updatedLast: String) {
-    Text(title, style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold))
-    Text(owner, style = MaterialTheme.typography.caption)
-    Text(updatedLast, style = MaterialTheme.typography.overline)
-}
-
 @ExperimentalComposeUiApi
 @Composable
 fun HeaderEdit(
@@ -303,7 +266,7 @@ fun HeaderEdit(
     updatedLast: String,
     onTitleChange: (String) -> Unit
 ) {
-    var openDialog by remember { mutableStateOf(false) }
+    var openDialog by rememberSaveable { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
     val submitNameChange: (String) -> Unit = {
         focusManager.clearFocus()
@@ -383,46 +346,6 @@ fun EditActionBar(
     }
 }
 
-@Composable
-fun SemesterItem(
-    title: String,
-    isCollapsed: Boolean = true,
-    isCollapsedIcon: Painter,
-    isExpandedIcon: Painter,
-    color: Color,
-    onClick: (String) -> Unit
-) {
-    Box(
-        Modifier
-            .background(MaterialTheme.colors.background)
-            .clickable { onClick(title) }
-    ) {
-        Spacer(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .height(1.dp)
-                .fillMaxWidth()
-                .background(color)
-        )
-        Text(
-            text = title,
-            color = color,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .background(MaterialTheme.colors.background)
-                .padding(horizontal = 16.dp)
-        )
-        Icon(
-            contentDescription = null,
-            tint = color,
-            painter = if (isCollapsed) isCollapsedIcon else isExpandedIcon,
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .background(MaterialTheme.colors.background)
-        )
-    }
-}
-
 @ExperimentalComposeUiApi
 @Composable
 fun SemesterItemEdit(
@@ -435,7 +358,7 @@ fun SemesterItemEdit(
     onRemove: (String) -> Unit,
     onTitleChange: (String) -> Unit
 ) {
-    var openDialog by remember { mutableStateOf(false) }
+    var openDialog by rememberSaveable { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
     val submitNameChange: (String) -> Unit = {
@@ -511,7 +434,7 @@ fun CourseItemEdit(
     onTitleChange: (String) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-    var openDialog by remember { mutableStateOf(false) }
+    var openDialog by rememberSaveable { mutableStateOf(false) }
 
     val submitNameChange: (String) -> Unit = {
         focusManager.clearFocus()
@@ -561,21 +484,5 @@ fun CourseItemEdit(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun CourseItem(
-    title: String,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.caption,
-        )
     }
 }

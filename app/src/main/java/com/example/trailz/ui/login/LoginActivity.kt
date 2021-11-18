@@ -25,17 +25,9 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class LoginActivity: BaseActivity(), LoginListener {
 
-    @Inject
-    lateinit var prefs: SharedPrefs
-
     @ExperimentalPagerApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (prefs.isDarkTheme) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
         setContentView(R.layout.activity_login)
         val navHost = findNavController(R.id.nav_host_fragment_activity_login)
         navHost.setGraph(R.navigation.login_navigation)

@@ -38,16 +38,8 @@ class MainActivity : BaseActivity(), LogoutListener {
     @Inject
     lateinit var application: TrailzApplication
 
-    @Inject
-    lateinit var prefs: SharedPrefs
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (prefs.isDarkTheme) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
         val bottomNavigationView = DataBindingUtil
             .setContentView<ActivityMainBinding>(this, R.layout.activity_main)
             .navView
