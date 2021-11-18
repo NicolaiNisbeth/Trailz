@@ -8,9 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.trailz.ui.common.DataState
+import com.example.trailz.ui.common.studyplan.StudyPlanList
 import com.example.trailz.ui.favorites.EmptyScreen
 import com.example.trailz.ui.favorites.LoadingScreen
-import com.example.trailz.ui.favorites.StudyPlansScreen
 import com.example.trailz.ui.favorites.StudyPlansUiModel
 
 @ExperimentalAnimationApi
@@ -65,7 +65,7 @@ private fun StudyPlans(
         }
 
         state.data?.let {
-            StudyPlansScreen(
+            StudyPlanList(
                 studyPlans = it,
                 onUpdateFavorite = onUpdateFavorite,
                 onStudyPlan = onStudyPlan,

@@ -12,8 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
 import com.example.trailz.ui.common.DataState
-import com.example.trailz.ui.studyplan.common.Header
-import com.example.trailz.ui.studyplan.common.SemesterList
+import com.example.trailz.ui.common.studyplan.SemesterList
 
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
@@ -62,25 +61,15 @@ private fun StudyPlan(
         }
     ) {
         state.data?.let {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxSize()
-            ) {
-                Header(
-                    title = it.title,
-                    owner = it.username,
-                    updatedLast = "Updated: ${it.updatedLast}"
-                )
-                SemesterList(
-                    semesterToCourses = semesterToCourses,
-                    isSemesterCollapsed = isSemesterCollapsed,
-                    expandSemester = expandSemester,
-                    collapseSemester = collapseSemester
-                )
-            }
+            SemesterList(
+                title = it.title,
+                username = "Created by ${it.username}",
+                updatedLast = "Updated ${it.updatedLast}",
+                semesterToCourses = semesterToCourses,
+                isSemesterCollapsed = isSemesterCollapsed,
+                expandSemester = expandSemester,
+                collapseSemester = collapseSemester
+            )
         }
     }
 }

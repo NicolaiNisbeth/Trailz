@@ -1,5 +1,10 @@
-package com.example.trailz.ui.studyplan.common
+package com.example.trailz.ui.common.studyplan
 
+import android.annotation.SuppressLint
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,34 +17,47 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
-
-@Composable
-fun Header(title: String, owner: String, updatedLast: String) {
-    Text(title, style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold))
-    Text("Created by $owner", style = MaterialTheme.typography.caption)
-    Text(updatedLast, style = MaterialTheme.typography.overline)
-}
+import com.example.trailz.ui.common.compose.EXPAND_ANIMATION_DURATION
 
 @ExperimentalFoundationApi
 @Composable
 fun SemesterList(
+    title: String,
+    username: String,
+    updatedLast: String,
     semesterToCourses: Map<Int, List<Course>>,
     isSemesterCollapsed: (Int) -> Boolean,
     expandSemester: (Int) -> Unit,
     collapseSemester: (Int) -> Unit
 ) {
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    LazyColumn(
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+
+        item {
+            Header(
+                Modifier.fillMaxWidth(),
+                title = title,
+                owner = username,
+                updatedLast = updatedLast
+            )
+        }
+
         semesterToCourses.toSortedMap().forEach { (semester, courses) ->
             val isCollapsed = isSemesterCollapsed(semester)
-            stickyHeader {
+            item {
                 SemesterItem(
                     title = "$semester",
                     isCollapsed = isCollapsed,
@@ -61,6 +79,27 @@ fun SemesterList(
 }
 
 @Composable
+fun Header(
+    modifier: Modifier = Modifier,
+    title: String,
+    owner: String,
+    updatedLast: String,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = verticalArrangement,
+        horizontalAlignment = horizontalAlignment
+    ) {
+        Text(title, style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold))
+        Text(owner, style = MaterialTheme.typography.caption)
+        Text(updatedLast, style = MaterialTheme.typography.overline)
+    }
+}
+
+@SuppressLint("UnusedTransitionTargetStateParameter")
+@Composable
 fun SemesterItem(
     title: String,
     isCollapsed: Boolean = true,
@@ -69,6 +108,21 @@ fun SemesterItem(
     color: Color,
     onClick: (String) -> Unit
 ) {
+
+    val transition = updateTransition(
+        label = "collapsedTranstion",
+        transitionState = remember {
+            MutableTransitionState(isCollapsed).apply {
+                targetState = !isCollapsed
+            }
+        }
+    )
+
+    val arrowRotationDegree by transition.animateFloat(
+        transitionSpec = { tween(durationMillis = EXPAND_ANIMATION_DURATION) },
+        targetValueByState = { if (isCollapsed) 0f else 180f },
+        label = "arrowRotation"
+    )
     Box(
         Modifier
             .background(MaterialTheme.colors.background)
@@ -92,8 +146,9 @@ fun SemesterItem(
         Icon(
             contentDescription = null,
             tint = color,
-            painter = if (isCollapsed) isCollapsedIcon else isExpandedIcon,
+            painter = isCollapsedIcon,
             modifier = Modifier
+                .rotate(arrowRotationDegree)
                 .align(Alignment.CenterEnd)
                 .background(MaterialTheme.colors.background)
         )

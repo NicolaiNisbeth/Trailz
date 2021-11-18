@@ -11,7 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-private val EXPAND_ANIMATION_DURATION = 200
+ val EXPAND_ANIMATION_DURATION = 200
 private val FADE_IN_ANIMATION_DURATION = 200
 private val FADE_OUT_ANIMATION_DURATION = 200
 private val COLLAPSE_ANIMATION_DURATION = 200
@@ -22,7 +22,7 @@ private val COLLAPSE_ANIMATION_DURATION = 200
 fun ExpandableCard(
     modifier: Modifier = Modifier,
     isExpanded: Boolean,
-    fixedContent: @Composable (arrowRotationDegree: Float) -> Unit,
+    FixedContent: @Composable (arrowRotationDegree: Float) -> Unit,
     expandableContent: @Composable ()  -> Unit
 ) {
     val transition = updateTransition(
@@ -51,7 +51,7 @@ fun ExpandableCard(
         modifier = modifier.fillMaxWidth()
     ) {
         Column {
-            fixedContent(arrowRotationDegree)
+            FixedContent(arrowRotationDegree)
             ExpandableContent(isVisible = isExpanded, initialVisibility = isExpanded) {
                 expandableContent()
             }

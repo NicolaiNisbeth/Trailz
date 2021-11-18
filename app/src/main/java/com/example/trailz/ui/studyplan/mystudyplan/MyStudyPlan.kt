@@ -1,5 +1,10 @@
 package com.example.trailz.ui.studyplan.mystudyplan
 
+import android.annotation.SuppressLint
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,6 +20,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -26,13 +32,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
 import com.example.trailz.ui.common.DataState
+import com.example.trailz.ui.common.compose.EXPAND_ANIMATION_DURATION
 import com.example.trailz.ui.common.compose.InputFieldDialog
 import com.example.trailz.ui.common.compose.InputFieldFocus
 import com.example.trailz.ui.common.compose.TextButtonV2
+import com.example.trailz.ui.common.studyplan.SemesterList
 import com.example.trailz.ui.studyplan.MyStudyPlanData
 import com.example.trailz.ui.studyplan.MyStudyPlanViewModel
-import com.example.trailz.ui.studyplan.common.Header
-import com.example.trailz.ui.studyplan.common.SemesterList
 import kotlinx.coroutines.launch
 
 @ExperimentalComposeUiApi
@@ -131,43 +137,31 @@ private fun MyStudyPlan(
             )
         }
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxSize()
-        ) {
-            state.data?.let {
-                if (it.inEditMode) {
-                    HeaderEdit(
-                        title = it.title,
-                        owner = it.username,
-                        updatedLast = "Updated: ${it.updatedLast}",
-                        onTitleChange = editStudyPlanTitle
-                    )
-                    SemesterListEdit(
-                        semesterToCourses = semesterToCourses,
-                        isSemesterCollapsed = isSemesterCollapsed,
-                        removeCourse = removeCourse,
-                        removeSemester = removeSemester,
-                        editSemester = editSemester,
-                        replaceCourseAt = replaceCourseAt,
-                        addCourse = addCourse
-                    )
-                } else {
-                    Header(
-                        title = it.title,
-                        owner = it.username,
-                        updatedLast = "Updated: ${it.updatedLast}"
-                    )
-                    SemesterList(
-                        semesterToCourses = semesterToCourses,
-                        isSemesterCollapsed = isSemesterCollapsed,
-                        expandSemester = expandSemester,
-                        collapseSemester = collapseSemester
-                    )
-                }
+        state.data?.let {
+            if (it.inEditMode) {
+                SemesterListEdit(
+                    title = it.title,
+                    username = "Created by ${it.username}",
+                    updated = "Updated: ${it.updatedLast}",
+                    editStudyPlanTitle = editStudyPlanTitle,
+                    semesterToCourses = semesterToCourses,
+                    isSemesterCollapsed = isSemesterCollapsed,
+                    removeCourse = removeCourse,
+                    removeSemester = removeSemester,
+                    editSemester = editSemester,
+                    replaceCourseAt = replaceCourseAt,
+                    addCourse = addCourse
+                )
+            } else {
+                SemesterList(
+                    title = it.title,
+                    username = "Created by ${it.username}",
+                    updatedLast = "Updated: ${it.updatedLast}",
+                    semesterToCourses = semesterToCourses,
+                    isSemesterCollapsed = isSemesterCollapsed,
+                    expandSemester = expandSemester,
+                    collapseSemester = collapseSemester
+                )
             }
         }
     }
@@ -177,6 +171,10 @@ private fun MyStudyPlan(
 @ExperimentalFoundationApi
 @Composable
 private fun SemesterListEdit(
+    title: String,
+    username: String,
+    updated: String,
+    editStudyPlanTitle: (String) -> Unit,
     semesterToCourses: Map<Int, List<Course>>,
     isSemesterCollapsed: (Int) -> Boolean,
     removeCourse: (Course, Int) -> Unit,
@@ -195,10 +193,22 @@ private fun SemesterListEdit(
         openDialog = false
     }
 
-    LazyColumn {
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+    ) {
+        item {
+            HeaderEdit(
+                Modifier.fillMaxWidth(),
+                title = title,
+                owner = username,
+                updatedLast = updated,
+                onTitleChange = editStudyPlanTitle
+            )
+        }
+
         semesterToCourses.toSortedMap().forEach { (semesterNum, courses) ->
             val isCollapsed = isSemesterCollapsed(semesterNum)
-            stickyHeader {
+            item {
                 SemesterItemEdit(
                     title = "$semesterNum",
                     isCollapsed = isCollapsed,
@@ -260,11 +270,14 @@ private fun SemesterListEdit(
 
 @ExperimentalComposeUiApi
 @Composable
-fun HeaderEdit(
+private fun HeaderEdit(
+    modifier: Modifier = Modifier,
     title: String,
     owner: String,
     updatedLast: String,
-    onTitleChange: (String) -> Unit
+    onTitleChange: (String) -> Unit,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally
 ) {
     var openDialog by rememberSaveable { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
@@ -274,41 +287,65 @@ fun HeaderEdit(
         openDialog = false
     }
 
-    Text(
-        modifier = Modifier.clickable { openDialog = true },
-        text = title,
-        style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold)
-    )
+    Column(
+        modifier = modifier,
+        verticalArrangement = verticalArrangement,
+        horizontalAlignment = horizontalAlignment
+    ) {
+        Text(
+            modifier = Modifier.clickable { openDialog = true },
+            text = title,
+            style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold)
+        )
 
-    Text(owner, style = MaterialTheme.typography.caption)
-    Text(updatedLast, style = MaterialTheme.typography.overline)
+        Text(owner, style = MaterialTheme.typography.caption)
+        Text(updatedLast, style = MaterialTheme.typography.overline)
 
-    if (openDialog) {
-        InputFieldDialog(
-            title = "Study Plan Title",
-            confirmTitle = "Confirm",
-            dismissTitle = "Dismiss",
-            onConfirm = submitNameChange,
-            onDismiss = { openDialog = false }
-        ) { value, onValueChange ->
-            InputFieldFocus { focusModifier ->
-                TextField(
-                    modifier = focusModifier,
-                    value = value,
-                    onValueChange = onValueChange,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Done,
-                        keyboardType = KeyboardType.Text
-                    ),
-                    keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
-                )
+        if (openDialog) {
+            InputFieldDialog(
+                title = "Study Plan Title",
+                confirmTitle = "Confirm",
+                dismissTitle = "Dismiss",
+                onConfirm = submitNameChange,
+                onDismiss = { openDialog = false }
+            ) { value, onValueChange ->
+                InputFieldFocus { focusModifier ->
+                    TextField(
+                        modifier = focusModifier,
+                        value = value,
+                        onValueChange = onValueChange,
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done,
+                            keyboardType = KeyboardType.Text
+                        ),
+                        keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun ActionBar(
+private fun EditActionBar(
+    onProfile: () -> Unit,
+    addSemester: () -> Unit,
+    saveStudyPlan: () -> Unit,
+    changeEditMode: (Boolean) -> Unit
+) {
+    IconButton(onClick = onProfile) {
+        Icon(Icons.Default.PermIdentity, contentDescription = null)
+    }
+    IconButton(onClick = addSemester) {
+        Icon(Icons.Default.Add, contentDescription = null)
+    }
+    IconButton(onClick = { saveStudyPlan(); changeEditMode(false) }) {
+        Icon(Icons.Default.Save, contentDescription = null)
+    }
+}
+
+@Composable
+private fun ActionBar(
     isAnyCollapsed: Boolean,
     toggleAllCollapsed: (Boolean) -> Unit,
     onProfile: () -> Unit,
@@ -328,27 +365,10 @@ fun ActionBar(
     }
 }
 
-@Composable
-fun EditActionBar(
-    onProfile: () -> Unit,
-    addSemester: () -> Unit,
-    saveStudyPlan: () -> Unit,
-    changeEditMode: (Boolean) -> Unit
-) {
-    IconButton(onClick = onProfile) {
-        Icon(Icons.Default.PermIdentity, contentDescription = null)
-    }
-    IconButton(onClick = addSemester) {
-        Icon(Icons.Default.Add, contentDescription = null)
-    }
-    IconButton(onClick = { saveStudyPlan(); changeEditMode(false) }) {
-        Icon(Icons.Default.Save, contentDescription = null)
-    }
-}
-
+@SuppressLint("UnusedTransitionTargetStateParameter")
 @ExperimentalComposeUiApi
 @Composable
-fun SemesterItemEdit(
+private fun SemesterItemEdit(
     modifier: Modifier = Modifier,
     title: String,
     isCollapsed: Boolean = true,
@@ -428,7 +448,7 @@ fun SemesterItemEdit(
 
 @ExperimentalComposeUiApi
 @Composable
-fun CourseItemEdit(
+private fun CourseItemEdit(
     title: String,
     onRemove: (String) -> Unit,
     onTitleChange: (String) -> Unit
