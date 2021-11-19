@@ -1,7 +1,10 @@
 package com.example.trailz.ui.studyplan
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -9,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
 import com.example.trailz.ui.common.DataState
@@ -61,15 +65,23 @@ private fun StudyPlan(
         }
     ) {
         state.data?.let {
-            SemesterList(
-                title = it.title,
-                username = "Created by ${it.username}",
-                updatedLast = "Updated ${it.updatedLast}",
-                semesterToCourses = semesterToCourses,
-                isSemesterCollapsed = isSemesterCollapsed,
-                expandSemester = expandSemester,
-                collapseSemester = collapseSemester
-            )
+            val elevation = if (MaterialTheme.colors.isLight) 2.dp else 0.dp
+            Card(
+                modifier = Modifier.padding(16.dp),
+                shape = MaterialTheme.shapes.medium.copy(CornerSize(16.dp)),
+                elevation = elevation
+            ) {
+                SemesterList(
+                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 6.dp),
+                    title = it.title,
+                    username = "Created by ${it.username}",
+                    updatedLast = "Updated ${it.updatedLast}",
+                    semesterToCourses = semesterToCourses,
+                    isSemesterCollapsed = isSemesterCollapsed,
+                    expandSemester = expandSemester,
+                    collapseSemester = collapseSemester
+                )
+            }
         }
     }
 }

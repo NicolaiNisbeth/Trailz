@@ -1,4 +1,4 @@
-package com.example.trailz.ui.signin
+package com.example.trailz.ui.login.signin
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -89,83 +89,85 @@ internal fun SignIn(
         Icons.Filled.VisibilityOff to PasswordVisualTransformation()
     }
 
-    LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxSize()
-    ) {
-        item {
-            Text(
-                text = "Welcome Back",
-                style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
-            )
-            Text(
-                text = "We have missed you, Let's start by Sign In!",
-                style = MaterialTheme.typography.caption,
-            )
-        }
-
-        item {
-            InputField(
-                value = email,
-                onValueChange = onEmailChange,
-                label = "Email address",
-                contentDescription = "Email address",
-                isError = hasError,
-                imeAction = ImeAction.Next,
-                keyboardType = KeyboardType.Email,
-                leadingIcon = rememberVectorPainter(Icons.Default.Email),
-                keyboardActions = KeyboardActions(onNext = {
-                    focusManager.moveFocus(FocusDirection.Down)
-                })
-            )
-
-            InputField(
-                value = password,
-                onValueChange = onPasswordChange,
-                label = "password",
-                contentDescription = "password",
-                isError = hasError,
-                imeAction = ImeAction.Done,
-                keyboardType = KeyboardType.Password,
-                leadingIcon = rememberVectorPainter(Icons.Default.VpnKey),
-                trailingIcon = rememberVectorPainter(passwordIcon),
-                visualTransformation = passwordTransformation,
-                onTrailingIconClicked = { passwordVisibility = !passwordVisibility },
-                keyboardActions = KeyboardActions(onDone = {
-                    focusManager.clearFocus()
-                    onSignin()
-                })
-            )
-        }
-
-        item {
-            Button(
-                onClick = onSignin,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .animateContentSize(tween())
-                    .height(50.dp)
-                    .clip(CircleShape)
-            ) {
-                Text(text = if (isLoading) "Loading..." else "Log In")
-            }
-        }
-
-        item { DividerWithText(text = R.string.login_divider) }
-
-        item {
-            OutlinedButton(
-                onClick = onSignUp, modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-            ) {
+    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            item {
                 Text(
-                    text = "Sign up",
-                    style = MaterialTheme.typography.h6.copy(fontSize = 14.sp),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    text = "Welcome Back",
+                    style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
                 )
+                Text(
+                    text = "We have missed you, Let's start by Sign In!",
+                    style = MaterialTheme.typography.caption,
+                )
+            }
+
+            item {
+                InputField(
+                    value = email,
+                    onValueChange = onEmailChange,
+                    label = "Email address",
+                    contentDescription = "Email address",
+                    isError = hasError,
+                    imeAction = ImeAction.Next,
+                    keyboardType = KeyboardType.Email,
+                    leadingIcon = rememberVectorPainter(Icons.Default.Email),
+                    keyboardActions = KeyboardActions(onNext = {
+                        focusManager.moveFocus(FocusDirection.Down)
+                    })
+                )
+
+                InputField(
+                    value = password,
+                    onValueChange = onPasswordChange,
+                    label = "password",
+                    contentDescription = "password",
+                    isError = hasError,
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Password,
+                    leadingIcon = rememberVectorPainter(Icons.Default.VpnKey),
+                    trailingIcon = rememberVectorPainter(passwordIcon),
+                    visualTransformation = passwordTransformation,
+                    onTrailingIconClicked = { passwordVisibility = !passwordVisibility },
+                    keyboardActions = KeyboardActions(onDone = {
+                        focusManager.clearFocus()
+                        onSignin()
+                    })
+                )
+            }
+
+            item {
+                Button(
+                    onClick = onSignin,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateContentSize(tween())
+                        .height(50.dp)
+                        .clip(CircleShape)
+                ) {
+                    Text(text = if (isLoading) "Loading..." else "Log In")
+                }
+            }
+
+            item { DividerWithText(text = R.string.login_divider) }
+
+            item {
+                OutlinedButton(
+                    onClick = onSignUp, modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                ) {
+                    Text(
+                        text = "Sign up",
+                        style = MaterialTheme.typography.h6.copy(fontSize = 14.sp),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
     }

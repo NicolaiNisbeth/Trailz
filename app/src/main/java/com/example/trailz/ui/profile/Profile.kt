@@ -16,14 +16,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.example.trailz.R
 import com.example.trailz.language.LanguageConfig
 import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.compose.RatingBar
+import com.example.trailz.ui.common.themeColor
 import com.example.trailz.ui.favorites.LoadingScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -104,6 +107,7 @@ fun Profile(
             )
         }
     ) { paddingValues ->
+
         ModalBottomSheetLayout(
             modifier = Modifier.padding(paddingValues),
             sheetState = modalBottomSheetState,
@@ -196,7 +200,6 @@ fun LoggedInView(
         Row(
             Modifier
                 .fillMaxWidth()
-                .background(Color.LightGray.copy(alpha = 0.1f))
                 .padding(vertical = 20.dp, horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -230,11 +233,9 @@ fun LoggedInView(
         Column(
             Modifier
                 .fillMaxWidth()
-                .background(Color.LightGray.copy(alpha = 0.1f))
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .background(MaterialTheme.colors.surface)
         ) {
-            Row(Modifier.fillMaxWidth(),
+            Row(Modifier.fillMaxWidth().padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -242,7 +243,7 @@ fun LoggedInView(
                 Text(text = user.email, color = MaterialTheme.colors.primary, textAlign = TextAlign.Center)
             }
 
-            Row(Modifier.fillMaxWidth(),
+            Row(Modifier.fillMaxWidth().padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -250,7 +251,7 @@ fun LoggedInView(
                 Text(text = "****", color = MaterialTheme.colors.primary, textAlign = TextAlign.Center, style = MaterialTheme.typography.h5)
             }
 
-            Row(Modifier.fillMaxWidth(),
+            Row(Modifier.fillMaxWidth().padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -269,7 +270,7 @@ fun LoggedInView(
         Column(
             Modifier
                 .fillMaxWidth()
-                .background(Color.LightGray.copy(alpha = 0.1f))
+                .background(MaterialTheme.colors.surface)
         ) {
             RateAppView(
                 modifier = Modifier.fillMaxWidth(),
@@ -289,7 +290,6 @@ fun LoggedInView(
                 Text(text = if (isDarkTheme) "Apply light theme" else "Apply dark theme")
                 Switch(isDarkTheme, toggleTheme)
             }
-
         }
 
         Text(
@@ -300,57 +300,6 @@ fun LoggedInView(
                 .padding(16.dp)
                 .clickable { logout() }
         )
-    }
-}
-
-@ExperimentalComposeUiApi
-@Composable
-fun LoggedOutView(
-    isDarkTheme: Boolean,
-    signUp: () -> Unit,
-    signIn: () -> Unit,
-    rateApp: () -> Unit,
-    settings: () -> Unit,
-    toggleTheme: (Boolean) -> Unit
-) {
-
-    Column(
-        modifier = Modifier
-            .padding(vertical = 16.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        LoginHeader(
-            onSignIn = signIn,
-            onSignUp = signUp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .background(Color.LightGray.copy(alpha = 0.1f))
-        )
-        RateAppView(
-            onRateApp = rateApp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.LightGray.copy(alpha = 0.1f))
-        )
-        SettingsView(
-            onSettings = settings,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.LightGray.copy(alpha = 0.1f))
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.LightGray.copy(alpha = 0.1f))
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(text = if (isDarkTheme) "Apply light theme" else "Apply dark theme")
-            Switch(isDarkTheme, toggleTheme,)
-        }
     }
 }
 
@@ -368,59 +317,6 @@ fun SettingsView(
     ) {
         Text(text = "Settings")
         Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null)
-    }
-}
-
-@Composable
-fun LoginHeader(
-    modifier: Modifier = Modifier,
-    onSignIn: () -> Unit,
-    onSignUp: () -> Unit
-) {
-    ConstraintLayout(modifier.padding(16.dp)) {
-        val (signInBtn, signUpBtn, description, spacer) = createRefs()
-        Text(
-            textAlign = TextAlign.Center,
-            text = "Se dine favoritter fra alle enheder",
-            modifier = Modifier.constrainAs(description){
-                top.linkTo(parent.top)
-                start.linkTo(signInBtn.start)
-                end.linkTo(signUpBtn.end)
-                bottom.linkTo(spacer.top)
-            }
-        )
-        Spacer(
-            Modifier
-                .height(16.dp)
-                .constrainAs(spacer) {
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(signInBtn.top)
-                    top.linkTo(description.bottom)
-                })
-        Button(
-            onClick = onSignIn,
-            modifier = Modifier.constrainAs(signInBtn){
-                start.linkTo(parent.start)
-                end.linkTo(signUpBtn.start)
-                bottom.linkTo(parent.bottom)
-                top.linkTo(spacer.bottom)
-            }
-        ) {
-            Text(text = "Sign in")
-        }
-
-        Button(
-            onClick = onSignUp,
-            modifier = Modifier.constrainAs(signUpBtn){
-                end.linkTo(parent.end)
-                bottom.linkTo(parent.bottom)
-                start.linkTo(signInBtn.end)
-                top.linkTo(spacer.bottom)
-            }
-        ) {
-            Text(text = "Sign up")
-        }
     }
 }
 

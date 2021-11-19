@@ -12,9 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
  val EXPAND_ANIMATION_DURATION = 200
-private val FADE_IN_ANIMATION_DURATION = 200
-private val FADE_OUT_ANIMATION_DURATION = 200
-private val COLLAPSE_ANIMATION_DURATION = 200
+ val FADE_IN_ANIMATION_DURATION = 200
+ val FADE_OUT_ANIMATION_DURATION = 200
+ val COLLAPSE_ANIMATION_DURATION = 200
 
 @ExperimentalAnimationApi
 @SuppressLint("UnusedTransitionTargetStateParameter")
@@ -86,7 +86,6 @@ fun ExpandableContent(
     }
     AnimatedVisibility(
         visible = isVisible,
-        initiallyVisible = initialVisibility,
         enter = enterExpand + enterFadeIn,
         exit = exitCollapse + exitFadeOut
     ) {

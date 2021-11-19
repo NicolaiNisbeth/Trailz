@@ -16,6 +16,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -25,14 +26,17 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
 import com.example.trailz.ui.common.compose.EXPAND_ANIMATION_DURATION
+import com.example.trailz.ui.common.themeColor
 
 @ExperimentalFoundationApi
 @Composable
 fun SemesterList(
+    modifier: Modifier = Modifier,
     title: String,
     username: String,
     updatedLast: String,
@@ -42,6 +46,7 @@ fun SemesterList(
     collapseSemester: (Int) -> Unit
 ) {
     LazyColumn(
+        modifier = modifier,
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -108,6 +113,7 @@ fun SemesterItem(
     color: Color,
     onClick: (String) -> Unit
 ) {
+    val surfaceColor = LocalContext.current.themeColor(com.example.trailz.R.attr.colorSurface)
 
     val transition = updateTransition(
         label = "collapsedTranstion",
@@ -125,7 +131,6 @@ fun SemesterItem(
     )
     Box(
         Modifier
-            .background(MaterialTheme.colors.background)
             .clickable { onClick(title) }
     ) {
         Spacer(
@@ -140,7 +145,7 @@ fun SemesterItem(
             color = color,
             modifier = Modifier
                 .align(Alignment.Center)
-                .background(MaterialTheme.colors.background)
+                .background(MaterialTheme.colors.surface)
                 .padding(horizontal = 16.dp)
         )
         Icon(
@@ -148,9 +153,9 @@ fun SemesterItem(
             tint = color,
             painter = isCollapsedIcon,
             modifier = Modifier
+                .background(MaterialTheme.colors.surface)
                 .rotate(arrowRotationDegree)
                 .align(Alignment.CenterEnd)
-                .background(MaterialTheme.colors.background)
         )
     }
 }

@@ -1,4 +1,4 @@
-package com.example.trailz.ui.signup
+package com.example.trailz.ui.login.signup
 
 import android.content.Context
 import android.os.Bundle

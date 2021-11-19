@@ -1,4 +1,4 @@
-package com.example.trailz.ui.signup
+package com.example.trailz.ui.login.signup
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

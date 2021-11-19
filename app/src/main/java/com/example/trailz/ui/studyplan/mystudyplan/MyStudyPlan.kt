@@ -1,15 +1,12 @@
 package com.example.trailz.ui.studyplan.mystudyplan
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -20,7 +17,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -32,7 +28,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
 import com.example.trailz.ui.common.DataState
-import com.example.trailz.ui.common.compose.EXPAND_ANIMATION_DURATION
 import com.example.trailz.ui.common.compose.InputFieldDialog
 import com.example.trailz.ui.common.compose.InputFieldFocus
 import com.example.trailz.ui.common.compose.TextButtonV2
@@ -138,30 +133,44 @@ private fun MyStudyPlan(
         }
     ) {
         state.data?.let {
+            val elevation = if (MaterialTheme.colors.isLight) 2.dp else 0.dp
             if (it.inEditMode) {
-                SemesterListEdit(
-                    title = it.title,
-                    username = "Created by ${it.username}",
-                    updated = "Updated: ${it.updatedLast}",
-                    editStudyPlanTitle = editStudyPlanTitle,
-                    semesterToCourses = semesterToCourses,
-                    isSemesterCollapsed = isSemesterCollapsed,
-                    removeCourse = removeCourse,
-                    removeSemester = removeSemester,
-                    editSemester = editSemester,
-                    replaceCourseAt = replaceCourseAt,
-                    addCourse = addCourse
-                )
+                Card(
+                    modifier = Modifier.padding(16.dp),
+                    shape = MaterialTheme.shapes.medium.copy(CornerSize(16.dp)),
+                    elevation = elevation
+                ) {
+                    SemesterListEdit(
+                        title = it.title,
+                        username = "Created by ${it.username}",
+                        updated = "Updated: ${it.updatedLast}",
+                        editStudyPlanTitle = editStudyPlanTitle,
+                        semesterToCourses = semesterToCourses,
+                        isSemesterCollapsed = isSemesterCollapsed,
+                        removeCourse = removeCourse,
+                        removeSemester = removeSemester,
+                        editSemester = editSemester,
+                        replaceCourseAt = replaceCourseAt,
+                        addCourse = addCourse
+                    )
+                }
             } else {
-                SemesterList(
-                    title = it.title,
-                    username = "Created by ${it.username}",
-                    updatedLast = "Updated: ${it.updatedLast}",
-                    semesterToCourses = semesterToCourses,
-                    isSemesterCollapsed = isSemesterCollapsed,
-                    expandSemester = expandSemester,
-                    collapseSemester = collapseSemester
-                )
+                Card(
+                    modifier = Modifier.padding(16.dp),
+                    shape = MaterialTheme.shapes.medium.copy(CornerSize(16.dp)),
+                    elevation = elevation
+                ) {
+                    SemesterList(
+                        modifier = Modifier.padding(vertical = 12.dp, horizontal = 6.dp),
+                        title = it.title,
+                        username = "Created by ${it.username}",
+                        updatedLast = "Updated: ${it.updatedLast}",
+                        semesterToCourses = semesterToCourses,
+                        isSemesterCollapsed = isSemesterCollapsed,
+                        expandSemester = expandSemester,
+                        collapseSemester = collapseSemester
+                    )
+                }
             }
         }
     }
@@ -387,10 +396,7 @@ private fun SemesterItemEdit(
         openDialog = false
     }
 
-    Box(
-        modifier
-            .background(MaterialTheme.colors.background)
-    ) {
+    Box{
         Spacer(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -402,7 +408,7 @@ private fun SemesterItemEdit(
             onClick = { openDialog = true },
             modifier = Modifier
                 .align(Alignment.Center)
-                .background(MaterialTheme.colors.background)
+                .background(MaterialTheme.colors.surface)
         ) {
             Text(
                 text = title,
@@ -417,7 +423,7 @@ private fun SemesterItemEdit(
                 painter = if (isCollapsed) isCollapsedIcon else isExpandedIcon,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
-                    .background(MaterialTheme.colors.background)
+                    .background(MaterialTheme.colors.surface)
             )
         }
 

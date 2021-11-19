@@ -1,4 +1,4 @@
-package com.example.trailz.ui.signin
+package com.example.trailz.ui.login.signin
 
 import android.content.Context
 import android.os.Bundle
@@ -30,16 +30,6 @@ class SigninFragment: Fragment() {
             loginListener = context as LoginListener
         } catch (e : Exception){
             throw IllegalStateException("Activity must implement $loginListener")
-        }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true).apply {
-            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-        }
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false).apply {
-            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
         }
     }
 

@@ -1,4 +1,4 @@
-package com.example.trailz.ui.signup
+package com.example.trailz.ui.login.signup
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -157,19 +157,22 @@ internal fun SignUp(
             }
 
             item {
-                InputField(
-                    value = username,
-                    onValueChange = onUsernameChange,
-                    label = "Username",
-                    contentDescription = "Username",
-                    isError = hasError,
-                    imeAction = ImeAction.Next,
-                    keyboardType = KeyboardType.Text,
-                    leadingIcon = rememberVectorPainter(Icons.Default.Person),
-                    keyboardActions = KeyboardActions(onNext = {
-                        focusManager.moveFocus(FocusDirection.Down)
-                    })
-                )
+                InputFieldFocus() {
+                    InputField(
+                        modifier = it,
+                        value = username,
+                        onValueChange = onUsernameChange,
+                        label = "Username",
+                        contentDescription = "Username",
+                        isError = hasError,
+                        imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Text,
+                        leadingIcon = rememberVectorPainter(Icons.Default.Person),
+                        keyboardActions = KeyboardActions(onNext = {
+                            focusManager.moveFocus(FocusDirection.Down)
+                        })
+                    )
+                }
 
                 InputField(
                     value = email,

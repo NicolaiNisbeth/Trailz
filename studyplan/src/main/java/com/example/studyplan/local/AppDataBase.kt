@@ -9,7 +9,7 @@ import com.example.studyplan.local.dao.StudyPlanDao
 import com.example.studyplan.local.entity.*
 
 @Database(
-    version = 1,
+    version = 2,
     exportSchema = false,
     entities = [
         StudyPlanEntity::class,
