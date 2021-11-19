@@ -1,6 +1,5 @@
 package com.example.studyplan.local
 
-import com.example.base.Result
 import com.example.base.domain.StudyPlan
 import kotlinx.coroutines.flow.Flow
 
@@ -19,7 +18,7 @@ interface StudyPlanLocalDataSource {
 
     suspend fun updateStudyPlan(id: String, studyPlan: StudyPlan)
 
-    suspend fun updateStudyPlanFavorite(id: String, isFavorite: Boolean)
+    suspend fun updateStudyPlanFavorite(id: String, isFavorite: Boolean, likes: Long)
 
     suspend fun createStudyPlans(data: List<StudyPlan>)
 }

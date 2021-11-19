@@ -22,7 +22,7 @@ import com.example.trailz.ui.favorites.StudyPlansUiModel
 @Composable
 fun StudyPlanList(
     studyPlans: StudyPlansUiModel,
-    onUpdateFavorite: (String, Boolean) -> Unit,
+    onUpdateFavorite: (String, Boolean, Long) -> Unit,
     onStudyPlan: (String) -> Unit,
     onExpandClicked: (String) -> Unit
 ) {
@@ -37,7 +37,7 @@ fun StudyPlanList(
                     username = it.username,
                     title = it.title,
                     semesters = it.semesters,
-                    likes = "${it.likes} likes",
+                    likes = it.likes,
                     lastUpdated = it.updated,
                     isExpanded = studyPlans.expandedPlans[it.userId] ?: false,
                     isChecked = it.isFavorite,
@@ -57,13 +57,13 @@ fun StudyPlanOverView(
     id: String,
     username: String,
     title: String,
-    likes: String,
+    likes: Long,
     lastUpdated: String,
     isChecked: Boolean,
     isExpanded: Boolean,
     semesters: List<Semester>,
     onExpandClicked: () -> Unit,
-    onUpdateFavorite: (String, Boolean) -> Unit,
+    onUpdateFavorite: (String, Boolean, Long) -> Unit,
     onStudyPlan: (String) -> Unit
 ){
     ExpandableCard(
@@ -71,7 +71,7 @@ fun StudyPlanOverView(
         isExpanded = isExpanded,
         FixedContent = { arrowRotationDegree ->
             val paddingModifier = Modifier.padding(horizontal = 12.dp)
-            Text(text = likes, style = MaterialTheme.typography.overline, modifier = paddingModifier.padding(top = 16.dp))
+            Text(text = "$likes likes", style = MaterialTheme.typography.overline, modifier = paddingModifier.padding(top = 16.dp))
             Text(text = title, style = MaterialTheme.typography.button, modifier = paddingModifier)
             Text(text = username, style = MaterialTheme.typography.body2, modifier = paddingModifier)
             Text(text = lastUpdated, style = MaterialTheme.typography.caption, modifier = paddingModifier)
@@ -81,7 +81,7 @@ fun StudyPlanOverView(
                     colorOnChecked = MaterialTheme.colors.primary,
                     colorUnChecked = MaterialTheme.colors.onBackground,
                     onClick = {
-                        onUpdateFavorite(id, it)
+                        onUpdateFavorite(id, it, likes)
                     }
                 )
                 if (semesters.any { it.courses.any { it.title.isNotBlank() } }){

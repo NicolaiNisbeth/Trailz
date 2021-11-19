@@ -4,12 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.base.Result
 import com.example.base.domain.StudyPlan
-import com.example.favorite.FavoriteRepository
-import com.example.studyplan.StudyPlanRepository
 import com.example.trailz.inject.SharedPrefs
 import com.example.trailz.ui.common.DataState
-import com.example.trailz.ui.common.mapAsync
 import com.example.trailz.ui.favorites.usecase.GetFavoritesUseCase
+import com.example.trailz.ui.favorites.usecase.UpdateFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -22,9 +20,8 @@ data class StudyPlansUiModel(
 
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
-    private val favoriteRepository: FavoriteRepository,
-    private val studyPlanRepository: StudyPlanRepository,
     private val getFavoritesUseCase: GetFavoritesUseCase,
+    private val updateFavoriteUseCase: UpdateFavoriteUseCase,
     private val prefs: SharedPrefs
 ) : ViewModel() {
 
@@ -40,20 +37,23 @@ class FavoritesViewModel @Inject constructor(
 
     private fun observeFavorites() {
         scope.launch {
-            when(val res = getFavoritesUseCase(prefs.loggedInId!!)){
-                is Result.Failed -> _state.value = _state.value.copy(exception = res.message)
-                is Result.Loading -> _state.value = _state.value.copy(isLoading = true)
-                is Result.Success -> _state.value = DataState(
-                    data = StudyPlansUiModel(res.data),
-                    isEmpty = res.data.isEmpty()
-                )
+            getFavoritesUseCase(prefs.loggedInId!!).collect {
+                when(it){
+                    is Result.Failed -> _state.value = _state.value.copy(exception = it.message)
+                    is Result.Loading -> _state.value = _state.value.copy(isLoading = true)
+                    is Result.Success -> _state.value = DataState(
+                        data = StudyPlansUiModel(it.data),
+                        isEmpty = it.data.isEmpty()
+                    )
+                }
             }
         }
     }
 
-    fun updateFavorite(favoriteId: String, userId: String, isFavorite: Boolean){
-        flipLocally(favoriteId)
+    fun updateFavorite(favoriteId: String, userId: String, isFavorite: Boolean, likes: Long){
         scope.launch {
+            flipLocally(favoriteId)
+            updateFavoriteUseCase(favoriteId, userId, isFavorite, likes)
         }
     }
 
@@ -72,13 +72,13 @@ class FavoritesViewModel @Inject constructor(
 
     private fun flipLocally(favoriteId: String) {
         val data = _state.value.data ?: return
-        val minusFavorited = data.copy(
+        val minusFavorite = data.copy(
             studyPlans = data.studyPlans.filterNot { it.userId == favoriteId },
             expandedPlans = data.expandedPlans.minus(favoriteId)
         )
         _state.value = _state.value.copy(
-            data = minusFavorited,
-            isEmpty = minusFavorited.studyPlans.isEmpty()
+            data = minusFavorite,
+            isEmpty = minusFavorite.studyPlans.isEmpty()
         )
     }
 }

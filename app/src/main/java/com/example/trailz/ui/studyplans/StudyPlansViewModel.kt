@@ -9,6 +9,8 @@ import com.example.trailz.inject.SharedPrefs
 import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.mapFind
 import com.example.trailz.ui.favorites.StudyPlansUiModel
+import com.example.trailz.ui.favorites.usecase.GetFavoritesUseCase
+import com.example.trailz.ui.favorites.usecase.UpdateFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -22,6 +24,7 @@ class StudyPlansViewModel @Inject constructor(
     private val studyPlanRepository: StudyPlanRepository,
     private val favoriteRepository: FavoriteRepository,
     private val sharedPrefs: SharedPrefs,
+    private val updateFavoriteUseCase: UpdateFavoriteUseCase,
 ) : ViewModel() {
 
     private val scope = viewModelScope
@@ -36,44 +39,55 @@ class StudyPlansViewModel @Inject constructor(
 
     private fun observeStudyPlans() {
         scope.launch {
-            val studyPlansFlow = studyPlanRepository.getStudyPlans()
-            val favoritesFlow = favoriteRepository.observeFavoriteBy(sharedPrefs.loggedInId!!)
-            studyPlansFlow.combine(favoritesFlow) { studyPlansRes, favoritesRes ->
-                when {
-                    studyPlansRes is Result.Success && favoritesRes is Result.Success -> {
-                        val favorites = favoritesRes.data.followedUserIds.toHashSet()
-                        val studyPlans = studyPlansRes.data.map { it.copy(isFavorite = it.userId in favorites) }
+            val favorites = when (val res = favoriteRepository.getFavoritesBy(sharedPrefs.loggedInId!!)){
+                is Result.Success -> res.data.followedUserIds
+                is Result.Failed -> emptyList()
+                is Result.Loading -> emptyList()
+            }.toHashSet()
+
+            studyPlanRepository.getStudyPlans().collect {
+                when (it) {
+                    is Result.Failed -> _state.value = _state.value.copy(exception = it.message)
+                    is Result.Loading -> _state.value = _state.value.copy(isLoading = true)
+                    is Result.Success -> {
+                        val studyPlans = it.data.map { it.copy(isFavorite = it.userId in favorites) }
                         _state.value = DataState(
                             StudyPlansUiModel(studyPlans),
                             isEmpty = studyPlans.isEmpty()
                         )
                     }
-                    studyPlansRes is Result.Success && favoritesRes is Result.Failed -> {
-                        _state.value = DataState(
-                            StudyPlansUiModel(studyPlansRes.data),
-                            isEmpty = studyPlansRes.data.isEmpty()
-                        )
-                    }
-                    studyPlansRes is Result.Failed && favoritesRes is Result.Success -> {
-                        _state.value = _state.value.copy(
-                            exception = "failed loading study plans"
-                        )
-                    }
-                    else -> _state.value = _state.value.copy(isLoading = true)
                 }
-            }.conflate().collect()
+            }
         }
     }
 
-    fun updateChecked(studyPlanId: String, isFavorite: Boolean) {
-        flipLocally(studyPlanId, isFavorite)
+    fun refreshStudyPlans(isForced: Boolean){
         scope.launch {
-            studyPlanRepository.updateStudyPlanFavorite(studyPlanId, isFavorite).collect()
-            if (isFavorite) {
-                favoriteRepository.addToFavorite(studyPlanId, sharedPrefs.loggedInId!!)
-            } else {
-                favoriteRepository.removeFromFavorite(studyPlanId, sharedPrefs.loggedInId!!)
+            studyPlanRepository.refreshStudyPlansIfStale(isForced).collect {
+                val favorites = when (val res = favoriteRepository.getFavoritesBy(sharedPrefs.loggedInId!!)){
+                    is Result.Success -> res.data.followedUserIds
+                    is Result.Failed -> emptyList()
+                    is Result.Loading -> emptyList()
+                }.toHashSet()
+                when (it) {
+                    is Result.Failed -> _state.value = _state.value.copy(exception = it.message)
+                    is Result.Loading -> _state.value = _state.value.copy(isLoading = true)
+                    is Result.Success -> {
+                        val studyPlans = it.data.map { it.copy(isFavorite = it.userId in favorites) }
+                        _state.value = DataState(
+                            StudyPlansUiModel(studyPlans),
+                            isEmpty = studyPlans.isEmpty()
+                        )
+                    }
+                }
             }
+        }
+    }
+
+    fun updateFavorite(studyPlanId: String, isFavorite: Boolean, likes: Long) {
+        scope.launch {
+            flipLocally(studyPlanId, isFavorite, likes)
+            updateFavoriteUseCase(studyPlanId, sharedPrefs.loggedInId!!, isFavorite, likes)
         }
     }
 
@@ -90,12 +104,17 @@ class StudyPlansViewModel @Inject constructor(
         )
     }
 
-    private fun flipLocally(favoriteId: String, isFavorite: Boolean) {
+    private fun flipLocally(favoriteId: String, isFavorite: Boolean, likes: Long) {
         val data = _state.value.data ?: return
         val newData = data.copy(
             studyPlans = data.studyPlans.mapFind(
                 predicate = { it.userId == favoriteId },
-                transform = { it.copy(isFavorite = isFavorite) }
+                transform = {
+                    it.copy(
+                        isFavorite = isFavorite,
+                        likes = if (isFavorite) likes.plus(1) else likes.minus(1)
+                    )
+                }
             )
         )
         _state.value = _state.value.copy(

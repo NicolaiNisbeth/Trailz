@@ -60,12 +60,6 @@ class FavoriteRepositoryImpl : FavoriteRepository {
 
     override suspend fun addToFavorite(favoritedId: String, userId: String): Result<Unit> {
         return try {
-            val favoritedStudyPlan = FirebaseFirestore.getInstance().collection("/studyplans").document(favoritedId)
-            favoritedStudyPlan.update(
-                "likes", FieldValue.increment(1),
-                "checked", true
-            ).await()
-
             val documentReference = collection.document(userId)
             val favorite = documentReference.get()
                 .await()
@@ -88,12 +82,6 @@ class FavoriteRepositoryImpl : FavoriteRepository {
     }
     override suspend fun removeFromFavorite(favoritedId: String, userId: String): Result<Unit> {
         return try {
-            val favoritedStudyPlan = FirebaseFirestore.getInstance().collection("/studyplans").document(favoritedId)
-            favoritedStudyPlan.update(
-                "likes", FieldValue.increment(-1),
-                "checked", false
-            ).await()
-
             val documentReference = collection.document(userId)
             val favorite = documentReference.get()
                 .await()

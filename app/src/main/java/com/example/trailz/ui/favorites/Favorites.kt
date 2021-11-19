@@ -29,8 +29,8 @@ fun Favorites(
         onStudyPlan = onStudyPlan,
         onProfile = onProfile,
         onFindFavorite = onFindFavorite,
-        onUpdateFavorite = { favoriteId, isChecked ->
-            viewModel.updateFavorite(favoriteId, userId, isChecked)
+        onUpdateFavorite = { favoriteId, isChecked, likes ->
+            viewModel.updateFavorite(favoriteId, userId, isChecked, likes)
         },
         onExpandClicked = { viewModel.updateExpanded(it) }
     )
@@ -41,7 +41,7 @@ fun Favorites(
 @Composable
 fun Favorites(
     state: DataState<StudyPlansUiModel>,
-    onUpdateFavorite: (String, Boolean) -> Unit,
+    onUpdateFavorite: (String, Boolean, Long) -> Unit,
     onStudyPlan: (String) -> Unit,
     onProfile: () -> Unit,
     onFindFavorite: () -> Unit,

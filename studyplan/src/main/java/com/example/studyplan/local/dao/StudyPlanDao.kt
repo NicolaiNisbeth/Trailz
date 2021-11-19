@@ -30,8 +30,8 @@ abstract class StudyPlanDao {
     @Query("SELECT * FROM studyplanentity WHERE studyPlanId = :userId")
     abstract fun studyPlanFlow(userId: String): Flow<StudyPlanEntity?>
 
-    @Query("UPDATE studyplanentity SET isFavorite = :isFavorite where studyPlanId = :studyPlanId")
-    abstract fun updateStudyPlanFavorite(studyPlanId: String, isFavorite: Boolean)
+    @Query("UPDATE studyplanentity SET isFavorite = :isFavorite, likes = :likes where studyPlanId = :studyPlanId")
+    abstract fun updateStudyPlanFavorite(studyPlanId: String, isFavorite: Boolean, likes: Long, )
 
     @Query("DELETE FROM studyplanentity")
     abstract suspend fun deleteAll()

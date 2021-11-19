@@ -19,4 +19,6 @@ interface StudyPlanRemoteDataSource {
     suspend fun createStudyPlan(studyPlan: StudyPlan): Flow<Result<Unit>>
 
     suspend fun updateStudyPlan(id: String, studyPlan: StudyPlan): Flow<Result<Unit>>
+
+    suspend fun updateStudyPlanFavorite(id: String, isFavorite: Boolean): Result<Unit>
 }

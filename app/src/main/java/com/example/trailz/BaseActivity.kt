@@ -9,8 +9,10 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
+import com.example.studyplan.CacheUtil
 import com.example.trailz.inject.SharedPrefs
 import com.example.trailz.language.LanguageConfig
 import com.google.android.material.transition.platform.MaterialSharedAxis

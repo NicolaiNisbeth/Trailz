@@ -1,5 +1,6 @@
 package com.example.trailz.inject
 
+import com.example.studyplan.CacheUtil
 import com.example.studyplan.StudyPlanRepository
 import com.example.studyplan.StudyPlanRepositoryImpl
 import com.example.studyplan.local.AppDataBase
@@ -26,9 +27,10 @@ class StudyPlanModule {
     @ViewModelScoped
     fun provideStudyPlanRepository(
         localDataSource: StudyPlanLocalDataSource,
-        remoteDataSource: StudyPlanRemoteDataSource
+        remoteDataSource: StudyPlanRemoteDataSource,
+        cacheUtil: CacheUtil
     ): StudyPlanRepository {
-        return StudyPlanRepositoryImpl(localDataSource, remoteDataSource)
+        return StudyPlanRepositoryImpl(localDataSource, remoteDataSource, cacheUtil)
     }
 
     @Provides

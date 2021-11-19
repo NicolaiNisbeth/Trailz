@@ -12,7 +12,9 @@ interface StudyPlanRepository {
 
     suspend fun getStudyPlans(): Flow<Result<List<StudyPlan>>>
 
-    suspend fun createStudyPlan(studyPlan: StudyPlan): Flow<Result<Unit>>
+    suspend fun createMyStudyPlan(studyPlan: StudyPlan): Flow<Result<Unit>>
 
-    suspend fun updateStudyPlanFavorite(id:String, isFavorite: Boolean): Flow<Unit>
+    suspend fun updateStudyPlanFavorite(id: String, isFavorite: Boolean, likes: Long): Flow<Unit>
+
+    suspend fun refreshStudyPlansIfStale(isForced: Boolean = false): Flow<Result<List<StudyPlan>>>
 }

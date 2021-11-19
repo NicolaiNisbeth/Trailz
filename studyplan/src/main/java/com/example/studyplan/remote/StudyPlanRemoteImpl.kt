@@ -3,6 +3,7 @@ package com.example.studyplan.remote
 import android.util.Log
 import com.example.base.Result
 import com.example.base.domain.StudyPlan
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -101,5 +102,16 @@ class StudyPlanRemoteImpl: StudyPlanRemoteDataSource {
     }.catch {
         emit(Result.Failed(it.message.toString()))
         Log.d(TAG, it.message.toString())
+    }
+
+    override suspend fun updateStudyPlanFavorite(id: String, isFavorite: Boolean): Result<Unit> {
+        return try {
+            val incrementer = if (isFavorite) 1L else -1L
+            collection.document(id).update("likes", FieldValue.increment(incrementer),).await()
+            Result.success(Unit)
+        } catch (e: Exception){
+            Log.d(TAG, e.message.toString())
+            Result.failed(e.message.toString())
+        }
     }
 }

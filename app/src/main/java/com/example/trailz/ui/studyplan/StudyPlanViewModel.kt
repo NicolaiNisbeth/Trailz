@@ -178,7 +178,7 @@ class MyStudyPlanViewModel @Inject constructor(
 
         if (isStudyPlanModified(studyPlan)) {
             viewModelScope.launch {
-                studyPlanRepository.createStudyPlan(studyPlan).collect {
+                studyPlanRepository.createMyStudyPlan(studyPlan).collect {
                     when (it) {
                         is Result.Loading -> _state.value = _state.value.copy(isLoading = true)
                         is Result.Failed -> _state.value =

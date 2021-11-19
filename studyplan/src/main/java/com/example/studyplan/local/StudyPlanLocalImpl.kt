@@ -19,7 +19,7 @@ class StudyPlanLocalImpl(
 ): StudyPlanLocalDataSource {
 
     override suspend fun getStudyPlan(id: String) = studyPlanDao.studyPlan(id)
-        .first()?.toDomain()
+        .firstOrNull()?.toDomain()
 
     override suspend fun observeStudyPlan(id: String) = studyPlanDao.studyPlanFlow(id)
         .mapNotNull { it?.toDomain() }
@@ -65,13 +65,9 @@ class StudyPlanLocalImpl(
         createStudyPlan(studyPlan)
     }
 
-    override suspend fun updateStudyPlanFavorite(id: String, isFavorite: Boolean) {
-        getStudyPlan(id)?.let {
-            val likes = if (isFavorite) it.likes.plus(1) else it.likes.minus(1)
-            updateStudyPlan(id, it.copy(isFavorite = isFavorite, likes = likes))
-            val studyPlan = getStudyPlan(id)
-            println(studyPlan)
-        }
+    override suspend fun updateStudyPlanFavorite(id: String, isFavorite: Boolean, likes: Long) {
+        val newLikes = if (isFavorite) likes.plus(1) else likes.minus(1)
+        studyPlanDao.updateStudyPlanFavorite(id, isFavorite, newLikes)
     }
 
 }
