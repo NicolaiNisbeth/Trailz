@@ -28,7 +28,7 @@ class SignupViewModel @Inject constructor(
     private val _password = MutableLiveData<String>()
     val password: LiveData<String> = _password
 
-    private val _studyPath = MutableLiveData<String>("Softwareteknologi")
+    private val _studyPath = MutableLiveData<String>("Software technology")
     val studyPath: LiveData<String> = _studyPath
 
     private val _studyPaths = MutableLiveData<List<String>>()
@@ -46,9 +46,8 @@ class SignupViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             _studyPaths.value = listOf(
-                "Softwareteknologi",
-                "Produktion",
-                "Elektroteknologi",
+                "Software technology",
+                "Production",
             )
         }
     }

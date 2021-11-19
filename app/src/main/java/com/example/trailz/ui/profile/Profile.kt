@@ -15,18 +15,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.trailz.R
 import com.example.trailz.language.LanguageConfig
 import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.compose.RatingBar
-import com.example.trailz.ui.common.themeColor
 import com.example.trailz.ui.favorites.LoadingScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -85,7 +82,7 @@ fun Profile(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Profile") },
+                title = { Text(text = stringResource(R.string.profile_toolbar_title)) },
                 backgroundColor = MaterialTheme.colors.background,
                 navigationIcon = {
                     IconButton(onClick = navigateUp) {
@@ -150,7 +147,7 @@ fun LanguageView(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Sprog",
+            text = stringResource(R.string.language_title),
             style = MaterialTheme.typography.h6,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
@@ -205,7 +202,7 @@ fun LoggedInView(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Velkommen ${user.username}",
+                text = stringResource(R.string.profile_title, formatArgs = arrayOf(user.username)),
                 style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.Center
             )
@@ -216,7 +213,7 @@ fun LoggedInView(
                     textAlign = TextAlign.Center
                 )
                 Text(
-                    text = "Likes",
+                    text = stringResource(R.string.user_likes),
                     style = MaterialTheme.typography.subtitle2,
                     textAlign = TextAlign.Center
                 )
@@ -224,7 +221,7 @@ fun LoggedInView(
         }
 
         Text(
-            text = "Profile",
+            text = stringResource(R.string.title_profile),
             style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.padding(start = 16.dp),
             textAlign = TextAlign.Center
@@ -235,33 +232,42 @@ fun LoggedInView(
                 .fillMaxWidth()
                 .background(MaterialTheme.colors.surface)
         ) {
-            Row(Modifier.fillMaxWidth().padding(16.dp),
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = "Email", textAlign = TextAlign.Center)
+                Text(text = stringResource(R.string.profile_field_email), textAlign = TextAlign.Center)
                 Text(text = user.email, color = MaterialTheme.colors.primary, textAlign = TextAlign.Center)
             }
 
-            Row(Modifier.fillMaxWidth().padding(16.dp),
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = "Password", textAlign = TextAlign.Center)
+                Text(text = stringResource(R.string.profile_field_password), textAlign = TextAlign.Center)
                 Text(text = "****", color = MaterialTheme.colors.primary, textAlign = TextAlign.Center, style = MaterialTheme.typography.h5)
             }
 
-            Row(Modifier.fillMaxWidth().padding(16.dp),
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = "Degree", textAlign = TextAlign.Center)
+                Text(text = stringResource(R.string.profile_field_degree), textAlign = TextAlign.Center)
                 Text(text = user.degree, color = MaterialTheme.colors.primary, textAlign = TextAlign.Center)
             }
         }
 
         Text(
-            text = "About",
+            text = stringResource(R.string.profile_field_about),
             style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.padding(start = 16.dp),
             textAlign = TextAlign.Center
@@ -287,13 +293,13 @@ fun LoggedInView(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = if (isDarkTheme) "Apply light theme" else "Apply dark theme")
+                Text(text = if (isDarkTheme) stringResource(R.string.profile_theme_light_cta) else stringResource(R.string.profile_theme_dark_cta))
                 Switch(isDarkTheme, toggleTheme)
             }
         }
 
         Text(
-            text = "Logout",
+            text = stringResource(R.string.profile_logout_cta),
             color = MaterialTheme.colors.error,
             textAlign = TextAlign.Center,
             modifier = Modifier
@@ -315,7 +321,7 @@ fun SettingsView(
             .clickable { onSettings() }
             .padding(16.dp)
     ) {
-        Text(text = "Settings")
+        Text(text = stringResource(R.string.profile_settings_cta))
         Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null)
     }
 }
@@ -333,7 +339,7 @@ fun RateAppView(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = "Bedøm vores app")
+        Text(text = stringResource(R.string.profile_review_cta))
         RatingBar(rating = 4)
     }
 }

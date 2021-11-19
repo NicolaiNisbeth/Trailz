@@ -8,6 +8,9 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.example.trailz.R
 import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.studyplan.StudyPlanList
 
@@ -50,7 +53,7 @@ fun Favorites(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Favoritter") },
+                title = { Text(stringResource(R.string.favorites_title)) },
                 backgroundColor = MaterialTheme.colors.background,
                 actions = {
                     IconButton(onClick = onProfile) {
@@ -98,9 +101,11 @@ fun EmptyScreen(onFindFavorite: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = null)
-        Text(text = "You have no favorites yet!")
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(stringResource(R.string.empty_favorites_title))
+        Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onFindFavorite) {
-            Text(text = "Find your favorite")
+            Text(stringResource(R.string.empty_favorites_description))
         }
     }
 }

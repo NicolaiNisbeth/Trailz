@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.example.trailz.R
 import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.studyplan.StudyPlanList
 import com.example.trailz.ui.favorites.LoadingScreen
@@ -51,7 +53,7 @@ private fun StudyPlans(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Study plans") },
+                title = { Text(text = stringResource(R.string.study_plans_toolbar_title)) },
                 backgroundColor = MaterialTheme.colors.background,
                 actions = {
                     IconButton(onClick = onProfile) {

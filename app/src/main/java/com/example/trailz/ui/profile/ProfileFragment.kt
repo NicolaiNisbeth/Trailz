@@ -96,6 +96,6 @@ class ProfileFragment : Fragment() {
     }
 
     private fun openGooglePlay(){
-        Toast.makeText(requireContext(), "Not available yet...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), getString(R.string.cta_disable), Toast.LENGTH_SHORT).show()
     }
 }

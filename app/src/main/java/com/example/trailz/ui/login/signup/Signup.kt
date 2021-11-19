@@ -43,6 +43,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
+import com.example.trailz.R
 import com.example.trailz.ui.common.compose.InputFieldFocus
 import com.google.accompanist.pager.PagerState
 
@@ -128,7 +130,7 @@ internal fun SignUp(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Sign Up") },
+                title = { Text(stringResource(R.string.sign_up_cta)) },
                 backgroundColor = MaterialTheme.colors.background,
                 navigationIcon = {
                     IconButton(onClick = navigateUp) {
@@ -147,11 +149,11 @@ internal fun SignUp(
         ) {
             item {
                 Text(
-                    text = "Welcome",
+                    text = stringResource(R.string.sign_up_title),
                     style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
                 )
                 Text(
-                    text = "Create your account",
+                    text = stringResource(R.string.sign_up_description),
                     style = MaterialTheme.typography.caption,
                 )
             }
@@ -162,8 +164,8 @@ internal fun SignUp(
                         modifier = it,
                         value = username,
                         onValueChange = onUsernameChange,
-                        label = "Username",
-                        contentDescription = "Username",
+                        label = stringResource(R.string.sign_up_username),
+                        contentDescription = stringResource(R.string.sign_up_username),
                         isError = hasError,
                         imeAction = ImeAction.Next,
                         keyboardType = KeyboardType.Text,
@@ -177,8 +179,8 @@ internal fun SignUp(
                 InputField(
                     value = email,
                     onValueChange = onEmailChange,
-                    label = "Email address",
-                    contentDescription = "Email address",
+                    label = stringResource(R.string.sign_up_email),
+                    contentDescription = stringResource(R.string.sign_up_email),
                     isError = hasError,
                     imeAction = ImeAction.Next,
                     keyboardType = KeyboardType.Email,
@@ -191,8 +193,8 @@ internal fun SignUp(
                 InputField(
                     value = password,
                     onValueChange = onPasswordChange,
-                    label = "password",
-                    contentDescription = "password",
+                    label = stringResource(R.string.sign_up_password),
+                    contentDescription = stringResource(R.string.sign_up_password),
                     isError = hasError,
                     imeAction = ImeAction.Done,
                     keyboardType = KeyboardType.Password,
@@ -216,7 +218,7 @@ internal fun SignUp(
                         .clip(CircleShape),
                     onClick = onSignup
                 ) {
-                    Text(text = if (isLoading) "Loading..." else "Sign up")
+                    Text(text = if (isLoading) stringResource(R.string.sign_up_loading) else stringResource(R.string.sign_in_cta))
                 }
             }
         }

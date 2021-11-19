@@ -10,7 +10,6 @@ class UpdateFavoriteUseCase(
     private val favoriteRepository: FavoriteRepository,
     private val studyPlanRepository: StudyPlanRepository
 ) {
-
     suspend operator fun invoke(
         favoriteId: String,
         userId: String,

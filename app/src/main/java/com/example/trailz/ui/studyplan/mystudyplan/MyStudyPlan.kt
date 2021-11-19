@@ -21,12 +21,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
+import com.example.trailz.R
 import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.compose.InputFieldDialog
 import com.example.trailz.ui.common.compose.InputFieldFocus
@@ -97,10 +99,9 @@ private fun MyStudyPlan(
     val scaffoldState = rememberScaffoldState()
 
     state.data?.isUpdated?.contentIfNotHandled()?.let {
+        val msg = if (it) stringResource(R.string.my_study_plan_saved) else stringResource(R.string.my_study_plan_saved_fail)
         coroutineScope.launch {
-            scaffoldState.snackbarHostState.showSnackbar(
-                message = if (it) "Saved" else "Failed to save!"
-            )
+            scaffoldState.snackbarHostState.showSnackbar(msg)
         }
     }
 
@@ -108,7 +109,7 @@ private fun MyStudyPlan(
         scaffoldState = scaffoldState,
         topBar = {
             TopAppBar(
-                title = { Text(text = "My Plan") },
+                title = { Text(text = stringResource(R.string.my_study_plan_title)) },
                 backgroundColor = MaterialTheme.colors.background,
                 actions = {
                     state.data?.let {
@@ -142,8 +143,8 @@ private fun MyStudyPlan(
                 ) {
                     SemesterListEdit(
                         title = it.title,
-                        username = "Created by ${it.username}",
-                        updated = "Updated: ${it.updatedLast}",
+                        username = stringResource(R.string.my_study_plan_creator, formatArgs = arrayOf(it.username)),
+                        updated = stringResource(R.string.my_study_plan_updated, formatArgs = arrayOf(it.updatedLast)),
                         editStudyPlanTitle = editStudyPlanTitle,
                         semesterToCourses = semesterToCourses,
                         isSemesterCollapsed = isSemesterCollapsed,
@@ -163,8 +164,8 @@ private fun MyStudyPlan(
                     SemesterList(
                         modifier = Modifier.padding(vertical = 12.dp, horizontal = 6.dp),
                         title = it.title,
-                        username = "Created by ${it.username}",
-                        updatedLast = "Updated: ${it.updatedLast}",
+                        username = stringResource(R.string.my_study_plan_creator, formatArgs = arrayOf(it.username)),
+                        updatedLast = stringResource(R.string.my_study_plan_creator, formatArgs = arrayOf(it.updatedLast)),
                         semesterToCourses = semesterToCourses,
                         isSemesterCollapsed = isSemesterCollapsed,
                         expandSemester = expandSemester,
@@ -245,7 +246,7 @@ private fun SemesterListEdit(
                     horizontalArrangement = Arrangement.Start
                 ) {
                     Text(
-                        text = "Add",
+                        text = stringResource(R.string.my_study_plan_add),
                         color = MaterialTheme.colors.secondaryVariant,
                         style = MaterialTheme.typography.caption,
                     )
@@ -253,26 +254,24 @@ private fun SemesterListEdit(
             }
         }
     }
-    if (openDialog) {
-        InputFieldDialog(
-            title = "What course is this?",
-            confirmTitle = "Confirm",
-            dismissTitle = "Dismiss",
-            onConfirm = submitNameChange,
-            onDismiss = { openDialog = false }
-        ) { value, onValueChange ->
-            InputFieldFocus { focusModifier ->
-                TextField(
-                    modifier = focusModifier,
-                    value = value,
-                    onValueChange = onValueChange,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Done,
-                        keyboardType = KeyboardType.Password
-                    ),
-                    keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
-                )
-            }
+    if (openDialog) InputFieldDialog(
+        title = stringResource(R.string.my_study_plan_dialog_course_title),
+        confirmTitle = stringResource(R.string.my_study_plan_dialog_confirm),
+        dismissTitle = stringResource(R.string.my_study_plan_dialog_dismiss),
+        onConfirm = submitNameChange,
+        onDismiss = { openDialog = false }
+    ) { value, onValueChange ->
+        InputFieldFocus { focusModifier ->
+            TextField(
+                modifier = focusModifier,
+                value = value,
+                onValueChange = onValueChange,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Password
+                ),
+                keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
+            )
         }
     }
 }
@@ -310,26 +309,24 @@ private fun HeaderEdit(
         Text(owner, style = MaterialTheme.typography.caption)
         Text(updatedLast, style = MaterialTheme.typography.overline)
 
-        if (openDialog) {
-            InputFieldDialog(
-                title = "Study Plan Title",
-                confirmTitle = "Confirm",
-                dismissTitle = "Dismiss",
-                onConfirm = submitNameChange,
-                onDismiss = { openDialog = false }
-            ) { value, onValueChange ->
-                InputFieldFocus { focusModifier ->
-                    TextField(
-                        modifier = focusModifier,
-                        value = value,
-                        onValueChange = onValueChange,
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            imeAction = ImeAction.Done,
-                            keyboardType = KeyboardType.Text
-                        ),
-                        keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
-                    )
-                }
+        if (openDialog) InputFieldDialog(
+            title = stringResource(R.string.my_study_plan_dialog_plan_title),
+            confirmTitle = stringResource(R.string.my_study_plan_dialog_confirm),
+            dismissTitle = stringResource(R.string.my_study_plan_dialog_dismiss),
+            onConfirm = submitNameChange,
+            onDismiss = { openDialog = false }
+        ) { value, onValueChange ->
+            InputFieldFocus { focusModifier ->
+                TextField(
+                    modifier = focusModifier,
+                    value = value,
+                    onValueChange = onValueChange,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Done,
+                        keyboardType = KeyboardType.Text
+                    ),
+                    keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
+                )
             }
         }
     }
@@ -396,7 +393,7 @@ private fun SemesterItemEdit(
         openDialog = false
     }
 
-    Box{
+    Box(modifier){
         Spacer(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -427,26 +424,24 @@ private fun SemesterItemEdit(
             )
         }
 
-        if (openDialog) {
-            InputFieldDialog(
-                title = "What semester is it?",
-                confirmTitle = "Confirm",
-                dismissTitle = "Dismiss",
-                onConfirm = submitNameChange,
-                onDismiss = { openDialog = false }
-            ) { value, onValueChange ->
-                InputFieldFocus { focusModifier ->
-                    TextField(
-                        modifier = focusModifier,
-                        value = value,
-                        onValueChange = onValueChange,
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            imeAction = ImeAction.Done,
-                            keyboardType = KeyboardType.Number
-                        ),
-                        keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
-                    )
-                }
+        if (openDialog) InputFieldDialog(
+            title = stringResource(R.string.my_study_plan_dialog_semester_title),
+            confirmTitle = stringResource(R.string.my_study_plan_dialog_confirm),
+            dismissTitle = stringResource(R.string.my_study_plan_dialog_dismiss),
+            onConfirm = submitNameChange,
+            onDismiss = { openDialog = false }
+        ) { value, onValueChange ->
+            InputFieldFocus { focusModifier ->
+                TextField(
+                    modifier = focusModifier,
+                    value = value,
+                    onValueChange = onValueChange,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Done,
+                        keyboardType = KeyboardType.Number
+                    ),
+                    keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
+                )
             }
         }
     }
@@ -482,33 +477,31 @@ private fun CourseItemEdit(
         }
         TextButtonV2(onClick = { onRemove(title) }, horizontalArrangement = Arrangement.End) {
             Text(
-                text = "Remove",
+                text = stringResource(R.string.my_study_plan_course_remove),
                 color = MaterialTheme.colors.error,
                 style = MaterialTheme.typography.caption,
             )
         }
     }
 
-    if (openDialog) {
-        InputFieldDialog(
-            title = "Course name",
-            confirmTitle = "Confirm",
-            dismissTitle = "Dismiss",
-            onConfirm = submitNameChange,
-            onDismiss = { openDialog = false }
-        ) { value, onValueChange ->
-            InputFieldFocus { focusModifier ->
-                TextField(
-                    modifier = focusModifier,
-                    value = value,
-                    onValueChange = onValueChange,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Done,
-                        keyboardType = KeyboardType.Password
-                    ),
-                    keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
-                )
-            }
+    if (openDialog) InputFieldDialog(
+        title = stringResource(R.string.my_study_plan_dialog_course_name),
+        confirmTitle = stringResource(R.string.my_study_plan_dialog_confirm),
+        dismissTitle = stringResource(R.string.my_study_plan_dialog_dismiss),
+        onConfirm = submitNameChange,
+        onDismiss = { openDialog = false }
+    ) { value, onValueChange ->
+        InputFieldFocus { focusModifier ->
+            TextField(
+                modifier = focusModifier,
+                value = value,
+                onValueChange = onValueChange,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Password
+                ),
+                keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
+            )
         }
     }
 }

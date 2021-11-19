@@ -19,9 +19,11 @@ class SigninViewModel @Inject constructor(
     private val sharedPrefs: SharedPrefs
 ): ViewModel() {
 
+    // FIXME: hardcoded email
     private val _email = MutableLiveData<String>("s175565@win.dtu.dk")
     val email: LiveData<String> = _email
 
+    // FIXME: hardcoded password
     private val _password = MutableLiveData<String>("nicolai")
     val password: LiveData<String> = _password
 
@@ -42,7 +44,7 @@ class SigninViewModel @Inject constructor(
         _password.value = password
     }
 
-    fun signin(){
+    fun signIn(){
         val email = email.value
         val password = password.value
         if (invalidInput(email, password)){

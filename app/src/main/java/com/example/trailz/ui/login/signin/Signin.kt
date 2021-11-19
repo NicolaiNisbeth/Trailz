@@ -2,13 +2,11 @@ package com.example.trailz.ui.login.signin
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -24,7 +22,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -36,7 +34,6 @@ import androidx.compose.ui.unit.sp
 import com.example.trailz.R
 import com.example.trailz.ui.common.compose.DividerWithText
 import com.example.trailz.ui.common.compose.InputField
-import com.example.trailz.ui.common.compose.InputFieldFocus
 
 @ExperimentalComposeUiApi
 @Composable
@@ -63,7 +60,7 @@ fun SignIn(
         onPasswordChange = viewModel::changePassword,
         isLoading = isLoading,
         hasError = hasError,
-        onSignin = viewModel::signin,
+        onSignin = viewModel::signIn,
         onSignUp = onSignUp
     )
 }
@@ -97,11 +94,11 @@ internal fun SignIn(
         ) {
             item {
                 Text(
-                    text = "Welcome Back",
+                    text = stringResource(R.string.sign_in_title),
                     style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
                 )
                 Text(
-                    text = "We have missed you, Let's start by Sign In!",
+                    text = stringResource(R.string.sign_in_description),
                     style = MaterialTheme.typography.caption,
                 )
             }
@@ -110,8 +107,8 @@ internal fun SignIn(
                 InputField(
                     value = email,
                     onValueChange = onEmailChange,
-                    label = "Email address",
-                    contentDescription = "Email address",
+                    label = stringResource(R.string.sign_in_email),
+                    contentDescription = stringResource(R.string.sign_in_email),
                     isError = hasError,
                     imeAction = ImeAction.Next,
                     keyboardType = KeyboardType.Email,
@@ -124,8 +121,8 @@ internal fun SignIn(
                 InputField(
                     value = password,
                     onValueChange = onPasswordChange,
-                    label = "password",
-                    contentDescription = "password",
+                    label = stringResource(R.string.sign_in_password),
+                    contentDescription = stringResource(R.string.sign_in_password),
                     isError = hasError,
                     imeAction = ImeAction.Done,
                     keyboardType = KeyboardType.Password,
@@ -149,7 +146,7 @@ internal fun SignIn(
                         .height(50.dp)
                         .clip(CircleShape)
                 ) {
-                    Text(text = if (isLoading) "Loading..." else "Log In")
+                    Text(text = if (isLoading) stringResource(R.string.sign_in_loading) else stringResource(R.string.sign_in_cta))
                 }
             }
 
@@ -162,7 +159,7 @@ internal fun SignIn(
                         .height(50.dp)
                 ) {
                     Text(
-                        text = "Sign up",
+                        text = stringResource(R.string.sign_up_cta),
                         style = MaterialTheme.typography.h6.copy(fontSize = 14.sp),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()

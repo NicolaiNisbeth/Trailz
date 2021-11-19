@@ -13,8 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
+import com.example.trailz.R
 import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.studyplan.SemesterList
 
@@ -74,8 +76,8 @@ private fun StudyPlan(
                 SemesterList(
                     modifier = Modifier.padding(vertical = 12.dp, horizontal = 6.dp),
                     title = it.title,
-                    username = "Created by ${it.username}",
-                    updatedLast = "Updated ${it.updatedLast}",
+                    username = stringResource(R.string.my_study_plan_creator, formatArgs = arrayOf(it.username)),
+                    updatedLast = stringResource(R.string.my_study_plan_updated, formatArgs = arrayOf(it.updatedLast)),
                     semesterToCourses = semesterToCourses,
                     isSemesterCollapsed = isSemesterCollapsed,
                     expandSemester = expandSemester,
@@ -94,7 +96,7 @@ private fun Toolbar(
     toggleAllCollapsed: (Boolean) -> Unit
 ) {
     TopAppBar(
-        title = { Text(text = "Study Plan") },
+        title = { Text(stringResource(R.string.study_plan_toolbar)) },
         backgroundColor = MaterialTheme.colors.background,
         navigationIcon = {
             IconButton(onClick = navigateUp) {

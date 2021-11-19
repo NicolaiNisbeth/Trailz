@@ -113,22 +113,6 @@ fun SemesterItem(
     color: Color,
     onClick: (String) -> Unit
 ) {
-    val surfaceColor = LocalContext.current.themeColor(com.example.trailz.R.attr.colorSurface)
-
-    val transition = updateTransition(
-        label = "collapsedTranstion",
-        transitionState = remember {
-            MutableTransitionState(isCollapsed).apply {
-                targetState = !isCollapsed
-            }
-        }
-    )
-
-    val arrowRotationDegree by transition.animateFloat(
-        transitionSpec = { tween(durationMillis = EXPAND_ANIMATION_DURATION) },
-        targetValueByState = { if (isCollapsed) 0f else 180f },
-        label = "arrowRotation"
-    )
     Box(
         Modifier
             .clickable { onClick(title) }
@@ -151,10 +135,9 @@ fun SemesterItem(
         Icon(
             contentDescription = null,
             tint = color,
-            painter = isCollapsedIcon,
+            painter = if (isCollapsed) isCollapsedIcon else isExpandedIcon,
             modifier = Modifier
                 .background(MaterialTheme.colors.surface)
-                .rotate(arrowRotationDegree)
                 .align(Alignment.CenterEnd)
         )
     }

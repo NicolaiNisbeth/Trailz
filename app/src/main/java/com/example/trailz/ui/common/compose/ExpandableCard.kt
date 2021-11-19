@@ -52,7 +52,7 @@ fun ExpandableCard(
     ) {
         Column {
             FixedContent(arrowRotationDegree)
-            ExpandableContent(isVisible = isExpanded, initialVisibility = isExpanded) {
+            ExpandableContent(isVisible = isExpanded) {
                 expandableContent()
             }
         }
@@ -63,7 +63,6 @@ fun ExpandableCard(
 @Composable
 fun ExpandableContent(
     isVisible: Boolean,
-    initialVisibility: Boolean,
     content: @Composable () -> Unit
 ) {
     val enterExpand = remember { expandVertically(animationSpec = tween(EXPAND_ANIMATION_DURATION)) }

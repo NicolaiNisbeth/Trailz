@@ -1,9 +1,6 @@
 package com.example.trailz.ui.onboarding
 
 import android.animation.ValueAnimator
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -11,22 +8,21 @@ import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.trailz.R
 import com.example.trailz.ui.common.compose.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -43,18 +39,18 @@ fun Onboarding(
 ) {
     val onboardingList = listOf(
         Triple(
-            "Trouble tailoring your study plan?",
-            "It is difficult to know when and what courses to take, in what order to best equip yourself for your dream career.",
+            stringResource(R.string.onboarding_problem_title),
+            stringResource(R.string.onboarding_problem_description),
             "problem.json"
         ),
         Triple(
-            "You don't tailor alone",
-                "Browse our study plans and find your favorite, so you no longer are in doubt when it matters.",
+            stringResource(R.string.onboarding_opportunity_title),
+            stringResource(R.string.onboarding_opportunity_description),
             "target.json"
         ),
         Triple(
-            "Lay the foundation today",
-            "Plan ahead and reach your destination without surprises and potential setbacks.",
+            stringResource(R.string.onboarding_solution_title),
+            stringResource(R.string.onboarding_solution_description),
             "trail.json"
         )
     )
@@ -69,14 +65,6 @@ fun Onboarding(
         pagerState = pagerState,
         onboardingList = onboardingList,
         finishOnboarding = finishOnboarding,
-        openNextPage = {
-            coroutineScope.launch {
-                pagerState.animateScrollToPage(
-                    page = pagerState.currentPage + 1,
-                    animationSpec = tween()
-                )
-            }
-        }
     )
 }
 
@@ -86,7 +74,6 @@ fun Onboarding(
 internal fun Onboarding(
     pagerState: PagerState,
     onboardingList: List<Triple<String, String, String>>,
-    openNextPage: () -> Unit,
     finishOnboarding: () -> Unit
 ) {
 
@@ -146,7 +133,7 @@ internal fun Onboarding(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text("Begin")
+                Text(stringResource(R.string.onboarding_cta))
             }
         }
     }

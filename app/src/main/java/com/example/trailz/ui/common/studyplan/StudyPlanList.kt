@@ -11,8 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Semester
+import com.example.trailz.R
 import com.example.trailz.ui.common.compose.ExpandableCard
 import com.example.trailz.ui.common.compose.FavoriteButton
 import com.example.trailz.ui.favorites.StudyPlansUiModel
@@ -71,7 +73,7 @@ fun StudyPlanOverView(
         isExpanded = isExpanded,
         FixedContent = { arrowRotationDegree ->
             val paddingModifier = Modifier.padding(horizontal = 12.dp)
-            Text(text = "$likes likes", style = MaterialTheme.typography.overline, modifier = paddingModifier.padding(top = 16.dp))
+            Text(text = stringResource(id = R.string.user_likes_args, formatArgs = arrayOf(likes)), style = MaterialTheme.typography.overline, modifier = paddingModifier.padding(top = 16.dp))
             Text(text = title, style = MaterialTheme.typography.button, modifier = paddingModifier)
             Text(text = username, style = MaterialTheme.typography.body2, modifier = paddingModifier)
             Text(text = lastUpdated, style = MaterialTheme.typography.caption, modifier = paddingModifier)
@@ -102,7 +104,13 @@ fun StudyPlanOverView(
             Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp)) {
                 semesters.forEachIndexed { index, semester ->
                     if (semester.courses.isNotEmpty()){
-                        Text(text = "${semester.order}. Semester", style = MaterialTheme.typography.button)
+                        Text(
+                            text = stringResource(
+                                id = R.string.semester_number,
+                                formatArgs = arrayOf(semester.order)
+                            ),
+                            style = MaterialTheme.typography.button
+                        )
                         for (course in semester.courses) {
                             Text(text = course.title, style = MaterialTheme.typography.overline)
                         }

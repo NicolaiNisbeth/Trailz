@@ -25,7 +25,7 @@ class StudyPlanRepositoryImpl(
     override suspend fun observeStudyPlan(id: String) = flow<Result<StudyPlan>> {
         val plan = localDataSource.getStudyPlan(id)
         if (plan != null) emit(Result.success(plan))
-        else emit(Result.failed("No studyPlan with id:$id"))
+        else emit(Result.failed("Unable to download studyPlan"))
         remoteDataSource.observeStudyPlan(id).collect {
             if (it is Result.Success){
                 emit(Result.success(it.data))
@@ -38,7 +38,7 @@ class StudyPlanRepositoryImpl(
     override suspend fun getStudyPlan(id: String) = flow<Result<StudyPlan>> {
         val studyPlan = localDataSource.getStudyPlan(id)
         if (studyPlan != null) emit(Result.success(studyPlan))
-        else emit(Result.failed("No studyPlan with id:$id"))
+        else emit(Result.failed("Unable to download studyPlan"))
         val res = remoteDataSource.getStudyPlan(id)
         if (res is Result.Success){
             emit(Result.success(res.data))
