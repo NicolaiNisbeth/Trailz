@@ -31,9 +31,7 @@ fun InputFieldDialog(
         buttons = {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
                 Text(text = title, style = textStyle)
-                inputField(newTitle){
-                    newTitle = it
-                }
+                inputField(newTitle){ newTitle = it }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     TextButton(onClick = onDismiss) {
                         Text(dismissTitle)

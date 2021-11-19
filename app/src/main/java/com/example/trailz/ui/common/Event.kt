@@ -2,6 +2,7 @@ package com.example.trailz.ui.common
 
 /**
  * Used as a wrapper for data that is exposed via a LiveData that represents an event.
+ * https://medium.com/androiddevelopers/livedata-with-snackbar-navigation-and-other-events-the-singleliveevent-case-ac2622673150
  */
 open class Event<T>(private val content: T) {
 
@@ -24,8 +25,4 @@ open class Event<T>(private val content: T) {
      * Returns the content, even if it's already been handled.
      */
     fun peekContent(): T = content
-
-    fun contentIfNotHandledElse(value: T): T {
-        return contentIfNotHandled() ?: value
-    }
 }

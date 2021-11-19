@@ -1,6 +1,7 @@
 package com.example.trailz
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Point
 import android.os.Bundle
@@ -27,39 +28,18 @@ import android.view.View
 import android.view.Window
 import android.view.WindowInsets
 import androidx.appcompat.app.AppCompatDelegate
+import com.example.trailz.ui.login.LoginActivity
+import kotlinx.coroutines.flow.MutableStateFlow
 
 
 @AndroidEntryPoint
-class MainActivity : BaseActivity() {
+class MainActivity : BaseActivity(), LogoutListener {
 
     @Inject
     lateinit var application: TrailzApplication
 
-    @Inject
-    lateinit var prefs: SharedPrefs
-
-    val viewModel: MainActivityViewModel by viewModels()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (prefs.isDarkTheme) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
-        /* FIXME: vi må lige rydde op i det her snask
-        val w: Window = window
-        w.setFlags(
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-        )
-        this.window.apply {
-            clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-            addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            statusBarColor = Color.TRANSPARENT
-        }
-         */
         val bottomNavigationView = DataBindingUtil
             .setContentView<ActivityMainBinding>(this, R.layout.activity_main)
             .navView
@@ -67,40 +47,19 @@ class MainActivity : BaseActivity() {
         bottomNavigationView.setupWithNavController(
             findNavController(R.id.nav_host_fragment_activity_main)
         )
+        bottomNavigationView.setOnItemReselectedListener {
+            /* to avoid recreating fragment when fragment is reselected */
+        }
+    }
 
-        val colorSecondary = themeColor(R.attr.colorSecondary)
-        val colorOnSecondary = themeColor(R.attr.colorOnSecondary)
-        val favoriteBadge = bottomNavigationView.getOrCreateBadge(R.id.favorites_navigation).apply {
-            backgroundColor = colorSecondary
-            badgeTextColor = colorOnSecondary
-        }
-        viewModel.count.observe(this) {
-            favoriteBadge.isVisible = it > 0
-            favoriteBadge.number = it
-        }
+    override fun onLogout() {
+        sharedPrefs.loggedInId = null
+        startActivity(Intent(this, LoginActivity::class.java))
+        finish()
     }
 }
 
-@HiltViewModel
-class MainActivityViewModel @Inject constructor(
-    private val repository: FavoriteRepository,
-    private val sharedPref: SharedPrefs
-): ViewModel(){
-
-    private val _count = MutableLiveData(0)
-    val count: LiveData<Int> = _count
-
-    init {
-        viewModelScope.launch {
-            repository.observeFavoriteBy(sharedPref.loggedInId).collect {
-                when (it){
-                    is Result.Failed -> { }
-                    is Result.Loading -> { }
-                    is Result.Success -> {
-                        _count.value = it.data.followedUserIds.count()
-                    }
-                }
-            }
-        }
-    }
+interface LogoutListener {
+    fun onLogout()
 }
+

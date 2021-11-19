@@ -1,50 +1,85 @@
 package com.example.studyplan.local.entity
 
 import androidx.room.*
+import com.example.base.domain.Course
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.lang.reflect.Type
 
 @Entity
 data class StudyPlanEntity(
     @PrimaryKey val studyPlanId: String,
-    val title: String
+    val title: String,
+    val username: String,
+    val updated: String,
+    val likes: Long,
+    val semesters: List<SemesterEntity>,
+    val isFavorite: Boolean
 )
 
 @Entity
 data class SemesterEntity(
-    val studyPlanCreatorId: String,
-    val semesterName: Int
+    val order: Int,
+    val courses: List<CourseEntity>
 ){
     @PrimaryKey(autoGenerate = true) var semesterId = 0L
 }
 
 @Entity
 data class CourseEntity(
-    val courseName: String,
-){
-    @PrimaryKey(autoGenerate = true) var courseId = 0L
+    @PrimaryKey val title: String
+)
+
+interface JsonParser {
+    fun <T> fromJson(json: String, type: Type): T?
+    fun <T> toJson(obj: T, type: Type): String?
 }
 
-@Entity(primaryKeys = ["semesterId", "courseId"])
-data class SemesterCourseCrossRef(
-    val semesterId: Long,
-    val courseId: Long
-)
+class GsonParser(
+    private val gson: Gson
+): JsonParser {
+    override fun <T> fromJson(json: String, type: Type): T? {
+        return gson.fromJson(json, type)
+    }
 
-data class SemesterWithCourses(
-    @Embedded val semester: SemesterEntity,
-    @Relation(
-        parentColumn = "semesterId",
-        entityColumn = "courseId",
-        associateBy = Junction(SemesterCourseCrossRef::class)
-    )
-    val courses: List<CourseEntity>
-)
+    override fun <T> toJson(obj: T, type: Type): String? {
+        return gson.toJson(obj, type)
+    }
+}
 
-data class StudyPlanWithSemestersAndCourses(
-    @Embedded val studyPlan: StudyPlanEntity,
-    @Relation(
-        entity = SemesterEntity::class,
-        parentColumn = "studyPlanId",
-        entityColumn = "studyPlanCreatorId"
-    )
-    val semesters: List<SemesterWithCourses>
-)
+@ProvidedTypeConverter
+class Converters(
+    private val jsonParser: JsonParser
+){
+    @TypeConverter
+    fun fromSemestersJson(json: String): List<SemesterEntity> {
+        return jsonParser.fromJson<List<SemesterEntity>>(
+            json,
+            object: TypeToken<List<SemesterEntity>>(){}.type
+        ) ?: emptyList()
+    }
+
+    @TypeConverter
+    fun toSemestersJson(semesters: List<SemesterEntity>): String{
+        return jsonParser.toJson(
+            semesters,
+            object: TypeToken<List<SemesterEntity>>(){}.type
+        ) ?: "[]"
+    }
+
+    @TypeConverter
+    fun fromCoursesJson(json: String): List<CourseEntity> {
+        return jsonParser.fromJson<List<CourseEntity>>(
+            json,
+            object: TypeToken<List<CourseEntity>>(){}.type
+        ) ?: emptyList()
+    }
+
+    @TypeConverter
+    fun toCoursesJson(semesters: List<CourseEntity>): String{
+        return jsonParser.toJson(
+            semesters,
+            object: TypeToken<List<CourseEntity>>(){}.type
+        ) ?: "[]"
+    }
+}

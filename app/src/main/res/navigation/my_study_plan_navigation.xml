@@ -8,8 +8,8 @@
 
     <fragment
         android:id="@+id/myStudyPlanFragment"
-        android:name="com.example.trailz.ui.mystudyplan.MyStudyPlanFragment"
-        android:label="MyStudyPlanFragment" >
+        android:name="com.example.trailz.ui.studyplan.mystudyplan.MyStudyPlanFragment"
+        android:label="MyStudyPlanFragment">
 
         <action
             android:id="@+id/action_my_study_plan_to_profile"
@@ -17,9 +17,7 @@
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
-
+            app:popExitAnim="@anim/slide_out_right" />
 
     </fragment>
 

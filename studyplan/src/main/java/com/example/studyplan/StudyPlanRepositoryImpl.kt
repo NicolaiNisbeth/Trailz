@@ -1,89 +1,85 @@
 package com.example.studyplan
 
+import android.os.SystemClock
 import com.example.base.domain.StudyPlan
 import com.example.base.Result
 import com.example.studyplan.local.StudyPlanLocalDataSource
 import com.example.studyplan.remote.StudyPlanRemoteDataSource
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import java.text.SimpleDateFormat
+import java.time.Clock
+import java.util.*
 
 class StudyPlanRepositoryImpl(
     private val localDataSource: StudyPlanLocalDataSource,
-    private val remoteDataSource: StudyPlanRemoteDataSource
-): StudyPlanRepository {
+    private val remoteDataSource: StudyPlanRemoteDataSource,
+    private val cacheUtil: CacheUtil
+) : StudyPlanRepository {
 
-    override suspend fun getStudyPlan(id: String?): Flow<Result<StudyPlan>> = if (id != null){
-        remoteDataSource.getStudyPlan(id)
-    } else {
-        flow {
-            val studyPlan = localDataSource.getStudyPlan()
-            if (studyPlan != null){
-                emit(Result.success<StudyPlan>(studyPlan))
-            } else {
-                emit(Result.failed<StudyPlan>(message = "user with id=$id has no studyplan"))
+    companion object {
+        const val STUDY_PLAN_CACHE_KEY = "study_play_cache_key"
+    }
+
+    override suspend fun observeStudyPlan(id: String) = flow<Result<StudyPlan>> {
+        val plan = localDataSource.getStudyPlan(id)
+        if (plan != null) emit(Result.success(plan))
+        else emit(Result.failed("Unable to download studyPlan"))
+        remoteDataSource.observeStudyPlan(id).collect {
+            if (it is Result.Success){
+                emit(Result.success(it.data))
+                remoteDataSource.createStudyPlan(it.data).collect()
+                cacheUtil.updateTimer(STUDY_PLAN_CACHE_KEY, System.currentTimeMillis())
             }
         }
+    }.flowOn(Dispatchers.Default)
+
+    override suspend fun getStudyPlan(id: String) = flow<Result<StudyPlan>> {
+        val studyPlan = localDataSource.getStudyPlan(id)
+        if (studyPlan != null) emit(Result.success(studyPlan))
+        else emit(Result.failed("Unable to download studyPlan"))
+        val res = remoteDataSource.getStudyPlan(id)
+        if (res is Result.Success){
+            emit(Result.success(res.data))
+            remoteDataSource.createStudyPlan(res.data).collect()
+            cacheUtil.updateTimer(STUDY_PLAN_CACHE_KEY, System.currentTimeMillis())
+        }
+    }.flowOn(Dispatchers.Default)
+
+    override suspend fun getStudyPlans() = flow<Result<List<StudyPlan>>> {
+        emit(Result.success(localDataSource.getStudyPlans()))
+        refreshStudyPlansIfStale().collect { emit(it) }
+    }.flowOn(Dispatchers.Default)
+
+    override suspend fun createMyStudyPlan(studyPlan: StudyPlan) = flow<Result<Unit>> {
+        val simpleDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+        val currentDT: String = simpleDateFormat.format(Date())
+        val studyPlanDate = studyPlan.copy(updated = currentDT)
+        remoteDataSource.createStudyPlan(studyPlanDate).collect(::emit)
     }.flowOn(Dispatchers.IO)
 
-    @FlowPreview
-    override suspend fun getStudyPlans() = observeStudyPlans()
-
-    fun refreshBreedsIfStale(forced: Boolean = false): Flow<Result<List<StudyPlan>>> = flow {
-        emit(Result.loading())
-        val networkBreedDataState: Flow<Result<List<StudyPlan>>>
-        if (forced) {
-            networkBreedDataState = remoteDataSource.getStudyPlans()
-            networkBreedDataState.collect {
-                if (it is Result.Success){
-                    it.data.forEach { localDataSource.createStudyPlan(it) }
-                } else {
-                    networkBreedDataState.collect { emit(it) }
-                }
-            }
+    override suspend fun updateStudyPlanFavorite(id: String, isFavorite: Boolean, likes: Long) = flow<Unit> {
+        localDataSource.updateStudyPlanFavorite(id, isFavorite, likes)
+        val result = remoteDataSource.updateStudyPlanFavorite(id, isFavorite)
+        if (result is Result.Failed){
+            localDataSource.updateStudyPlanFavorite(id, !isFavorite, likes)
         }
     }
 
-    private suspend fun getStudyPlansFromCache(): Flow<Result<List<StudyPlan>>> =
-        localDataSource.observeStudyPlans()
-            .mapNotNull {
-                if (it.isEmpty()){
-                    null
-                } else {
-                    Result.success(it)
+    override suspend fun refreshStudyPlansIfStale(isForced: Boolean) = flow<Result<List<StudyPlan>>> {
+        val isStale = cacheUtil.isDataStale(STUDY_PLAN_CACHE_KEY, System.currentTimeMillis())
+        if (isForced || isStale) {
+            emit(Result.loading())
+            delay(1500) // FIXME: For demonstration purposes
+            when (val result = remoteDataSource.getStudyPlans()) {
+                is Result.Failed -> emit(Result.failed(result.message))
+                is Result.Success -> {
+                    localDataSource.createStudyPlans(result.data)
+                    emit(Result.success(result.data))
                 }
-            }
-
-    @FlowPreview
-    override suspend fun observeStudyPlans() = flowOf(
-        refreshBreedsIfStale(true),
-        getStudyPlansFromCache()
-    ).flattenMerge().flowOn(Dispatchers.IO)
-
-    override suspend fun deleteStudyPlan(id: String) = flow<Result<Unit>> {
-        localDataSource.deleteStudyPlan(id)
-        remoteDataSource.deleteStudyPlan(id).collect {
-            if (it is Result.Success){
-                emit(it)
+                is Result.Loading -> emit(Result.loading())
             }
         }
-    }.flowOn(Dispatchers.IO)
-
-    override suspend fun createStudyPlan(studyPlan: StudyPlan) = flow<Result<Unit>> {
-        localDataSource.createStudyPlan(studyPlan)
-        remoteDataSource.createStudyPlan(studyPlan).collect {
-            if (it is Result.Success){
-                emit(it)
-            }
-        }
-    }.flowOn(Dispatchers.IO)
-
-    override suspend fun updateStudyPlan(id: String, studyPlan: StudyPlan) = flow<Result<Unit>> {
-        localDataSource.updateStudyPlan(id, studyPlan)
-        remoteDataSource.updateStudyPlan(id, studyPlan).collect {
-            if (it is Result.Success){
-                emit(it)
-            }
-        }
-    }.flowOn(Dispatchers.IO)
+    }.flowOn(Dispatchers.Default)
 }

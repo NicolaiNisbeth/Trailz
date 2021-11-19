@@ -6,9 +6,11 @@ import kotlinx.coroutines.flow.Flow
 
 interface FavoriteRepository {
 
-    fun observeFavoriteBy(userId: String?): Flow<Result<Favorite>>
+    fun observeFavoriteBy(userId: String): Flow<Result<Favorite>>
 
-    fun addToFavorite(favoritedId: String, userId: String?): Flow<Result<Unit>>
+    suspend fun getFavoritesBy(userId: String): Result<Favorite>
 
-    fun removeFromFavorite(favoritedId: String, userId: String?): Flow<Result<Unit>>
+    suspend fun addToFavorite(favoritedId: String, userId: String): Result<Unit>
+
+    suspend fun removeFromFavorite(favoritedId: String, userId: String): Result<Unit>
 }

@@ -11,22 +11,20 @@ import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.HorizontalAlignmentLine
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.trailz.R
 import com.example.trailz.language.LanguageConfig
+import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.compose.RatingBar
-import com.example.trailz.ui.signup.User
+import com.example.trailz.ui.favorites.LoadingScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -40,8 +38,7 @@ fun Profile(
     onChangeLanguage: (String) -> Unit,
     navigateUp: () -> Unit,
     toggleTheme: (Boolean) -> Unit,
-    signIn: () -> Unit,
-    signUp: () -> Unit,
+    logout: () -> Unit,
     rateApp: () -> Unit,
     settings: () -> Unit
 ) {
@@ -49,7 +46,7 @@ fun Profile(
     val modalBottomSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
     )
-    val uiState by viewModel.state.observeAsState(initial = ProfileUiState(isLoading = true))
+    val uiState by viewModel.state.observeAsState(initial = DataState(isLoading = true))
 
     Profile(
         state = uiState,
@@ -60,9 +57,7 @@ fun Profile(
         onChangeLanguage = onChangeLanguage,
         navigateUp = navigateUp,
         toggleTheme = toggleTheme,
-        signIn = signIn,
-        signUp = signUp,
-        logout = viewModel::logout,
+        logout = logout,
         rateApp = rateApp,
         settings = settings
     )
@@ -72,7 +67,7 @@ fun Profile(
 @ExperimentalMaterialApi
 @Composable
 fun Profile(
-    state: ProfileUiState,
+    state: DataState<ProfileData>,
     coroutineScope: CoroutineScope,
     isDarkTheme: Boolean,
     modalBottomSheetState: ModalBottomSheetState,
@@ -80,8 +75,6 @@ fun Profile(
     onChangeLanguage: (String) -> Unit,
     navigateUp: () -> Unit,
     toggleTheme: (Boolean) -> Unit,
-    signIn: () -> Unit,
-    signUp: () -> Unit,
     logout: () -> Unit,
     rateApp: () -> Unit,
     settings: () -> Unit
@@ -89,7 +82,7 @@ fun Profile(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Profile") },
+                title = { Text(text = stringResource(R.string.profile_toolbar_title)) },
                 backgroundColor = MaterialTheme.colors.background,
                 navigationIcon = {
                     IconButton(onClick = navigateUp) {
@@ -111,6 +104,7 @@ fun Profile(
             )
         }
     ) { paddingValues ->
+
         ModalBottomSheetLayout(
             modifier = Modifier.padding(paddingValues),
             sheetState = modalBottomSheetState,
@@ -121,12 +115,21 @@ fun Profile(
                         .padding(16.dp), onChangeLanguage, appliedCountry)
             }
         ) {
-            Box(Modifier.fillMaxSize()) {
-                when {
-                    state.isLoading -> {}
-                    state.isLoggedIn -> LoggedInView(state.user!!, isDarkTheme, logout, rateApp, settings, toggleTheme)
-                    else -> LoggedOutView(isDarkTheme, signUp, signIn, rateApp, settings, toggleTheme)
-                }
+            if (state.isLoading){
+                LoadingScreen()
+            }
+
+            val data = state.data
+            if (data != null){
+                LoggedInView(
+                    user = data.user,
+                    likes = data.likes,
+                    isDarkTheme = isDarkTheme,
+                    logout = logout,
+                    rateApp = rateApp,
+                    settings = settings,
+                    toggleTheme = toggleTheme
+                )
             }
         }
     }
@@ -144,7 +147,7 @@ fun LanguageView(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Sprog",
+            text = stringResource(R.string.language_title),
             style = MaterialTheme.typography.h6,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
@@ -177,6 +180,7 @@ fun LanguageView(
 @Composable
 fun LoggedInView(
     user: com.example.base.domain.User,
+    likes: Long,
     isDarkTheme: Boolean,
     logout: () -> Unit,
     rateApp: () -> Unit,
@@ -189,20 +193,35 @@ fun LoggedInView(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.LightGray.copy(alpha = 0.1f))
-            .padding(vertical = 30.dp, horizontal = 16.dp)
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp, horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Velkommen ${user.username}",
-                style = MaterialTheme.typography.h4.copy(fontWeight = FontWeight.Bold),
+                text = stringResource(R.string.profile_title, formatArgs = arrayOf(user.username)),
+                style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.Center
             )
+            Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "$likes",
+                    style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = stringResource(R.string.user_likes),
+                    style = MaterialTheme.typography.subtitle2,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
 
         Text(
-            text = "Profile",
+            text = stringResource(R.string.title_profile),
             style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.padding(start = 16.dp),
             textAlign = TextAlign.Center
@@ -211,41 +230,44 @@ fun LoggedInView(
         Column(
             Modifier
                 .fillMaxWidth()
-                .background(Color.LightGray.copy(alpha = 0.1f))
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .background(MaterialTheme.colors.surface)
         ) {
-            Row(Modifier.fillMaxWidth(),
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = "Email", textAlign = TextAlign.Center)
+                Text(text = stringResource(R.string.profile_field_email), textAlign = TextAlign.Center)
                 Text(text = user.email, color = MaterialTheme.colors.primary, textAlign = TextAlign.Center)
             }
 
-            Divider(Modifier.height(1.dp), color = MaterialTheme.colors.onSurface.copy(0.1f))
-
-            Row(Modifier.fillMaxWidth(),
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = "Password", textAlign = TextAlign.Center)
+                Text(text = stringResource(R.string.profile_field_password), textAlign = TextAlign.Center)
                 Text(text = "****", color = MaterialTheme.colors.primary, textAlign = TextAlign.Center, style = MaterialTheme.typography.h5)
             }
 
-            Divider(Modifier.height(1.dp), color = MaterialTheme.colors.onSurface.copy(0.1f))
-
-            Row(Modifier.fillMaxWidth(),
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = "Degree", textAlign = TextAlign.Center)
+                Text(text = stringResource(R.string.profile_field_degree), textAlign = TextAlign.Center)
                 Text(text = user.degree, color = MaterialTheme.colors.primary, textAlign = TextAlign.Center)
             }
         }
 
         Text(
-            text = "About",
+            text = stringResource(R.string.profile_field_about),
             style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.padding(start = 16.dp),
             textAlign = TextAlign.Center
@@ -254,7 +276,7 @@ fun LoggedInView(
         Column(
             Modifier
                 .fillMaxWidth()
-                .background(Color.LightGray.copy(alpha = 0.1f))
+                .background(MaterialTheme.colors.surface)
         ) {
             RateAppView(
                 modifier = Modifier.fillMaxWidth(),
@@ -271,71 +293,19 @@ fun LoggedInView(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = if (isDarkTheme) "Apply light theme" else "Apply dark theme")
+                Text(text = if (isDarkTheme) stringResource(R.string.profile_theme_light_cta) else stringResource(R.string.profile_theme_dark_cta))
                 Switch(isDarkTheme, toggleTheme)
             }
-
         }
 
         Text(
-            text = "Logout",
+            text = stringResource(R.string.profile_logout_cta),
             color = MaterialTheme.colors.error,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(16.dp)
                 .clickable { logout() }
         )
-    }
-}
-
-@ExperimentalComposeUiApi
-@Composable
-fun LoggedOutView(
-    isDarkTheme: Boolean,
-    signUp: () -> Unit,
-    signIn: () -> Unit,
-    rateApp: () -> Unit,
-    settings: () -> Unit,
-    toggleTheme: (Boolean) -> Unit
-) {
-
-    Column(
-        modifier = Modifier
-            .padding(vertical = 16.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        LoginHeader(
-            onSignIn = signIn,
-            onSignUp = signUp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .background(Color.LightGray.copy(alpha = 0.1f))
-        )
-        RateAppView(
-            onRateApp = rateApp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.LightGray.copy(alpha = 0.1f))
-        )
-        SettingsView(
-            onSettings = settings,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.LightGray.copy(alpha = 0.1f))
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.LightGray.copy(alpha = 0.1f))
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(text = if (isDarkTheme) "Apply light theme" else "Apply dark theme")
-            Switch(isDarkTheme, toggleTheme,)
-        }
     }
 }
 
@@ -351,58 +321,8 @@ fun SettingsView(
             .clickable { onSettings() }
             .padding(16.dp)
     ) {
-        Text(text = "Settings")
+        Text(text = stringResource(R.string.profile_settings_cta))
         Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null)
-    }
-}
-
-@Composable
-fun LoginHeader(
-    modifier: Modifier = Modifier,
-    onSignIn: () -> Unit,
-    onSignUp: () -> Unit
-) {
-    ConstraintLayout(modifier.padding(16.dp)) {
-        val (signInBtn, signUpBtn, description, spacer) = createRefs()
-        Text(
-            textAlign = TextAlign.Center,
-            text = "Se dine favoritter fra alle enheder",
-            modifier = Modifier.constrainAs(description){
-                top.linkTo(parent.top)
-                start.linkTo(signInBtn.start)
-                end.linkTo(signUpBtn.end)
-                bottom.linkTo(spacer.top)
-            }
-        )
-        Spacer(Modifier.height(16.dp).constrainAs(spacer){
-            start.linkTo(parent.start)
-            end.linkTo(parent.end)
-            bottom.linkTo(signInBtn.top)
-            top.linkTo(description.bottom)
-        })
-        Button(
-            onClick = onSignIn,
-            modifier = Modifier.constrainAs(signInBtn){
-                start.linkTo(parent.start)
-                end.linkTo(signUpBtn.start)
-                bottom.linkTo(parent.bottom)
-                top.linkTo(spacer.bottom)
-            }
-        ) {
-            Text(text = "Sign in")
-        }
-
-        Button(
-            onClick = onSignUp,
-            modifier = Modifier.constrainAs(signUpBtn){
-                end.linkTo(parent.end)
-                bottom.linkTo(parent.bottom)
-                start.linkTo(signInBtn.end)
-                top.linkTo(spacer.bottom)
-            }
-        ) {
-            Text(text = "Sign up")
-        }
     }
 }
 
@@ -419,7 +339,7 @@ fun RateAppView(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = "Bedøm vores app")
-        RatingBar(rating = 3)
+        Text(text = stringResource(R.string.profile_review_cta))
+        RatingBar(rating = 4)
     }
 }

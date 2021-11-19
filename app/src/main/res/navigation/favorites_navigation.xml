@@ -5,7 +5,7 @@
     android:id="@+id/favorites_navigation"
     app:startDestination="@id/favoritesFragment">
 
-    <include app:graph="@navigation/study_planner_navigation" />
+    <include app:graph="@navigation/study_plan_navigation" />
     <include app:graph="@navigation/profile_navigation" />
 
     <fragment
@@ -15,12 +15,15 @@
 
         <action
             android:id="@+id/action_favorites_to_study_planner"
-            app:destination="@id/study_planner_navigation" >
+            app:destination="@id/study_plan_navigation"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out">
 
             <argument
                 android:name="ownerId"
-                app:argType="string"
-                />
+                app:argType="string" />
 
         </action>
 
@@ -30,12 +33,15 @@
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
+            app:popExitAnim="@anim/slide_out_right" />
 
         <action
             android:id="@+id/action_favorites_to_study_planners"
-            app:destination="@id/study_planners_navigation" />
+            app:destination="@id/study_plans_navigation"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
 
     </fragment>
 

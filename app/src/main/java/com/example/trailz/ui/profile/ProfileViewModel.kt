@@ -6,54 +6,53 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.base.Result
 import com.example.base.domain.User
+import com.example.studyplan.StudyPlanRepository
 import com.example.trailz.inject.SharedPrefs
-import com.example.trailz.ui.signup.GetUserUseCase
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
+import com.example.trailz.ui.common.DataState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.example.user.UserRepository
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
 
-data class ProfileUiState(
-    val user: User? = null,
-    val isLoading: Boolean = false,
-    val error: String? = null
-) {
-    val isLoggedIn = user != null
-}
+data class ProfileData(
+    val user: User,
+    val likes: Long
+)
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val repository: UserRepository,
+    private val userRepository: UserRepository,
+    private val studyPlan: StudyPlanRepository,
     private val sharedPrefs: SharedPrefs
 ) : ViewModel() {
 
-    private val _state = MutableLiveData<ProfileUiState>()
-    val state: LiveData<ProfileUiState> = _state
+    private val _state = MutableLiveData<DataState<ProfileData>>(DataState(isLoading = true))
+    val state: LiveData<DataState<ProfileData>> = _state
 
-    fun logout(){
-        sharedPrefs.loggedInId = null
-        _state.value = ProfileUiState()
-    }
-
-    fun getUser(userId: String?){
-        if (userId.isNullOrBlank()) {
-            // default Ui state is logged out
-            _state.value = ProfileUiState()
-            return
-        }
-
+    init {
         viewModelScope.launch {
-            repository.getUserBy(userId).collect {
-                _state.value = when (it){
-                    is Result.Loading -> ProfileUiState(isLoading = true)
-                    is Result.Failed -> ProfileUiState(error = it.message)
-                    is Result.Success -> ProfileUiState(user = it.data)
+            val userFlow = userRepository.getUserBy(sharedPrefs.loggedInId!!)
+            val studyPlanFlow = studyPlan.observeStudyPlan(sharedPrefs.loggedInId!!)
+            userFlow.combine(studyPlanFlow){ userRes, studyPlanRes ->
+                 when {
+                    userRes is Result.Success && studyPlanRes is Result.Success -> {
+                        _state.value = DataState(data = ProfileData(userRes.data, studyPlanRes.data.likes))
+                    }
+                    userRes is Result.Success && studyPlanRes is Result.Failed -> {
+                        _state.value = DataState(data = ProfileData(userRes.data, 0))
+                    }
+                    userRes is Result.Failed && studyPlanRes is Result.Success -> {
+                        _state.value = _state.value?.copy(exception = userRes.message)
+                    }
+                    userRes is Result.Failed && studyPlanRes is Result.Failed -> {
+                        _state.value = _state.value?.copy(exception = userRes.message)
+                    }
+                    else -> _state.value = _state.value?.copy(isLoading = true)
                 }
-            }
+            }.conflate().collect()
         }
     }
 }

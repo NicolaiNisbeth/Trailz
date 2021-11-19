@@ -2,9 +2,9 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root_navigation"
-    app:startDestination="@id/study_planners_navigation">
+    app:startDestination="@id/study_plans_navigation">
 
-    <include app:graph="@navigation/study_planners_navigation" />
+    <include app:graph="@navigation/study_plans_navigation" />
     <include app:graph="@navigation/favorites_navigation" />
     <include app:graph="@navigation/my_study_plan_navigation" />
 

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/study_plan_navigation"
+    app:startDestination="@id/studyPlanFragment">
+
+    <include app:graph="@navigation/profile_navigation" />
+
+    <argument
+        android:name="ownerId"
+        app:argType="string" />
+
+    <fragment
+        android:id="@+id/studyPlanFragment"
+        android:name="com.example.trailz.ui.studyplan.StudyPlanFragment">
+
+        <action
+            android:id="@+id/action_study_plan_to_profile"
+            app:destination="@+id/profile_navigation"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+    </fragment>
+
+</navigation>

@@ -41,23 +41,16 @@ class ProfileFragment : Fragment() {
 
     private lateinit var onLanguageListener: ChangeLanguageListener
     private lateinit var onSettingsListener: OpenSettingsListener
-    private lateinit var changeAnimationListener: ChangeAnimationListener
+    private lateinit var logoutListener: LogoutListener
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         try {
             onLanguageListener = context as ChangeLanguageListener
             onSettingsListener = context as OpenSettingsListener
-            changeAnimationListener = context as ChangeAnimationListener
+            logoutListener = context as LogoutListener
         } catch (e: Error) {
             throw IllegalStateException("Activity must implement $onLanguageListener")
-        }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enterTransition = MaterialFadeThrough().apply {
-            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
         }
     }
 
@@ -68,7 +61,6 @@ class ProfileFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewModel.getUser(sharedPrefs.loggedInId)
         val binding = FragmentProfileBinding.inflate(inflater, container, false)
         setupComposeView(binding.composeViewProfile)
         return binding.root
@@ -83,13 +75,12 @@ class ProfileFragment : Fragment() {
                     viewModel = viewModel,
                     appliedCountry = appliedCountry,
                     isDarkTheme = sharedPrefs.isDarkTheme,
-                    signIn = ::signIn,
-                    signUp = ::signUp,
                     rateApp = ::openGooglePlay,
                     toggleTheme = ::toggleTheme,
-                    navigateUp = { findNavController().navigateUp() },
                     onChangeLanguage = onLanguageListener::onChangeLanguage,
-                    settings = onSettingsListener::onOpenSettingsListener
+                    settings = onSettingsListener::onOpenSettingsListener,
+                    navigateUp = findNavController()::navigateUp,
+                    logout = logoutListener::onLogout
                 )
             }
         }
@@ -105,32 +96,6 @@ class ProfileFragment : Fragment() {
     }
 
     private fun openGooglePlay(){
-        Toast.makeText(requireContext(), "Not available yet...", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun signIn(){
-        changeAnimationListener.applyAnimationChanges {
-            exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true).apply {
-                duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-            }
-            reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false).apply {
-                duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-            }
-        }
-
-        findNavController().navigate(ProfileFragmentDirections.actionProfileToSignin())
-    }
-
-    private fun signUp(){
-        changeAnimationListener.applyAnimationChanges {
-            exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true).apply {
-                duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-            }
-            reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false).apply {
-                duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-            }
-        }
-
-        findNavController().navigate(ProfileFragmentDirections.actionProfileToSignup())
+        Toast.makeText(requireContext(), getString(R.string.cta_disable), Toast.LENGTH_SHORT).show()
     }
 }

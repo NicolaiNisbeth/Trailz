@@ -2,9 +2,14 @@ package com.example.trailz.inject
 
 import android.content.Context
 import androidx.room.Room
+import com.example.studyplan.CacheUtil
 import com.example.studyplan.local.AppDataBase
+import com.example.studyplan.local.entity.Converters
+import com.example.studyplan.local.entity.GsonParser
 import com.example.trailz.TrailzApplication
+import com.example.trailz.cache.CacheHelper
 import com.google.firebase.database.FirebaseDatabase
+import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,6 +44,13 @@ class AppModule{
     fun provideRoomDatabase(@ApplicationContext appContext: Context): AppDataBase {
         return Room.databaseBuilder(appContext, AppDataBase::class.java, "data.db")
             .fallbackToDestructiveMigration()
+            .addTypeConverter(Converters(GsonParser(Gson())))
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideCacheUtil(@ApplicationContext appContext: Context): CacheUtil {
+        return CacheHelper(appContext)
     }
 }

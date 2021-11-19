@@ -1,85 +1,84 @@
 package com.example.trailz.ui.favorites
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.base.Result
-import com.example.base.domain.Favorite
 import com.example.base.domain.StudyPlan
-import com.example.favorite.FavoriteRepository
+import com.example.trailz.inject.SharedPrefs
+import com.example.trailz.ui.common.DataState
+import com.example.trailz.ui.favorites.usecase.GetFavoritesUseCase
+import com.example.trailz.ui.favorites.usecase.UpdateFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class StudyPlansUiModel(
+    val studyPlans: List<StudyPlan>,
+    val expandedPlans: Map<String, Boolean> = studyPlans.associate { it.userId to false }
+)
+
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
-    private val repository: FavoriteRepository
+    private val getFavoritesUseCase: GetFavoritesUseCase,
+    private val updateFavoriteUseCase: UpdateFavoriteUseCase,
+    private val prefs: SharedPrefs
 ) : ViewModel() {
 
-    private val _favorite = MutableLiveData<Favorite>()
-    val favorite: LiveData<Favorite>
-        get() = _favorite
+    private val scope = viewModelScope
+    private val _state: MutableStateFlow<DataState<StudyPlansUiModel>> = MutableStateFlow(
+        DataState(isLoading = true)
+    )
+    val state: MutableStateFlow<DataState<StudyPlansUiModel>> = _state
 
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean>
-        get() = _isLoading
+    init {
+        observeFavorites()
+    }
 
-    private val _isError = MutableLiveData<String>()
-    val isError: LiveData<String>
-        get() = _isError
-
-    fun initObserveFavoriteBy(userId: String){
-        viewModelScope.launch {
-            repository.observeFavoriteBy(userId).collect {
-                when (it){
-                    is Result.Failed -> {
-                        _isError.value = it.message
-                        _isLoading.value = false
-                    }
-                    is Result.Loading -> _isLoading.value = true
-                    is Result.Success -> {
-                        val favorite = it.data
-                        _favorite.value = favorite
-                        _isLoading.value = false
-                    }
+    private fun observeFavorites() {
+        scope.launch {
+            getFavoritesUseCase(prefs.loggedInId!!).collect {
+                when(it){
+                    is Result.Failed -> _state.value = _state.value.copy(exception = it.message)
+                    is Result.Loading -> _state.value = _state.value.copy(isLoading = true)
+                    is Result.Success -> _state.value = DataState(
+                        data = StudyPlansUiModel(it.data),
+                        isEmpty = it.data.isEmpty()
+                    )
                 }
             }
         }
     }
 
-    fun addToFavorite(favoritedId: String, userId: String?){
-        viewModelScope.launch {
-            repository.addToFavorite(favoritedId, userId).collect {
-                when (it){
-                    is Result.Failed -> {
-                        _isError.value = it.message
-                        _isLoading.value = false
-                    }
-                    is Result.Loading -> _isLoading.value = true
-                    is Result.Success -> {
-                        _isLoading.value = false
-                    }
-                }
-            }
+    fun updateFavorite(favoriteId: String, userId: String, isFavorite: Boolean, likes: Long){
+        scope.launch {
+            flipLocally(favoriteId)
+            updateFavoriteUseCase(favoriteId, userId, isFavorite, likes)
         }
     }
 
-    fun removeFromFavorite(favoritedId: String, userId: String?){
-        viewModelScope.launch {
-            repository.removeFromFavorite(favoritedId, userId).collect {
-                when (it){
-                    is Result.Failed -> {
-                        _isError.value = it.message
-                        _isLoading.value = false
-                    }
-                    is Result.Loading -> _isLoading.value = true
-                    is Result.Success -> {
-                        _isLoading.value = false
-                    }
-                }
+    fun updateExpanded(studyPlanId: String){
+        val data = _state.value.data ?: return
+        val state = data.copy(
+            expandedPlans = data.expandedPlans.toMutableMap().apply {
+                this[studyPlanId] = this[studyPlanId]?.not() ?: false
             }
-        }
+        )
+        _state.value = _state.value.copy(
+            data = state,
+            isEmpty = state.studyPlans.isEmpty()
+        )
+    }
+
+    private fun flipLocally(favoriteId: String) {
+        val data = _state.value.data ?: return
+        val minusFavorite = data.copy(
+            studyPlans = data.studyPlans.filterNot { it.userId == favoriteId },
+            expandedPlans = data.expandedPlans.minus(favoriteId)
+        )
+        _state.value = _state.value.copy(
+            data = minusFavorite,
+            isEmpty = minusFavorite.studyPlans.isEmpty()
+        )
     }
 }

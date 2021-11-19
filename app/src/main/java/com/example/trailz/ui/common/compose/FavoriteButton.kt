@@ -21,17 +21,19 @@ import androidx.compose.ui.unit.dp
 fun FavoriteButton(
     modifier: Modifier = Modifier,
     isChecked: Boolean,
-    onClick: () -> Unit
+    colorOnChecked: Color,
+    colorUnChecked: Color,
+    onClick: (Boolean) -> Unit
 ) {
     IconToggleButton(
         modifier = modifier,
         checked = isChecked,
-        onCheckedChange = { onClick() }
+        onCheckedChange = onClick
     ) {
         val transition = updateTransition(isChecked, label = "Checked indicator")
 
         val tint by transition.animateColor(label = "ColorAnimation") { isChecked ->
-            if (isChecked) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+            if (isChecked) colorOnChecked else colorUnChecked
         }
 
         val size by transition.animateDp(
