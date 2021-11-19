@@ -37,26 +37,30 @@ class StudyPlanRemoteImpl: StudyPlanRemoteDataSource {
         awaitClose { listener.remove() }
     }
 
-    override suspend fun getStudyPlan(id: String) = flow<Result<StudyPlan>> {
-        val document = collection.document(id).get().await()
-        val studyPlan = document.toObject(StudyPlan::class.java)
-        if (studyPlan != null){
-            emit(Result.success(studyPlan))
-        } else {
-            emit(Result.failed("Study plan $id was not found"))
+    override suspend fun getStudyPlan(id: String): Result<StudyPlan> {
+        return try {
+            val document = collection.document(id).get().await()
+            val studyPlan = document.toObject(StudyPlan::class.java)
+            if (studyPlan != null){
+                Result.success(studyPlan)
+            } else {
+                Result.failed("Study plan $id was not found")
+            }
+        } catch (e: Exception){
+            Log.d(TAG, e.message.toString())
+            Result.failed(e.message.toString())
         }
-    }.catch {
-        emit(Result.failed(it.message.toString()))
-        Log.d(TAG, it.message.toString())
     }
 
-    override suspend fun getStudyPlans()= flow<Result<List<StudyPlan>>> {
-        val documents = collection.get().await()
-        val studyPlans = documents.toObjects(StudyPlan::class.java)
-        emit(Result.success(studyPlans))
-    }.catch {
-        emit(Result.failed(it.message.toString()))
-        Log.d(TAG, it.message.toString())
+    override suspend fun getStudyPlans() : Result<List<StudyPlan>> {
+        return try {
+            val documents = collection.get().await()
+            val studyPlans = documents.toObjects(StudyPlan::class.java)
+            Result.success(studyPlans)
+        } catch (e: Exception) {
+            Log.d(TAG, e.message.toString())
+            Result.failed(e.message.toString())
+        }
     }
 
     @ExperimentalCoroutinesApi

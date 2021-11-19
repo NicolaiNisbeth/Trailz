@@ -27,6 +27,9 @@ abstract class StudyPlanDao {
     @Query("SELECT * FROM studyplanentity WHERE studyPlanId = :userId")
     abstract fun studyPlan(userId: String): List<StudyPlanEntity?>
 
+    @Query("SELECT * FROM studyplanentity WHERE studyPlanId = :userId")
+    abstract fun studyPlanFlow(userId: String): Flow<StudyPlanEntity?>
+
     @Query("UPDATE studyplanentity SET isFavorite = :isFavorite where studyPlanId = :studyPlanId")
     abstract fun updateStudyPlanFavorite(studyPlanId: String, isFavorite: Boolean)
 

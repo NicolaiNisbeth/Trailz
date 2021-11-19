@@ -8,9 +8,9 @@ interface StudyPlanRemoteDataSource {
 
     suspend fun observeStudyPlan(id: String): Flow<Result<StudyPlan>>
 
-    suspend fun getStudyPlan(id: String): Flow<Result<StudyPlan>>
+    suspend fun getStudyPlan(id: String): Result<StudyPlan>
 
-    suspend fun getStudyPlans(): Flow<Result<List<StudyPlan>>>
+    suspend fun getStudyPlans(): Result<List<StudyPlan>>
 
     suspend fun observeStudyPlans(): Flow<Result<List<StudyPlan>>>
 

@@ -10,6 +10,7 @@ import com.example.studyplan.local.mapper.toDomain
 import com.example.studyplan.local.mapper.toEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 
 class StudyPlanLocalImpl(
     private val studyPlanDao: StudyPlanDao,
@@ -19,6 +20,9 @@ class StudyPlanLocalImpl(
 
     override suspend fun getStudyPlan(id: String) = studyPlanDao.studyPlan(id)
         .first()?.toDomain()
+
+    override suspend fun observeStudyPlan(id: String) = studyPlanDao.studyPlanFlow(id)
+        .mapNotNull { it?.toDomain() }
 
     override suspend fun getStudyPlans(): List<StudyPlan> {
         return studyPlanDao.studyPlans()
@@ -49,6 +53,12 @@ class StudyPlanLocalImpl(
             )
         )
         return studyPlan.userId
+    }
+
+    override suspend fun createStudyPlans(data: List<StudyPlan>) {
+        for (studyPlan in data) {
+            createStudyPlan(studyPlan)
+        }
     }
 
     override suspend fun updateStudyPlan(id: String, studyPlan: StudyPlan){

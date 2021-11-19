@@ -334,6 +334,6 @@ fun RateAppView(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = "Bedøm vores app")
-        RatingBar(rating = 3)
+        RatingBar(rating = 4)
     }
 }

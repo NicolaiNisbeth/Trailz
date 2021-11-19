@@ -37,7 +37,7 @@ class StudyPlansViewModel @Inject constructor(
     private fun observeStudyPlans() {
         scope.launch {
             val studyPlansFlow = studyPlanRepository.getStudyPlans()
-            val favoritesFlow = favoriteRepository.getFavoritesBy(sharedPrefs.loggedInId!!)
+            val favoritesFlow = favoriteRepository.observeFavoriteBy(sharedPrefs.loggedInId!!)
             studyPlansFlow.combine(favoritesFlow) { studyPlansRes, favoritesRes ->
                 when {
                     studyPlansRes is Result.Success && favoritesRes is Result.Success -> {
@@ -73,7 +73,7 @@ class StudyPlansViewModel @Inject constructor(
                 favoriteRepository.addToFavorite(studyPlanId, sharedPrefs.loggedInId!!)
             } else {
                 favoriteRepository.removeFromFavorite(studyPlanId, sharedPrefs.loggedInId!!)
-            }.collect()
+            }
         }
     }
 
@@ -94,8 +94,8 @@ class StudyPlansViewModel @Inject constructor(
         val data = _state.value.data ?: return
         val newData = data.copy(
             studyPlans = data.studyPlans.mapFind(
-                predicate = {it.userId == favoriteId},
-                transform = {it.copy(isFavorite = isFavorite)}
+                predicate = { it.userId == favoriteId },
+                transform = { it.copy(isFavorite = isFavorite) }
             )
         )
         _state.value = _state.value.copy(

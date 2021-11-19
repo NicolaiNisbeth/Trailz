@@ -41,72 +41,75 @@ class FavoriteRepositoryImpl : FavoriteRepository {
         awaitClose { listener.remove() }
     }
 
-    override fun getFavoritesBy(userId: String) = flow<Result<Favorite>> {
-        val document = collection.document(userId)
-            .get()
-            .await()
-
-        val user = document.toObject(Favorite::class.java)
-        if (user != null){
-            emit(Result.success(user))
-        } else {
-            emit(Result.failed("No favorite was found by id=$user"))
+    override suspend fun getFavoritesBy(userId: String): Result<Favorite> {
+        return try {
+            val document = collection.document(userId)
+                .get()
+                .await()
+            val user = document.toObject(Favorite::class.java)
+            if (user != null) {
+                Result.success(user)
+            } else {
+                Result.failed("No favorite was found by id=$user")
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, e.message.toString())
+            Result.failed(e.message.toString())
         }
-    }.catch {
-        emit(Result.failed(it.message.toString()))
-        Log.d(TAG, it.message.toString())
     }
 
-    override fun addToFavorite(favoritedId: String, userId: String) = flow<Result<Unit>> {
-        val favoritedStudyPlan = FirebaseFirestore.getInstance().collection("/studyplans").document(favoritedId)
-        favoritedStudyPlan.update(
-            "likes", FieldValue.increment(1),
-            "checked", true
-        ).await()
+    override suspend fun addToFavorite(favoritedId: String, userId: String): Result<Unit> {
+        return try {
+            val favoritedStudyPlan = FirebaseFirestore.getInstance().collection("/studyplans").document(favoritedId)
+            favoritedStudyPlan.update(
+                "likes", FieldValue.increment(1),
+                "checked", true
+            ).await()
 
-        val documentReference = collection.document(userId)
-        val favorite = documentReference.get()
-            .await()
-            .toObject(Favorite::class.java)
+            val documentReference = collection.document(userId)
+            val favorite = documentReference.get()
+                .await()
+                .toObject(Favorite::class.java)
 
-        if (favorite != null) {
-            documentReference
-                .update("followedUserIds", FieldValue.arrayUnion(favoritedId))
-                .await()
-        } else {
-            documentReference
-                .set(Favorite(userId, listOf(favoritedId)))
-                .await()
+            if (favorite != null) {
+                documentReference
+                    .update("followedUserIds", FieldValue.arrayUnion(favoritedId))
+                    .await()
+            } else {
+                documentReference
+                    .set(Favorite(userId, listOf(favoritedId)))
+                    .await()
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.d(TAG, e.message.toString())
+            Result.failed(e.message.toString())
         }
+    }
+    override suspend fun removeFromFavorite(favoritedId: String, userId: String): Result<Unit> {
+        return try {
+            val favoritedStudyPlan = FirebaseFirestore.getInstance().collection("/studyplans").document(favoritedId)
+            favoritedStudyPlan.update(
+                "likes", FieldValue.increment(-1),
+                "checked", false
+            ).await()
 
-        emit(Result.success(Unit))
-    }.catch {
-        emit(Result.failed(it.message.toString()))
-        Log.d(TAG, it.message.toString())
-    }.flowOn(Dispatchers.IO)
-
-    override fun removeFromFavorite(favoritedId: String, userId: String) = flow<Result<Unit>> {
-        val favoritedStudyPlan = FirebaseFirestore.getInstance().collection("/studyplans").document(favoritedId)
-        favoritedStudyPlan.update(
-            "likes", FieldValue.increment(-1),
-            "checked", false
-        ).await()
-
-        val documentReference = collection.document(userId)
-        val favorite = documentReference.get()
-            .await()
-            .toObject(Favorite::class.java)
-
-        if (favorite != null) {
-            documentReference
-                .update("followedUserIds", FieldValue.arrayRemove(favoritedId))
+            val documentReference = collection.document(userId)
+            val favorite = documentReference.get()
                 .await()
-        }
+                .toObject(Favorite::class.java)
 
-        emit(Result.success(Unit))
-    }.catch {
-        emit(Result.failed(it.message.toString()))
-        Log.d(TAG, it.message.toString())
-    }.flowOn(Dispatchers.IO)
+            if (favorite != null) {
+                documentReference
+                    .update("followedUserIds", FieldValue.arrayRemove(favoritedId))
+                    .await()
+            }
+
+            Result.success(Unit)
+        } catch (e: Exception){
+            Log.d(TAG, e.message.toString())
+            Result.failed(e.message.toString())
+        }
+    }
 }
 

@@ -9,6 +9,7 @@ import com.example.studyplan.StudyPlanRepository
 import com.example.trailz.inject.SharedPrefs
 import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.mapAsync
+import com.example.trailz.ui.favorites.usecase.GetFavoritesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -23,6 +24,7 @@ data class StudyPlansUiModel(
 class FavoritesViewModel @Inject constructor(
     private val favoriteRepository: FavoriteRepository,
     private val studyPlanRepository: StudyPlanRepository,
+    private val getFavoritesUseCase: GetFavoritesUseCase,
     private val prefs: SharedPrefs
 ) : ViewModel() {
 
@@ -38,43 +40,20 @@ class FavoritesViewModel @Inject constructor(
 
     private fun observeFavorites() {
         scope.launch {
-            _state.value = _state.value.copy(isLoading = true)
-
-            // get the users favorites
-            val favoriteFlow = favoriteRepository.getFavoritesBy(prefs.loggedInId!!)
-            val favoriteIds = favoriteFlow.mapNotNull {
-                if (it is Result.Success) it.data.followedUserIds else null
+            when(val res = getFavoritesUseCase(prefs.loggedInId!!)){
+                is Result.Failed -> _state.value = _state.value.copy(exception = res.message)
+                is Result.Loading -> _state.value = _state.value.copy(isLoading = true)
+                is Result.Success -> _state.value = DataState(
+                    data = StudyPlansUiModel(res.data),
+                    isEmpty = res.data.isEmpty()
+                )
             }
-
-            // get study plan for each favorite
-            val studyPlans = mutableListOf<StudyPlan>()
-            favoriteIds.collect {
-                // run N remote calls concurrently and await all
-                 val studyPlanFlows = it.mapAsync {
-                    studyPlanRepository.getStudyPlan(it).mapNotNull {
-                        if (it is Result.Success)
-                            it.data.copy(isFavorite = true)
-                        else
-                            null
-                    }
-                }
-                studyPlanFlows.forEach { it.toCollection(studyPlans) }
-            }
-            _state.value = DataState(StudyPlansUiModel(studyPlans.filter { it.isFavorite }), isEmpty = studyPlans.isEmpty())
         }
     }
 
     fun updateFavorite(favoriteId: String, userId: String, isFavorite: Boolean){
         flipLocally(favoriteId)
         scope.launch {
-            studyPlanRepository.updateStudyPlanFavorite(userId, isFavorite).collect()
-            favoriteRepository.removeFromFavorite(favoriteId, userId).collect {
-                when (it){
-                    is Result.Failed -> _state.value = _state.value.copy(exception = it.message)
-                    is Result.Loading -> _state.value = _state.value.copy(isLoading = true)
-                    is Result.Success -> {}
-                }
-            }
         }
     }
 
