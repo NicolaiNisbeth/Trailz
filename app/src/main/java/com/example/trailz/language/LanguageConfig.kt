@@ -11,8 +11,8 @@ enum class LanguageConfig(
     @DrawableRes val flagResource: Int,
 ) {
 
-    DK("Dansk", "dk", "da", R.drawable.flag_dk,),
-    EU("English", "eu", "en", R.drawable.flag_eu);
+    DK("Dansk", "dk", "da", R.drawable.flag_denmark,),
+    EU("English", "eu", "en", R.drawable.flag_united_kingdom);
 
     companion object {
         fun codeToConfig(code: String?): LanguageConfig {
@@ -28,7 +28,6 @@ enum class LanguageConfig(
                 EU.language -> EU
                 else -> EU
             }
-
         }
     }
 }
