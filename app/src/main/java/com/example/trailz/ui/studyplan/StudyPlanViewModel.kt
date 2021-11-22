@@ -102,7 +102,7 @@ class StudyPlanViewModel @Inject constructor(
     }
 
     fun editStudyPlanTitle(newTitle: String) {
-        _state.value = _state.value.copy(data = _state.value.data?.copy(title = newTitle))
+        _state.value = _state.value.copy(data = _state.value.data?.copy(title = newTitle.trim()))
     }
 
     fun saveStudyPlan() {
@@ -154,7 +154,7 @@ class StudyPlanViewModel @Inject constructor(
     }
 
     fun editSemester(id: Int, newTitle: String) {
-        studyPlanUtil.editSemester(id, newTitle)
+        studyPlanUtil.editSemester(id, newTitle.trim())
     }
 
     fun addCourse(course: Course, semesterId: Int) {

@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Semester
 import com.example.trailz.R
@@ -75,7 +77,7 @@ fun StudyPlanOverView(
         FixedContent = { arrowRotationDegree ->
             val paddingModifier = Modifier.padding(horizontal = 12.dp)
             Text(text = stringResource(id = R.string.user_likes_args, formatArgs = arrayOf(likes)), style = MaterialTheme.typography.overline, modifier = paddingModifier.padding(top = 16.dp))
-            Text(text = title, style = MaterialTheme.typography.button, modifier = paddingModifier)
+            Text(text = title, style = MaterialTheme.typography.button.copy(fontWeight = FontWeight.Bold), modifier = paddingModifier)
             Text(text = username, style = MaterialTheme.typography.body2, modifier = paddingModifier)
             Text(text = lastUpdated, style = MaterialTheme.typography.caption, modifier = paddingModifier)
             Row(
@@ -105,7 +107,7 @@ fun StudyPlanOverView(
             }
         },
         ExpandableContent = {
-            Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp).testTag("semesters")) {
+            Column(Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 12.dp).testTag("semesters")) {
                 semesters.forEachIndexed { index, semester ->
                     if (semester.courses.isNotEmpty()){
                         Text(
@@ -116,7 +118,12 @@ fun StudyPlanOverView(
                             )
                         )
                         for (course in semester.courses) {
-                            Text(text = course.title, style = MaterialTheme.typography.overline)
+                            Text(
+                                text = course.title,
+                                style = MaterialTheme.typography.overline,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                     }
                     if (index != semesters.lastIndex){

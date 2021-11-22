@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -24,9 +26,13 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import com.example.base.domain.Course
 import com.example.trailz.R
 import com.example.trailz.ui.common.DataState
@@ -97,6 +103,7 @@ private fun MyStudyPlan(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
+    val lazyListState = rememberLazyListState()
 
     state.data?.isUpdated?.contentIfNotHandled()?.let {
         val msg = if (it) stringResource(R.string.my_study_plan_saved) else stringResource(R.string.my_study_plan_saved_fail)
@@ -116,9 +123,9 @@ private fun MyStudyPlan(
                         if (it.inEditMode) {
                             EditActionBar(
                                 onProfile = onProfile,
-                                addSemester = addSemester,
                                 saveStudyPlan = saveStudyPlan,
-                                changeEditMode = changeEditMode
+                                changeEditMode = changeEditMode,
+                                addSemester = addSemester
                             )
                         } else {
                             ActionBar(
@@ -137,11 +144,14 @@ private fun MyStudyPlan(
             val elevation = if (MaterialTheme.colors.isLight) 2.dp else 0.dp
             if (it.inEditMode) {
                 Card(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
                     shape = MaterialTheme.shapes.medium.copy(CornerSize(16.dp)),
                     elevation = elevation
                 ) {
                     SemesterListEdit(
+                        lazyListState = lazyListState,
                         title = it.title,
                         username = stringResource(R.string.my_study_plan_creator, formatArgs = arrayOf(it.username)),
                         updated = stringResource(R.string.my_study_plan_updated, formatArgs = arrayOf(it.updatedLast)),
@@ -181,6 +191,7 @@ private fun MyStudyPlan(
 @ExperimentalFoundationApi
 @Composable
 fun SemesterListEdit(
+    lazyListState: LazyListState = rememberLazyListState(),
     title: String,
     username: String,
     updated: String,
@@ -199,11 +210,13 @@ fun SemesterListEdit(
 
     val submitNameChange: (String) -> Unit = {
         focusManager.clearFocus()
-        addCourse(Course(it), newTitleSemester)
+        addCourse(Course(it.trim()), newTitleSemester)
         openDialog = false
     }
 
     LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        state = lazyListState,
         contentPadding = PaddingValues(16.dp),
     ) {
         item {
@@ -268,7 +281,9 @@ fun SemesterListEdit(
                 onValueChange = onValueChange,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done,
-                    keyboardType = KeyboardType.Password
+                    keyboardType = KeyboardType.Password,
+                    capitalization = KeyboardCapitalization.Sentences,
+                    autoCorrect = true
                 ),
                 keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
             )
@@ -291,7 +306,7 @@ private fun HeaderEdit(
     val focusManager = LocalFocusManager.current
     val submitNameChange: (String) -> Unit = {
         focusManager.clearFocus()
-        onTitleChange(it)
+        onTitleChange(it.trim())
         openDialog = false
     }
 
@@ -323,7 +338,9 @@ private fun HeaderEdit(
                     onValueChange = onValueChange,
                     keyboardOptions = KeyboardOptions.Default.copy(
                         imeAction = ImeAction.Done,
-                        keyboardType = KeyboardType.Text
+                        keyboardType = KeyboardType.Text,
+                        capitalization = KeyboardCapitalization.Sentences,
+                        autoCorrect = true
                     ),
                     keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
                 )
@@ -389,7 +406,7 @@ private fun SemesterItemEdit(
 
     val submitNameChange: (String) -> Unit = {
         focusManager.clearFocus()
-        onTitleChange(it)
+        onTitleChange(it.trim())
         openDialog = false
     }
 
@@ -438,7 +455,7 @@ private fun SemesterItemEdit(
                     onValueChange = onValueChange,
                     keyboardOptions = KeyboardOptions.Default.copy(
                         imeAction = ImeAction.Done,
-                        keyboardType = KeyboardType.Number
+                        keyboardType = KeyboardType.Number,
                     ),
                     keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
                 )
@@ -459,23 +476,44 @@ private fun CourseItemEdit(
 
     val submitNameChange: (String) -> Unit = {
         focusManager.clearFocus()
-        onTitleChange(it)
+        onTitleChange(it.trim())
         openDialog = false
     }
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    ConstraintLayout(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        TextButtonV2(onClick = { openDialog = true }, horizontalArrangement = Arrangement.Start) {
+        val (titleRef, removeRef) = createRefs()
+        TextButtonV2(
+            onClick = { openDialog = true },
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier.constrainAs(titleRef){
+                start.linkTo(parent.start)
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                end.linkTo(removeRef.start)
+                height = Dimension.fillToConstraints
+                width = Dimension.fillToConstraints
+            }
+        ) {
             Text(
                 text = title,
                 color = MaterialTheme.colors.onBackground,
                 style = MaterialTheme.typography.subtitle2,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
             )
         }
-        TextButtonV2(onClick = { onRemove(title) }, horizontalArrangement = Arrangement.End) {
+        TextButtonV2(
+            onClick = { onRemove(title) },
+            horizontalArrangement = Arrangement.End,
+            modifier = Modifier.constrainAs(removeRef){
+                end.linkTo(parent.end)
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                start.linkTo(titleRef.end)
+            }
+        ) {
             Text(
                 text = stringResource(R.string.my_study_plan_course_remove),
                 color = MaterialTheme.colors.error,
@@ -493,12 +531,14 @@ private fun CourseItemEdit(
     ) { value, onValueChange ->
         InputFieldFocus { focusModifier ->
             TextField(
-                modifier = focusModifier,
+                modifier = focusModifier.height(IntrinsicSize.Max),
                 value = value,
                 onValueChange = onValueChange,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done,
-                    keyboardType = KeyboardType.Password
+                    keyboardType = KeyboardType.Password,
+                    capitalization = KeyboardCapitalization.Sentences,
+                    autoCorrect = true
                 ),
                 keyboardActions = KeyboardActions(onDone = { submitNameChange(value) }),
             )

@@ -57,7 +57,7 @@
     <string name="my_study_plan_dialog_course_title">What course is this?</string>
     <string name="my_study_plan_dialog_confirm">Confirm</string>
     <string name="my_study_plan_dialog_dismiss">Dismiss</string>
-    <string name="my_study_plan_dialog_plan_title">Study Plan</string>
+    <string name="my_study_plan_dialog_plan_title">What study plan is this?</string>
     <string name="my_study_plan_dialog_plan_confirm">Confirm</string>
     <string name="my_study_plan_dialog_plan_dismiss">Dismiss</string>
     <string name="my_study_plan_dialog_semester_title">What semester is it?</string>

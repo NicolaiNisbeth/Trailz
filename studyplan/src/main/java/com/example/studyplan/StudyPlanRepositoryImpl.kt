@@ -48,7 +48,7 @@ class StudyPlanRepositoryImpl(
         } else {
             localDataSource.getStudyPlan(id)?.let {
                 emit(Result.success(it))
-            }
+            } ?: emit(Result.failed("Unable find studyPlan"))
         }
 
     }.flowOn(Dispatchers.Default)

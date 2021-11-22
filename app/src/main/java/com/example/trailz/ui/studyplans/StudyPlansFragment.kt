@@ -14,11 +14,16 @@ import androidx.navigation.fragment.findNavController
 import com.example.trailz.R
 import dagger.hilt.android.AndroidEntryPoint
 import com.example.trailz.databinding.FragmentStudyPlansBinding
+import com.example.trailz.inject.SharedPrefs
 import com.google.android.material.composethemeadapter.MdcTheme
 import kotlinx.coroutines.flow.*
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class StudyPlansFragment : Fragment() {
+
+    @Inject
+    lateinit var prefs: SharedPrefs
 
     lateinit var binding: FragmentStudyPlansBinding
     private val viewModel: StudyPlansViewModel by viewModels()
@@ -54,10 +59,14 @@ class StudyPlansFragment : Fragment() {
     }
 
     private fun openStudyPlan(userId: String) {
-        findNavController().navigate(
-            resId = R.id.action_study_plans_to_study_plan,
-            args = Bundle().apply { putString("ownerId", userId) },
-            navOptions = null,
-        )
+        if (userId == prefs.loggedInId){
+            findNavController().navigate(R.id.action_study_plans_to_my_study_plan)
+        } else {
+            findNavController().navigate(
+                resId = R.id.action_study_plans_to_study_plan,
+                args = Bundle().apply { putString("ownerId", userId) },
+                navOptions = null,
+            )
+        }
     }
 }

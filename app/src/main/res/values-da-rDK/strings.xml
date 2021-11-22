@@ -58,7 +58,7 @@
     <string name="my_study_plan_dialog_course_title">Hvilket kursus er dette?</string>
     <string name="my_study_plan_dialog_confirm">Bekræft</string>
     <string name="my_study_plan_dialog_dismiss">Afvis</string>
-    <string name="my_study_plan_dialog_plan_title">Studieplan</string>
+    <string name="my_study_plan_dialog_plan_title">Hvilken studieplan er det?</string>
     <string name="my_study_plan_dialog_plan_confirm">Bekræft</string>
     <string name="my_study_plan_dialog_plan_dismiss">Afvis</string>
     <string name="my_study_plan_dialog_semester_title">Hvilket semester er det?</string>

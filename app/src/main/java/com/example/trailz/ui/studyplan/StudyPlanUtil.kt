@@ -50,7 +50,7 @@ class StudyPlanUtil(
     fun addCourse(course: Course, semesterId: Int) {
         if (course.title.isNotBlank()) {
             semesterToCourses[semesterId] = semesterToCourses[semesterId]
-                ?.plus(course)
+                ?.plus(course.copy(title = course.title.trim()))
                 ?: emptyList()
         }
     }
@@ -64,7 +64,7 @@ class StudyPlanUtil(
     fun replaceCourseAt(index: Int, semesterId: Int, course: Course) {
         if (course.title.isNotBlank()) {
             semesterToCourses[semesterId]?.toMutableList()?.let {
-                it[index] = course
+                it[index] = course.copy(title = course.title.trim())
                 semesterToCourses[semesterId] = it
             }
         }
