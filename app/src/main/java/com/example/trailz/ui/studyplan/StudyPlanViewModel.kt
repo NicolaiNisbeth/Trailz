@@ -30,16 +30,16 @@ data class MyStudyPlanData(
 )
 
 @HiltViewModel
-class MyStudyPlanViewModel @Inject constructor(
+class StudyPlanViewModel @Inject constructor(
     private val studyPlanRepository: StudyPlanRepository,
     private val userRepository: UserRepository,
     private val sharedPrefs: SharedPrefs,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+    private val studyPlanUtil = StudyPlanUtil(mutableStateMapOf())
     private val ownerId = savedStateHandle.get<String>("ownerId") ?: sharedPrefs.loggedInId
     private val savedStudyPlan = MutableLiveData<StudyPlan>()
-    private var collapsedSemesters = mutableStateMapOf<Int, Boolean>()
-    var semesterToCourses = mutableStateMapOf<Int, List<Course>>()
+    var semesterToCourses = studyPlanUtil.semesterToCourses
 
     private val _state: MutableStateFlow<DataState<MyStudyPlanData>> = MutableStateFlow(
         DataState(isLoading = true)
@@ -88,75 +88,14 @@ class MyStudyPlanViewModel @Inject constructor(
             likes = studyPlan.likes,
             updatedLast = studyPlan.updated,
         )
-        studyPlan.semesters.forEach { addSemester(it.order, it.courses) }
-        studyPlan.semesters.forEach { expandSemester(it.order) }
+        studyPlan.semesters.forEach { studyPlanUtil.addSemester(it.order, it.courses) }
+        studyPlan.semesters.forEach { studyPlanUtil.expandSemester(it.order) }
         savedStudyPlan.value = studyPlan
         _state.value = DataState(data)
     }
 
     private fun isStudyPlanModified(unsavedStudyPlan: StudyPlan) =
         unsavedStudyPlan != savedStudyPlan.value
-
-    fun isSemesterCollapsed(semesterId: Int) = collapsedSemesters[semesterId] ?: false
-
-    fun collapseSemester(semesterId: Int) {
-        collapsedSemesters[semesterId] = true
-    }
-
-    fun expandSemester(semesterID: Int) {
-        collapsedSemesters[semesterID] = false
-    }
-
-    fun isAnyCollapsed() = collapsedSemesters.any { it.value }
-
-    fun toggleAllSemesters(allCollapsed: Boolean) {
-        semesterToCourses.keys.forEach {
-            if (allCollapsed) expandSemester(it) else collapseSemester(it)
-        }
-    }
-
-    fun addSemester(semesterId: Int? = null, courses: List<Course> = emptyList()) {
-        val newSemesterId = semesterId ?: semesterToCourses.keys.maxOrNull()?.plus(1) ?: 1
-        semesterToCourses[newSemesterId] = courses
-        collapsedSemesters[newSemesterId] = false
-    }
-
-    fun removeSemester(semesterId: Int) {
-        semesterToCourses.remove(semesterId)
-        collapsedSemesters.remove(semesterId)
-    }
-
-    fun editSemester(id: Int, newTitle: String) {
-        val title = newTitle.toIntOrNull() ?: return
-        val isTitleUnique = semesterToCourses[title] == null
-        if (isTitleUnique) {
-            semesterToCourses[title] = semesterToCourses[id] ?: emptyList()
-            removeSemester(id)
-        }
-    }
-
-    fun addCourse(course: Course, semesterId: Int) {
-        if (course.title.isNotBlank()) {
-            semesterToCourses[semesterId] = semesterToCourses[semesterId]
-                ?.plus(course)
-                ?: emptyList()
-        }
-    }
-
-    fun removeCourse(course: Course, semesterId: Int) {
-        semesterToCourses[semesterId] = semesterToCourses[semesterId]
-            ?.minus(course)
-            ?: emptyList()
-    }
-
-    fun replaceCourseAt(index: Int, semesterId: Int, course: Course) {
-        if (course.title.isNotBlank()) {
-            semesterToCourses[semesterId]?.toMutableList()?.let {
-                it[index] = course
-                semesterToCourses[semesterId] = it
-            }
-        }
-    }
 
     fun changeEditMode(edit: Boolean) {
         _state.value = _state.value.copy(data = _state.value.data?.copy(inEditMode = edit))
@@ -189,5 +128,44 @@ class MyStudyPlanViewModel @Inject constructor(
                 }
             }
         }
+    }
+    fun isSemesterCollapsed(semesterId: Int) = studyPlanUtil.isSemesterCollapsed(semesterId)
+
+    fun isAnyCollapsed() = studyPlanUtil.isAnyCollapsed()
+
+    fun collapseSemester(semesterId: Int) {
+        studyPlanUtil.collapseSemester(semesterId)
+    }
+
+    fun expandSemester(semesterID: Int) {
+       studyPlanUtil.expandSemester(semesterID)
+    }
+
+    fun toggleAllSemesters(allCollapsed: Boolean) {
+        studyPlanUtil.flipAllSemesterVisibility(allCollapsed)
+    }
+
+    fun addSemester(semesterId: Int? = null, courses: List<Course> = emptyList()) {
+        studyPlanUtil.addSemester(semesterId, courses)
+    }
+
+    fun removeSemester(semesterId: Int) {
+        studyPlanUtil.removeSemester(semesterId)
+    }
+
+    fun editSemester(id: Int, newTitle: String) {
+        studyPlanUtil.editSemester(id, newTitle)
+    }
+
+    fun addCourse(course: Course, semesterId: Int) {
+        studyPlanUtil.addCourse(course, semesterId)
+    }
+
+    fun removeCourse(course: Course, semesterId: Int) {
+       studyPlanUtil.removeCourse(course, semesterId)
+    }
+
+    fun replaceCourseAt(index: Int, semesterId: Int, course: Course) {
+        studyPlanUtil.replaceCourseAt(index, semesterId, course)
     }
 }

@@ -7,7 +7,8 @@ import com.example.studyplan.CacheUtil
 
 class CacheHelper(private val context: Context): CacheUtil {
 
-    override fun isDataStale(key: String, currentMillis: Long): Boolean {
+    override fun isDataStale(key: String): Boolean {
+        val currentMillis = System.currentTimeMillis()
         val lastFetchTimeMS = PreferenceManager.getDefaultSharedPreferences(context).getLong(key, 0)
         val oneHourMS = 60 * 60 * 1000
         val isOneHourAgo = currentMillis > lastFetchTimeMS + oneHourMS

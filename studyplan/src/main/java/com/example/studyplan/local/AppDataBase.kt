@@ -3,8 +3,6 @@ package com.example.studyplan.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.example.studyplan.local.dao.CourseDao
-import com.example.studyplan.local.dao.SemesterDao
 import com.example.studyplan.local.dao.StudyPlanDao
 import com.example.studyplan.local.entity.*
 
@@ -20,6 +18,4 @@ import com.example.studyplan.local.entity.*
 @TypeConverters(Converters::class)
 abstract class AppDataBase: RoomDatabase() {
     abstract fun studyPlanDao(): StudyPlanDao
-    abstract fun courseDao(): CourseDao
-    abstract fun semesterDao(): SemesterDao
 }

@@ -35,14 +35,14 @@ import com.example.trailz.ui.common.compose.InputFieldFocus
 import com.example.trailz.ui.common.compose.TextButtonV2
 import com.example.trailz.ui.common.studyplan.SemesterList
 import com.example.trailz.ui.studyplan.MyStudyPlanData
-import com.example.trailz.ui.studyplan.MyStudyPlanViewModel
+import com.example.trailz.ui.studyplan.StudyPlanViewModel
 import kotlinx.coroutines.launch
 
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 @Composable
 fun MyStudyPlan(
-    viewModel: MyStudyPlanViewModel,
+    viewModel: StudyPlanViewModel,
     onProfile: () -> Unit,
     navigateUp: () -> Unit
 ) {
@@ -180,7 +180,7 @@ private fun MyStudyPlan(
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 @Composable
-private fun SemesterListEdit(
+fun SemesterListEdit(
     title: String,
     username: String,
     updated: String,

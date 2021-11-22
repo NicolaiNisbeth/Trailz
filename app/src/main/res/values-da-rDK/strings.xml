@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Trailz</string>
-    <string name="title_study_planners">StudiePlaner</string>
+    <string name="title_study_planners">Studieplaner</string>
     <string name="title_favorites">Favoritter</string>
     <string name="title_profile">Profil</string>
     <string name="title_my_study_planner">Min Plan</string>
@@ -67,5 +67,5 @@
     <string name="my_study_plan_course_remove">Slet</string>
     <string name="my_study_plan_dialog_course_name">Kursus navn</string>
     <string name="study_plan_toolbar">Studieplan</string>
-    <string name="study_plans_toolbar_title">Studieplanner</string>
+    <string name="study_plans_toolbar_title">Studieplaner</string>
 </resources>

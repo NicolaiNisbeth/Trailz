@@ -18,7 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class StudyPlanFragment : Fragment() {
 
-    private val viewModel: MyStudyPlanViewModel by viewModels()
+    private val viewModel: StudyPlanViewModel by viewModels()
     lateinit var binding: FragmentStudyPlanBinding
 
     @ExperimentalFoundationApi

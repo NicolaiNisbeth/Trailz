@@ -23,7 +23,7 @@ fun ExpandableCard(
     modifier: Modifier = Modifier,
     isExpanded: Boolean,
     FixedContent: @Composable (arrowRotationDegree: Float) -> Unit,
-    expandableContent: @Composable ()  -> Unit
+    ExpandableContent: @Composable ()  -> Unit
 ) {
     val transition = updateTransition(
         label = "expandTransition",
@@ -53,7 +53,7 @@ fun ExpandableCard(
         Column {
             FixedContent(arrowRotationDegree)
             ExpandableContent(isVisible = isExpanded) {
-                expandableContent()
+                ExpandableContent()
             }
         }
     }

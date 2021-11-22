@@ -6,18 +6,15 @@ import com.example.studyplan.StudyPlanRepositoryImpl
 import com.example.studyplan.local.AppDataBase
 import com.example.studyplan.local.StudyPlanLocalDataSource
 import com.example.studyplan.local.StudyPlanLocalImpl
-import com.example.studyplan.local.dao.CourseDao
-import com.example.studyplan.local.dao.SemesterDao
 import com.example.studyplan.local.dao.StudyPlanDao
 import com.example.studyplan.remote.StudyPlanRemoteDataSource
 import com.example.studyplan.remote.StudyPlanRemoteImpl
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -37,16 +34,16 @@ class StudyPlanModule {
     @ViewModelScoped
     fun provideLocalDataSource(
         studyPlanDao: StudyPlanDao,
-        courseDao: CourseDao,
-        semesterDao: SemesterDao
     ): StudyPlanLocalDataSource {
-        return StudyPlanLocalImpl(studyPlanDao, courseDao, semesterDao)
+        return StudyPlanLocalImpl(studyPlanDao)
     }
 
     @Provides
     @ViewModelScoped
-    fun provideRemoteDataSource(): StudyPlanRemoteDataSource {
-        return StudyPlanRemoteImpl()
+    fun provideRemoteDataSource(
+        firebaseFireStore: FirebaseFirestore
+    ): StudyPlanRemoteDataSource {
+        return StudyPlanRemoteImpl(firebaseFireStore)
     }
 
     @Provides
@@ -54,18 +51,5 @@ class StudyPlanModule {
     fun provideStudyPlanDao(database: AppDataBase): StudyPlanDao {
         return database.studyPlanDao()
     }
-
-    @Provides
-    @ViewModelScoped
-    fun provideCourseDao(database: AppDataBase): CourseDao {
-        return database.courseDao()
-    }
-
-    @Provides
-    @ViewModelScoped
-    fun provideSemesterDao(database: AppDataBase): SemesterDao {
-        return database.semesterDao()
-    }
-
 }
 

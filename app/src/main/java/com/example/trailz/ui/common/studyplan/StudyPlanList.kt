@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Semester
@@ -77,17 +78,20 @@ fun StudyPlanOverView(
             Text(text = title, style = MaterialTheme.typography.button, modifier = paddingModifier)
             Text(text = username, style = MaterialTheme.typography.body2, modifier = paddingModifier)
             Text(text = lastUpdated, style = MaterialTheme.typography.caption, modifier = paddingModifier)
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 FavoriteButton(
                     isChecked = isChecked,
                     colorOnChecked = MaterialTheme.colors.primary,
                     colorUnChecked = MaterialTheme.colors.onBackground,
-                    onClick = {
-                        onUpdateFavorite(id, it, likes)
-                    }
+                    onClick = { onUpdateFavorite(id, it, likes) }
                 )
                 if (semesters.any { it.courses.any { it.title.isNotBlank() } }){
                     IconButton(
+                        modifier = Modifier.testTag("expandButton"),
                         onClick = onExpandClicked,
                         content = {
                             Icon(
@@ -100,16 +104,16 @@ fun StudyPlanOverView(
                 }
             }
         },
-        expandableContent = {
-            Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp)) {
+        ExpandableContent = {
+            Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp).testTag("semesters")) {
                 semesters.forEachIndexed { index, semester ->
                     if (semester.courses.isNotEmpty()){
                         Text(
+                            style = MaterialTheme.typography.button,
                             text = stringResource(
                                 id = R.string.semester_number,
                                 formatArgs = arrayOf(semester.order)
-                            ),
-                            style = MaterialTheme.typography.button
+                            )
                         )
                         for (course in semester.courses) {
                             Text(text = course.title, style = MaterialTheme.typography.overline)

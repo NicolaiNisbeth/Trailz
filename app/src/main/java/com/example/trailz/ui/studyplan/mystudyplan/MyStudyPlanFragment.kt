@@ -1,6 +1,5 @@
 package com.example.trailz.ui.studyplan.mystudyplan
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,17 +12,16 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.trailz.R
 import com.example.trailz.databinding.FragmentMyStudyPlanBinding
-import com.example.trailz.ui.studyplan.MyStudyPlanViewModel
+import com.example.trailz.ui.studyplan.StudyPlanViewModel
 import com.google.android.material.composethemeadapter.MdcTheme
 import dagger.hilt.android.AndroidEntryPoint
-import java.lang.IllegalStateException
 
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 @AndroidEntryPoint
 class MyStudyPlanFragment: Fragment() {
 
-    private val viewModel: MyStudyPlanViewModel by viewModels()
+    private val viewModel: StudyPlanViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

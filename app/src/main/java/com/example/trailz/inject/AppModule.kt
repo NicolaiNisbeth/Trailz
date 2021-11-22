@@ -9,6 +9,7 @@ import com.example.studyplan.local.entity.GsonParser
 import com.example.trailz.TrailzApplication
 import com.example.trailz.cache.CacheHelper
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -52,5 +53,11 @@ class AppModule{
     @Singleton
     fun provideCacheUtil(@ApplicationContext appContext: Context): CacheUtil {
         return CacheHelper(appContext)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseFireStore(): FirebaseFirestore {
+        return FirebaseFirestore.getInstance()
     }
 }
