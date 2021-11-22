@@ -36,9 +36,9 @@ class StudyPlanViewModel @Inject constructor(
     private val sharedPrefs: SharedPrefs,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-    private val studyPlanUtil = StudyPlanUtil(mutableStateMapOf())
     private val ownerId = savedStateHandle.get<String>("ownerId") ?: sharedPrefs.loggedInId
     private val savedStudyPlan = MutableLiveData<StudyPlan>()
+    private val studyPlanUtil = StudyPlanUtil(mutableStateMapOf())
     var semesterToCourses = studyPlanUtil.semesterToCourses
 
     private val _state: MutableStateFlow<DataState<MyStudyPlanData>> = MutableStateFlow(
@@ -112,6 +112,7 @@ class StudyPlanViewModel @Inject constructor(
             username = unsavedStudyPlan?.username ?: "",
             title = unsavedStudyPlan?.title ?: "",
             likes = unsavedStudyPlan?.likes ?: 0,
+            updated = unsavedStudyPlan?.updatedLast ?: "",
             semesters = semesterToCourses.map { Semester(it.key, it.value) }
         )
 

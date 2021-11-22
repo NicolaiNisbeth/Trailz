@@ -7,7 +7,6 @@
 
     <include app:graph="@navigation/study_plan_navigation" />
     <include app:graph="@navigation/profile_navigation" />
-    <include app:graph="@navigation/my_study_plan_navigation" />
 
     <fragment
         android:id="@+id/studyPlansFragment"
@@ -30,8 +29,7 @@
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out"
             app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/fade_out">
-        </action>
+            app:popExitAnim="@anim/fade_out" />
         <action
             android:id="@+id/action_study_plans_to_profile"
             app:destination="@id/profile_navigation"

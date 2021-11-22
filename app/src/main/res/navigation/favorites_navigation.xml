@@ -7,7 +7,6 @@
 
     <include app:graph="@navigation/study_plan_navigation" />
     <include app:graph="@navigation/profile_navigation" />
-    <include app:graph="@navigation/my_study_plan_navigation" />
 
     <fragment
         android:id="@+id/favoritesFragment"
