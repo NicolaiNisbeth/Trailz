@@ -49,7 +49,7 @@
     <string name="profile_settings_cta">Indstillinger</string>
     <string name="profile_review_cta">Bedøm app</string>
     <string name="cta_disable">Ikke tilgængelig endnu...</string>
-    <string name="my_study_plan_saved">Gemt</string>
+    <string name="my_study_plan_saved">Ændringer gemt</string>
     <string name="my_study_plan_saved_fail">Ikke gemt!</string>
     <string name="my_study_plan_title">Min Plan</string>
     <string name="my_study_plan_creator">Af %s</string>

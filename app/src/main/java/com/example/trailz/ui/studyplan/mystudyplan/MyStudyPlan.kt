@@ -144,9 +144,7 @@ private fun MyStudyPlan(
             val elevation = if (MaterialTheme.colors.isLight) 2.dp else 0.dp
             if (it.inEditMode) {
                 Card(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
+                    modifier = Modifier.padding(16.dp),
                     shape = MaterialTheme.shapes.medium.copy(CornerSize(16.dp)),
                     elevation = elevation
                 ) {
@@ -162,7 +160,9 @@ private fun MyStudyPlan(
                         removeSemester = removeSemester,
                         editSemester = editSemester,
                         replaceCourseAt = replaceCourseAt,
-                        addCourse = addCourse
+                        addCourse = addCourse,
+                        expandSemester = expandSemester,
+                        collapsSemester = collapseSemester
                     )
                 }
             } else {
@@ -203,6 +203,8 @@ fun SemesterListEdit(
     editSemester: (Int, String) -> Unit,
     replaceCourseAt: (Int, Int, Course) -> Unit,
     addCourse: (Course, Int) -> Unit,
+    expandSemester: (Int) -> Unit,
+    collapsSemester: (Int) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     var openDialog by rememberSaveable { mutableStateOf(false) }
@@ -215,7 +217,6 @@ fun SemesterListEdit(
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
         state = lazyListState,
         contentPadding = PaddingValues(16.dp),
     ) {
@@ -236,33 +237,38 @@ fun SemesterListEdit(
                     title = "$semesterNum",
                     isCollapsed = isCollapsed,
                     color = MaterialTheme.colors.primary,
-                    isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Clear),
-                    isExpandedIcon = rememberVectorPainter(image = Icons.Default.Clear),
+                    isCollapsedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowDown),
+                    isExpandedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowUp),
                     onRemove = { removeSemester(semesterNum) },
-                    onTitleChange = { editSemester(semesterNum, it) }
+                    onTitleChange = { editSemester(semesterNum, it) },
+                    onToggleSemester = {
+                        if (isCollapsed) expandSemester(semesterNum) else collapsSemester(semesterNum)
+                    }
                 )
             }
-            courses.forEachIndexed { index, course ->
-                item {
-                    CourseItemEdit(
-                        title = course.title,
-                        onRemove = { removeCourse(course, semesterNum) },
-                        onTitleChange = { title ->
-                            replaceCourseAt(index, semesterNum, Course(title))
-                        }
-                    )
+            if (!isCollapsed) {
+                courses.forEachIndexed { index, course ->
+                    item {
+                        CourseItemEdit(
+                            title = course.title,
+                            onRemove = { removeCourse(course, semesterNum) },
+                            onTitleChange = { title ->
+                                replaceCourseAt(index, semesterNum, Course(title))
+                            }
+                        )
+                    }
                 }
-            }
-            item {
-                TextButtonV2(
-                    onClick = { newTitleSemester = semesterNum; openDialog = true },
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Text(
-                        text = stringResource(R.string.my_study_plan_add),
-                        color = MaterialTheme.colors.secondaryVariant,
-                        style = MaterialTheme.typography.caption,
-                    )
+                item {
+                    TextButtonV2(
+                        onClick = { newTitleSemester = semesterNum; openDialog = true },
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        Text(
+                            text = stringResource(R.string.my_study_plan_add),
+                            color = MaterialTheme.colors.secondaryVariant,
+                            style = MaterialTheme.typography.caption,
+                        )
+                    }
                 }
             }
         }
@@ -398,7 +404,8 @@ private fun SemesterItemEdit(
     isExpandedIcon: Painter,
     color: Color,
     onRemove: (String) -> Unit,
-    onTitleChange: (String) -> Unit
+    onTitleChange: (String) -> Unit,
+    onToggleSemester: () -> Unit
 ) {
     var openDialog by rememberSaveable { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
@@ -433,12 +440,26 @@ private fun SemesterItemEdit(
             Icon(
                 contentDescription = null,
                 tint = MaterialTheme.colors.error,
-                painter = if (isCollapsed) isCollapsedIcon else isExpandedIcon,
+                painter = rememberVectorPainter(image = Icons.Default.Clear),
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .background(MaterialTheme.colors.surface)
             )
         }
+        IconButton(
+            onClick = onToggleSemester,
+            modifier = Modifier.align(Alignment.CenterStart)
+        ) {
+            Icon(
+                contentDescription = null,
+                tint = color,
+                painter = if (isCollapsed) isCollapsedIcon else isExpandedIcon,
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .background(MaterialTheme.colors.surface)
+            )
+        }
+
 
         if (openDialog) InputFieldDialog(
             title = stringResource(R.string.my_study_plan_dialog_semester_title),

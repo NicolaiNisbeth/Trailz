@@ -12,7 +12,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -33,6 +32,7 @@ fun InputField(
     trailingIcon: Painter? = null,
     imeAction: ImeAction,
     keyboardType: KeyboardType,
+    keyboardCapitalization: KeyboardCapitalization = KeyboardCapitalization.None,
     onTrailingIconClicked: (() -> Unit)? = null,
     visualTransformation: VisualTransformation? = null,
     keyboardActions: KeyboardActions,
@@ -44,7 +44,11 @@ fun InputField(
         placeholder = { if (placeholder != null) Text(text = placeholder) },
         maxLines = maxLines,
         isError = isError,
-        keyboardOptions = KeyboardOptions.Default.copy(imeAction = imeAction, keyboardType = keyboardType),
+        keyboardOptions = KeyboardOptions.Default.copy(
+            imeAction = imeAction,
+            keyboardType = keyboardType,
+            capitalization = keyboardCapitalization
+        ),
         keyboardActions = keyboardActions,
         leadingIcon = {
             leadingIcon?.let {
