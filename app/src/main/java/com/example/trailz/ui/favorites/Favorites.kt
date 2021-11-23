@@ -73,7 +73,7 @@ fun Favorites(
 
         state.data?.let {
             StudyPlanList(
-                studyPlans = it,
+                state = it,
                 onUpdateFavorite = onUpdateFavorite,
                 onStudyPlan = onStudyPlan,
                 onExpandClicked = onExpandClicked
