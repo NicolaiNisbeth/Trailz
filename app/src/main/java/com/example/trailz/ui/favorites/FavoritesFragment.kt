@@ -1,6 +1,5 @@
 package com.example.trailz.ui.favorites
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +15,6 @@ import com.example.trailz.databinding.FragmentFavoritesBinding
 import com.example.trailz.inject.SharedPrefs
 import com.google.android.material.composethemeadapter.MdcTheme
 import dagger.hilt.android.AndroidEntryPoint
-import java.lang.IllegalStateException
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -56,8 +54,12 @@ class FavoritesFragment : Fragment() {
     }
 
     private fun openStudyPlan(ownerId: String){
-        val direction = FavoritesFragmentDirections.actionFavoritesToStudyPlanner(ownerId)
-        findNavController().navigate(direction)
+        if (ownerId == sharedPrefs.loggedInId){
+            findNavController().navigate(R.id.action_favorites_to_my_study_plan)
+        } else {
+            val direction = FavoritesFragmentDirections.actionFavoritesToStudyPlan(ownerId)
+            findNavController().navigate(direction)
+        }
     }
 
     private fun openProfile(){
@@ -65,6 +67,6 @@ class FavoritesFragment : Fragment() {
     }
 
     private fun openStudyPlanners(){
-        findNavController().navigate(R.id.action_favorites_to_study_planners)
+        findNavController().navigate(R.id.action_favorites_to_study_plans)
     }
 }

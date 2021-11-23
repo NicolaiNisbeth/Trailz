@@ -5,6 +5,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -23,10 +24,11 @@ fun InputFieldDialog(
     onConfirm: (String) -> Unit,
     inputField: @Composable (String, (String) -> Unit) -> Unit
 ) {
-    var newTitle by remember { mutableStateOf("") }
+    var newTitle by rememberSaveable { mutableStateOf("") }
 
     val textStyle = MaterialTheme.typography.subtitle1.copy(fontWeight = FontWeight.Bold)
     AlertDialog(
+        modifier = Modifier.wrapContentHeight(unbounded = true),
         onDismissRequest = onDismiss,
         buttons = {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {

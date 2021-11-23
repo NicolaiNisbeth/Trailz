@@ -5,7 +5,7 @@
     app:startDestination="@id/study_plans_navigation">
 
     <include app:graph="@navigation/study_plans_navigation" />
-    <include app:graph="@navigation/favorites_navigation" />
     <include app:graph="@navigation/my_study_plan_navigation" />
+    <include app:graph="@navigation/favorites_navigation" />
 
 </navigation>

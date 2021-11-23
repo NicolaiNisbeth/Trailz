@@ -41,23 +41,22 @@
     <string name="profile_field_email">Email</string>
     <string name="profile_field_password">Password</string>
     <string name="profile_field_degree">Degree</string>
-    <string name="profile_field_about">About</string>
+    <string name="profile_field_about">General</string>
     <string name="profile_theme_light_cta">Apply light theme</string>
     <string name="profile_theme_dark_cta">Apply dark theme</string>
     <string name="profile_logout_cta">Logout</string>
     <string name="profile_settings_cta">Settings</string>
-    <string name="profile_review_cta">Rate our app</string>
+    <string name="profile_review_cta">Rate app</string>
     <string name="cta_disable">Not available yet…</string>
     <string name="my_study_plan_saved">Saved</string>
     <string name="my_study_plan_saved_fail">Failed to save!</string>
     <string name="my_study_plan_title">My Plan</string>
-    <string name="my_study_plan_creator">Created by %s</string>
-    <string name="my_study_plan_updated">Updated %s</string>
+    <string name="my_study_plan_creator">By %s</string>
     <string name="my_study_plan_add">Add</string>
     <string name="my_study_plan_dialog_course_title">What course is this?</string>
     <string name="my_study_plan_dialog_confirm">Confirm</string>
     <string name="my_study_plan_dialog_dismiss">Dismiss</string>
-    <string name="my_study_plan_dialog_plan_title">Study Plan</string>
+    <string name="my_study_plan_dialog_plan_title">What study plan is this?</string>
     <string name="my_study_plan_dialog_plan_confirm">Confirm</string>
     <string name="my_study_plan_dialog_plan_dismiss">Dismiss</string>
     <string name="my_study_plan_dialog_semester_title">What semester is it?</string>
@@ -67,4 +66,5 @@
     <string name="my_study_plan_dialog_course_name">Course name</string>
     <string name="study_plan_toolbar">Study Plan</string>
     <string name="study_plans_toolbar_title">Study plans</string>
+    <string name="study_plan_author_date">%1$s - %2$s</string>
 </resources>

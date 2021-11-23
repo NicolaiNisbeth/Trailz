@@ -6,6 +6,7 @@ import com.example.base.domain.StudyPlan
 import com.example.favorite.FavoriteRepository
 import com.example.studyplan.StudyPlanRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.toCollection
@@ -21,8 +22,8 @@ class GetFavoritesUseCase(
             val favorites = if (favRes is Success) favRes.data.followedUserIds else emptyList()
 
             val studyPlansResult = mutableListOf<Result<StudyPlan>>()
-            favorites.forEach {
-                studyPlanRepository.getStudyPlan(it).toCollection(studyPlansResult)
+            for (favorite in favorites){
+                studyPlanRepository.getStudyPlan(favorite).toCollection(studyPlansResult)
             }
 
             val studyPlans = studyPlansResult.mapNotNull {

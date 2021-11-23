@@ -14,7 +14,7 @@
         tools:layout="@layout/fragment_favorites">
 
         <action
-            android:id="@+id/action_favorites_to_study_planner"
+            android:id="@+id/action_favorites_to_study_plan"
             app:destination="@id/study_plan_navigation"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out"
@@ -28,6 +28,15 @@
         </action>
 
         <action
+            android:id="@+id/action_favorites_to_my_study_plan"
+            app:destination="@id/my_study_plan_navigation"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out">
+        </action>
+
+        <action
             android:id="@+id/action_favorites_to_profile"
             app:destination="@id/profile_navigation"
             app:enterAnim="@anim/slide_in_right"
@@ -36,7 +45,7 @@
             app:popExitAnim="@anim/slide_out_right" />
 
         <action
-            android:id="@+id/action_favorites_to_study_planners"
+            android:id="@+id/action_favorites_to_study_plans"
             app:destination="@id/study_plans_navigation"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out"

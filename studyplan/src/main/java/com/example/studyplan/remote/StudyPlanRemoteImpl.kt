@@ -11,12 +11,14 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.tasks.await
 
-class StudyPlanRemoteImpl: StudyPlanRemoteDataSource {
+class StudyPlanRemoteImpl(
+    firebaseFirestore: FirebaseFirestore
+): StudyPlanRemoteDataSource {
 
     private val TAG = javaClass.name
     private val collectionPath = "/studyplans"
     private val collection by lazy {
-        FirebaseFirestore.getInstance().collection(collectionPath)
+        firebaseFirestore.collection(collectionPath)
     }
 
     @ExperimentalCoroutinesApi

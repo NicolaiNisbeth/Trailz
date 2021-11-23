@@ -19,32 +19,38 @@ class StudyPlanRepositoryImpl(
 ) : StudyPlanRepository {
 
     companion object {
-        const val STUDY_PLAN_CACHE_KEY = "study_play_cache_key"
+        const val STUDY_PLAN_CACHE_KEY = "study_plan_cache_key"
     }
 
     override suspend fun observeStudyPlan(id: String) = flow<Result<StudyPlan>> {
         val plan = localDataSource.getStudyPlan(id)
         if (plan != null) emit(Result.success(plan))
         else emit(Result.failed("Unable to download studyPlan"))
+
         remoteDataSource.observeStudyPlan(id).collect {
             if (it is Result.Success){
                 emit(Result.success(it.data))
-                remoteDataSource.createStudyPlan(it.data).collect()
-                cacheUtil.updateTimer(STUDY_PLAN_CACHE_KEY, System.currentTimeMillis())
+                localDataSource.createStudyPlan(it.data)
             }
         }
     }.flowOn(Dispatchers.Default)
 
     override suspend fun getStudyPlan(id: String) = flow<Result<StudyPlan>> {
-        val studyPlan = localDataSource.getStudyPlan(id)
-        if (studyPlan != null) emit(Result.success(studyPlan))
-        else emit(Result.failed("Unable to download studyPlan"))
-        val res = remoteDataSource.getStudyPlan(id)
-        if (res is Result.Success){
-            emit(Result.success(res.data))
-            remoteDataSource.createStudyPlan(res.data).collect()
-            cacheUtil.updateTimer(STUDY_PLAN_CACHE_KEY, System.currentTimeMillis())
+        val isStale = cacheUtil.isDataStale(STUDY_PLAN_CACHE_KEY)
+        if (isStale){
+            val res = remoteDataSource.getStudyPlan(id)
+            if (res is Result.Success){
+                emit(Result.success(res.data))
+                localDataSource.createStudyPlan(res.data)
+            } else {
+                emit(Result.failed("Unable to download studyPlan"))
+            }
+        } else {
+            localDataSource.getStudyPlan(id)?.let {
+                emit(Result.success(it))
+            } ?: emit(Result.failed("Unable find studyPlan"))
         }
+
     }.flowOn(Dispatchers.Default)
 
     override suspend fun getStudyPlans() = flow<Result<List<StudyPlan>>> {
@@ -68,17 +74,18 @@ class StudyPlanRepositoryImpl(
     }
 
     override suspend fun refreshStudyPlansIfStale(isForced: Boolean) = flow<Result<List<StudyPlan>>> {
-        val isStale = cacheUtil.isDataStale(STUDY_PLAN_CACHE_KEY, System.currentTimeMillis())
+        val isStale = cacheUtil.isDataStale(STUDY_PLAN_CACHE_KEY)
         if (isForced || isStale) {
             emit(Result.loading())
             delay(1500) // FIXME: For demonstration purposes
             when (val result = remoteDataSource.getStudyPlans()) {
+                is Result.Loading -> emit(Result.loading())
                 is Result.Failed -> emit(Result.failed(result.message))
                 is Result.Success -> {
                     localDataSource.createStudyPlans(result.data)
+                    cacheUtil.updateTimer(STUDY_PLAN_CACHE_KEY, System.currentTimeMillis())
                     emit(Result.success(result.data))
                 }
-                is Result.Loading -> emit(Result.loading())
             }
         }
     }.flowOn(Dispatchers.Default)

@@ -2,8 +2,6 @@ package com.example.studyplan.local
 
 import com.example.base.domain.Semester
 import com.example.base.domain.StudyPlan
-import com.example.studyplan.local.dao.CourseDao
-import com.example.studyplan.local.dao.SemesterDao
 import com.example.studyplan.local.dao.StudyPlanDao
 import com.example.studyplan.local.entity.*
 import com.example.studyplan.local.mapper.toDomain
@@ -14,8 +12,6 @@ import kotlinx.coroutines.flow.mapNotNull
 
 class StudyPlanLocalImpl(
     private val studyPlanDao: StudyPlanDao,
-    private val courseDao: CourseDao,
-    private val semesterDao: SemesterDao
 ): StudyPlanLocalDataSource {
 
     override suspend fun getStudyPlan(id: String) = studyPlanDao.studyPlan(id)

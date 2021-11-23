@@ -20,11 +20,11 @@ class SigninViewModel @Inject constructor(
 ): ViewModel() {
 
     // FIXME: hardcoded email
-    private val _email = MutableLiveData<String>("s175565@win.dtu.dk")
+    private val _email = MutableLiveData<String>()
     val email: LiveData<String> = _email
 
     // FIXME: hardcoded password
-    private val _password = MutableLiveData<String>("nicolai")
+    private val _password = MutableLiveData<String>()
     val password: LiveData<String> = _password
 
     private val _loading = MutableLiveData<Boolean>()

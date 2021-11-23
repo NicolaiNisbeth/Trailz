@@ -1,18 +1,14 @@
 package com.example.trailz.ui.studyplan
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
@@ -24,7 +20,7 @@ import com.example.trailz.ui.common.studyplan.SemesterList
 @ExperimentalFoundationApi
 @Composable
 fun StudyPlan(
-    viewModel: MyStudyPlanViewModel,
+    viewModel: StudyPlanViewModel,
     onProfile: () -> Unit,
     navigateUp: () -> Unit
 ) {
@@ -77,7 +73,7 @@ private fun StudyPlan(
                     modifier = Modifier.padding(vertical = 12.dp, horizontal = 6.dp),
                     title = it.title,
                     username = stringResource(R.string.my_study_plan_creator, formatArgs = arrayOf(it.username)),
-                    updatedLast = stringResource(R.string.my_study_plan_updated, formatArgs = arrayOf(it.updatedLast)),
+                    updatedLast = it.updatedLast,
                     semesterToCourses = semesterToCourses,
                     isSemesterCollapsed = isSemesterCollapsed,
                     expandSemester = expandSemester,

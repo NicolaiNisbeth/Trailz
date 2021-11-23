@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.base.Result
 import com.example.base.domain.User
 import com.example.trailz.inject.SharedPrefs
+import com.example.trailz.ui.common.compose.invalidInput
 import com.example.user.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
@@ -73,12 +74,8 @@ class SignupViewModel @Inject constructor(
         val email = email.value
         val password = password.value
         val studyPath = studyPath.value
-        val isInputInvalid = username.isNullOrBlank()
-                || email.isNullOrBlank()
-                || password.isNullOrBlank()
-                || studyPath.isNullOrBlank()
 
-        if (isInputInvalid){
+        if (invalidInput(username, email, password, studyPath)){
             _error.value = true
             return
         }
