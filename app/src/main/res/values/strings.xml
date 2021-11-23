@@ -48,7 +48,7 @@
     <string name="profile_settings_cta">Settings</string>
     <string name="profile_review_cta">Rate app</string>
     <string name="cta_disable">Not available yet…</string>
-    <string name="my_study_plan_saved">Saved</string>
+    <string name="my_study_plan_saved">Changes saved</string>
     <string name="my_study_plan_saved_fail">Failed to save!</string>
     <string name="my_study_plan_title">My Plan</string>
     <string name="my_study_plan_creator">By %s</string>

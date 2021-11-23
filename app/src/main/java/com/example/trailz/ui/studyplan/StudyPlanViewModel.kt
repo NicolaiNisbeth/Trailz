@@ -120,7 +120,8 @@ class StudyPlanViewModel @Inject constructor(
             viewModelScope.launch {
                 studyPlanRepository.createMyStudyPlan(studyPlan).collect {
                     when (it) {
-                        is Result.Loading -> _state.value = _state.value.copy(isLoading = true)
+                        is Result.Loading -> _state.value =
+                            _state.value.copy(isLoading = true)
                         is Result.Failed -> _state.value =
                             _state.value.copy(data = _state.value.data?.copy(isUpdated = Event(false)))
                         is Result.Success -> _state.value =

@@ -110,15 +110,16 @@ fun Profile(
             )
         }
     ) { paddingValues ->
-
         ModalBottomSheetLayout(
             modifier = Modifier.padding(paddingValues),
             sheetState = modalBottomSheetState,
             sheetContent = {
                 LanguageView(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                     onChangeLanguage = onChangeLanguage,
-                    appliedCountry = appliedCountry
+                    appliedCountry = appliedCountry,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp)
                 )
             }
         ) {
@@ -198,187 +199,178 @@ fun LoggedInView(
     toggleTheme: (Boolean) -> Unit
 ) {
     Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
-
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 20.dp, horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(R.string.profile_title, formatArgs = arrayOf(user.username)),
-                style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
-                textAlign = TextAlign.Center
-            )
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "$likes",
-                    style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = stringResource(R.string.user_likes),
-                    style = MaterialTheme.typography.subtitle2,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
-        Text(
-            text = stringResource(R.string.title_profile),
-            style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(start = 16.dp),
-            textAlign = TextAlign.Center
+        Header(
+            username = user.username,
+            likes = likes
         )
 
+        ProfileSection(
+            email = user.email,
+            degree = user.degree
+        )
+
+        GeneralSection(
+            rateApp = rateApp,
+            settings = settings,
+            isDarkTheme = isDarkTheme,
+            toggleTheme = toggleTheme,
+            logout = logout
+        )
+    }
+}
+
+@Composable
+private fun Header(
+    username: String,
+    likes: Long
+) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 20.dp, horizontal = 16.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.profile_title, formatArgs = arrayOf(username)),
+            style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
+            textAlign = TextAlign.Center
+        )
         Column(
-            Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colors.surface)
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+            Text(
+                text = "$likes",
+                style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = stringResource(R.string.user_likes),
+                style = MaterialTheme.typography.subtitle2,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProfileSection(
+    email: String,
+    degree: String
+) {
+    Text(
+        text = stringResource(R.string.title_profile),
+        style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
+        modifier = Modifier.padding(start = 16.dp),
+        textAlign = TextAlign.Center
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colors.surface)
+    ) {
+        RowItem(
+            startTitle = stringResource(R.string.profile_field_email),
+            endContent = {
                 Text(
-                    text = stringResource(R.string.profile_field_email),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = user.email,
+                    text = email,
                     color = MaterialTheme.colors.primary,
                     textAlign = TextAlign.Center
                 )
             }
-
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+        )
+        RowItem(
+            startTitle = stringResource(R.string.profile_field_password),
+            endContent = {
                 Text(
-                    text = stringResource(R.string.profile_field_password),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "****",
+                    text = "*****",
                     color = MaterialTheme.colors.primary,
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.h5
                 )
             }
-
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+        )
+        RowItem(
+            startTitle = stringResource(R.string.profile_field_degree),
+            endContent = {
                 Text(
-                    text = stringResource(R.string.profile_field_degree),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = user.degree,
+                    text = degree,
                     color = MaterialTheme.colors.primary,
                     textAlign = TextAlign.Center
                 )
             }
-        }
-
-        Text(
-            text = stringResource(R.string.profile_field_about),
-            style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(start = 16.dp),
-            textAlign = TextAlign.Center
         )
-
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colors.surface)
-        ) {
-            RateAppView(
-                modifier = Modifier.fillMaxWidth(),
-                onRateApp = rateApp,
-            )
-            SettingsView(
-                modifier = Modifier.fillMaxWidth(),
-                onSettings = settings,
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = if (isDarkTheme) stringResource(R.string.profile_theme_light_cta) else stringResource(
-                        R.string.profile_theme_dark_cta
-                    )
-                )
-                Switch(isDarkTheme, toggleTheme)
-            }
-        }
-
-        Text(
-            text = stringResource(R.string.profile_logout_cta),
-            color = MaterialTheme.colors.error,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .padding(16.dp)
-                .clickable { logout() }
-        )
-    }
-}
-
-@Composable
-fun SettingsView(
-    modifier: Modifier = Modifier,
-    onSettings: () -> Unit
-) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .clickable { onSettings() }
-            .padding(16.dp)
-    ) {
-        Text(text = stringResource(R.string.profile_settings_cta))
-        Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null)
     }
 }
 
 @ExperimentalComposeUiApi
 @Composable
-fun RateAppView(
+private fun GeneralSection(
+    rateApp: () -> Unit,
+    settings: () -> Unit,
+    isDarkTheme: Boolean,
+    toggleTheme: (Boolean) -> Unit,
+    logout: () -> Unit
+) {
+    Text(
+        text = stringResource(R.string.profile_field_about),
+        style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
+        modifier = Modifier.padding(start = 16.dp),
+        textAlign = TextAlign.Center
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colors.surface)
+    ) {
+        RowItem(
+            modifier = Modifier.clickable { rateApp() },
+            startTitle = stringResource(R.string.profile_review_cta),
+            endContent = { RatingBar(rating = 4) }
+        )
+        RowItem(
+            modifier = Modifier.clickable { settings() },
+            startTitle = stringResource(R.string.profile_settings_cta),
+            endContent = { Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null) }
+        )
+        RowItem(
+            startTitle = if (isDarkTheme) stringResource(R.string.profile_theme_light_cta) else stringResource(R.string.profile_theme_dark_cta),
+            endContent = { Switch(isDarkTheme, toggleTheme) }
+        )
+    }
+
+    Text(
+        text = stringResource(R.string.profile_logout_cta),
+        color = MaterialTheme.colors.error,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .clickable { logout() }
+            .padding(16.dp)
+    )
+}
+
+@Composable
+private fun RowItem(
     modifier: Modifier = Modifier,
-    onRateApp: () -> Unit
+    startTitle: String,
+    endContent: @Composable RowScope.() -> Unit
 ) {
     Row(
-        modifier = modifier
-            .clickable { onRateApp() }
-            .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp)
     ) {
-        Text(text = stringResource(R.string.profile_review_cta))
-        RatingBar(rating = 4)
+        Text(startTitle, textAlign = TextAlign.Center)
+        endContent()
     }
 }

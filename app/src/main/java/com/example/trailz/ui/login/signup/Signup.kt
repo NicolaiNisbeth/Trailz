@@ -23,10 +23,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.trailz.ui.common.compose.InputField
@@ -44,6 +40,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.*
 import com.example.trailz.R
 import com.example.trailz.ui.common.compose.InputFieldFocus
 import com.google.accompanist.pager.PagerState
@@ -170,6 +167,7 @@ internal fun SignUp(
                         imeAction = ImeAction.Next,
                         keyboardType = KeyboardType.Text,
                         leadingIcon = rememberVectorPainter(Icons.Default.Person),
+                        keyboardCapitalization = KeyboardCapitalization.Sentences,
                         keyboardActions = KeyboardActions(onNext = {
                             focusManager.moveFocus(FocusDirection.Down)
                         })

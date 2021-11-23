@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -27,31 +27,31 @@ import com.example.trailz.ui.favorites.StudyPlansUiModel
 @ExperimentalMaterialApi
 @Composable
 fun StudyPlanList(
-    studyPlans: StudyPlansUiModel,
+    state: StudyPlansUiModel,
     onUpdateFavorite: (String, Boolean, Long) -> Unit,
     onStudyPlan: (String) -> Unit,
     onExpandClicked: (String) -> Unit
 ) {
+    val studyPlans = state.studyPlans.sortedBy { it.title }.toList()
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        studyPlans.studyPlans.sortedBy { it.title }.forEach {
-            item {
-                StudyPlanOverView(
-                    id = it.userId,
-                    username = it.username,
-                    title = it.title,
-                    semesters = it.semesters,
-                    likes = it.likes,
-                    lastUpdated = it.updated,
-                    isExpanded = studyPlans.expandedPlans[it.userId] ?: false,
-                    isChecked = it.isFavorite,
-                    onExpandClicked = { onExpandClicked(it.userId) },
-                    onUpdateFavorite = onUpdateFavorite,
-                    onStudyPlan = onStudyPlan
-                )
-            }
+        items(studyPlans.size) { idx ->
+            val studyPlan = studyPlans[idx]
+            StudyPlanOverView(
+                id = studyPlan.userId,
+                username = studyPlan.username,
+                title = studyPlan.title,
+                semesters = studyPlan.semesters,
+                likes = studyPlan.likes,
+                lastUpdated = studyPlan.updated,
+                isExpanded = state.expandedPlans[studyPlan.userId] ?: false,
+                isChecked = studyPlan.isFavorite,
+                onExpandClicked = { onExpandClicked(studyPlan.userId) },
+                onUpdateFavorite = onUpdateFavorite,
+                onStudyPlan = onStudyPlan
+            )
         }
     }
 }
@@ -75,7 +75,7 @@ fun StudyPlanOverView(
     ExpandableCard(
         modifier = modifier.clickable { onStudyPlan(id) },
         isExpanded = isExpanded,
-        FixedContent = { arrowRotationDegree ->
+        fixedContent = { arrowRotationDegree ->
             Metadata(
                 id = id,
                 username = username,
@@ -89,7 +89,7 @@ fun StudyPlanOverView(
                 arrowRotationDegree = arrowRotationDegree
             )
         },
-        ExpandableContent = {
+        expandedContent = {
             StudyPlan(semesters)
         }
     )
@@ -111,7 +111,10 @@ private fun Metadata(
     val paddingModifier = Modifier.padding(horizontal = 12.dp)
     val typography = MaterialTheme.typography
     Text(
-        text = stringResource(id = R.string.user_likes_args, formatArgs = arrayOf(likes)).toUpperCase(),
+        text = stringResource(
+            id = R.string.user_likes_args,
+            formatArgs = arrayOf(likes)
+        ).toUpperCase(),
         style = typography.overline,
         modifier = paddingModifier.padding(top = 16.dp, bottom = 4.dp)
     )
@@ -151,7 +154,7 @@ private fun Metadata(
                 onClick = onExpandClicked,
                 content = {
                     Icon(
-                        Icons.Default.KeyboardArrowUp,
+                        Icons.Default.KeyboardArrowDown,
                         contentDescription = "Expandable Arrow",
                         modifier = Modifier.rotate(arrowRotationDegree),
                     )

@@ -62,6 +62,7 @@ class StudyPlanRepositoryImpl(
         val simpleDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
         val currentDT: String = simpleDateFormat.format(Date())
         val studyPlanDate = studyPlan.copy(updated = currentDT)
+        localDataSource.createStudyPlan(studyPlan)
         remoteDataSource.createStudyPlan(studyPlanDate).collect(::emit)
     }.flowOn(Dispatchers.IO)
 

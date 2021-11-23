@@ -11,10 +11,41 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
- val EXPAND_ANIMATION_DURATION = 200
- val FADE_IN_ANIMATION_DURATION = 200
- val FADE_OUT_ANIMATION_DURATION = 200
- val COLLAPSE_ANIMATION_DURATION = 200
+val EXPAND_ANIMATION_DURATION = 200
+val FADE_IN_ANIMATION_DURATION = 200
+val FADE_OUT_ANIMATION_DURATION = 200
+val COLLAPSE_ANIMATION_DURATION = 200
+
+@SuppressLint("UnusedTransitionTargetStateParameter")
+@ExperimentalAnimationApi
+@Composable
+fun ExpandableContent(
+    isExpanded: Boolean,
+    fixedContent: @Composable (arrowRotationDegree: Float) -> Unit,
+    expandedContent: @Composable ()  -> Unit
+) {
+    val transition = updateTransition(
+        label = "expandTransition",
+        transitionState = remember {
+            MutableTransitionState(isExpanded).apply {
+                targetState = !isExpanded
+            }
+        }
+    )
+
+    val arrowRotationDegree by transition.animateFloat(
+        transitionSpec = { tween(durationMillis = EXPAND_ANIMATION_DURATION) },
+        targetValueByState = { if (isExpanded) 0f else 180f },
+        label = "arrowRotation"
+    )
+
+    Column {
+        fixedContent(arrowRotationDegree)
+        ExpandableContent(isVisible = isExpanded) {
+            expandedContent()
+        }
+    }
+}
 
 @ExperimentalAnimationApi
 @SuppressLint("UnusedTransitionTargetStateParameter")
@@ -22,8 +53,8 @@ import androidx.compose.ui.unit.dp
 fun ExpandableCard(
     modifier: Modifier = Modifier,
     isExpanded: Boolean,
-    FixedContent: @Composable (arrowRotationDegree: Float) -> Unit,
-    ExpandableContent: @Composable ()  -> Unit
+    fixedContent: @Composable (arrowRotationDegree: Float) -> Unit,
+    expandedContent: @Composable ()  -> Unit
 ) {
     val transition = updateTransition(
         label = "expandTransition",
@@ -50,18 +81,21 @@ fun ExpandableCard(
         elevation = cardElevation,
         modifier = modifier.fillMaxWidth()
     ) {
-        Column {
-            FixedContent(arrowRotationDegree)
-            ExpandableContent(isVisible = isExpanded) {
-                ExpandableContent()
+        ExpandableContent(
+            isExpanded = isExpanded,
+            fixedContent = { fixedContent(arrowRotationDegree) },
+            expandedContent = {
+                ExpandableContent(isVisible = isExpanded) {
+                    expandedContent()
+                }
             }
-        }
+        )
     }
 }
 
 @ExperimentalAnimationApi
 @Composable
-fun ExpandableContent(
+private fun ExpandableContent(
     isVisible: Boolean,
     content: @Composable () -> Unit
 ) {

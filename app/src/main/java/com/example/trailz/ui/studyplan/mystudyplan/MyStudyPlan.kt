@@ -1,6 +1,7 @@
 package com.example.trailz.ui.studyplan.mystudyplan
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +20,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -36,14 +38,18 @@ import androidx.constraintlayout.compose.Dimension
 import com.example.base.domain.Course
 import com.example.trailz.R
 import com.example.trailz.ui.common.DataState
+import com.example.trailz.ui.common.compose.ExpandableContent
 import com.example.trailz.ui.common.compose.InputFieldDialog
 import com.example.trailz.ui.common.compose.InputFieldFocus
 import com.example.trailz.ui.common.compose.TextButtonV2
+import com.example.trailz.ui.common.studyplan.CourseItem
+import com.example.trailz.ui.common.studyplan.SemesterItem
 import com.example.trailz.ui.common.studyplan.SemesterList
 import com.example.trailz.ui.studyplan.MyStudyPlanData
 import com.example.trailz.ui.studyplan.StudyPlanViewModel
 import kotlinx.coroutines.launch
 
+@ExperimentalAnimationApi
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 @Composable
@@ -78,6 +84,7 @@ fun MyStudyPlan(
     )
 }
 
+@ExperimentalAnimationApi
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 @Composable
@@ -106,7 +113,8 @@ private fun MyStudyPlan(
     val lazyListState = rememberLazyListState()
 
     state.data?.isUpdated?.contentIfNotHandled()?.let {
-        val msg = if (it) stringResource(R.string.my_study_plan_saved) else stringResource(R.string.my_study_plan_saved_fail)
+        val msg =
+            if (it) stringResource(R.string.my_study_plan_saved) else stringResource(R.string.my_study_plan_saved_fail)
         coroutineScope.launch {
             scaffoldState.snackbarHostState.showSnackbar(msg)
         }
@@ -144,9 +152,7 @@ private fun MyStudyPlan(
             val elevation = if (MaterialTheme.colors.isLight) 2.dp else 0.dp
             if (it.inEditMode) {
                 Card(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
+                    modifier = Modifier.padding(16.dp),
                     shape = MaterialTheme.shapes.medium.copy(CornerSize(16.dp)),
                     elevation = elevation
                 ) {
@@ -162,7 +168,9 @@ private fun MyStudyPlan(
                         removeSemester = removeSemester,
                         editSemester = editSemester,
                         replaceCourseAt = replaceCourseAt,
-                        addCourse = addCourse
+                        addCourse = addCourse,
+                        expandSemester = expandSemester,
+                        collapsSemester = collapseSemester
                     )
                 }
             } else {
@@ -187,6 +195,7 @@ private fun MyStudyPlan(
     }
 }
 
+@ExperimentalAnimationApi
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 @Composable
@@ -203,6 +212,8 @@ fun SemesterListEdit(
     editSemester: (Int, String) -> Unit,
     replaceCourseAt: (Int, Int, Course) -> Unit,
     addCourse: (Course, Int) -> Unit,
+    expandSemester: (Int) -> Unit,
+    collapsSemester: (Int) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     var openDialog by rememberSaveable { mutableStateOf(false) }
@@ -214,8 +225,9 @@ fun SemesterListEdit(
         openDialog = false
     }
 
+    val list = semesterToCourses.toSortedMap().toList()
+
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
         state = lazyListState,
         contentPadding = PaddingValues(16.dp),
     ) {
@@ -229,42 +241,50 @@ fun SemesterListEdit(
             )
         }
 
-        semesterToCourses.toSortedMap().forEach { (semesterNum, courses) ->
-            val isCollapsed = isSemesterCollapsed(semesterNum)
-            item {
-                SemesterItemEdit(
-                    title = "$semesterNum",
-                    isCollapsed = isCollapsed,
-                    color = MaterialTheme.colors.primary,
-                    isCollapsedIcon = rememberVectorPainter(image = Icons.Default.Clear),
-                    isExpandedIcon = rememberVectorPainter(image = Icons.Default.Clear),
-                    onRemove = { removeSemester(semesterNum) },
-                    onTitleChange = { editSemester(semesterNum, it) }
-                )
-            }
-            courses.forEachIndexed { index, course ->
-                item {
-                    CourseItemEdit(
-                        title = course.title,
-                        onRemove = { removeCourse(course, semesterNum) },
-                        onTitleChange = { title ->
-                            replaceCourseAt(index, semesterNum, Course(title))
+        items(list.size) { idx ->
+            val (semester, courses) = list[idx]
+            val isCollapsed = isSemesterCollapsed(semester)
+            ExpandableContent(
+                isExpanded = isCollapsed.not(),
+                fixedContent = { rotationDegree ->
+                    SemesterItemEdit(
+                        title = "$semester",
+                        rotationDegree = rotationDegree,
+                        color = MaterialTheme.colors.primary,
+                        isExpandedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowUp),
+                        onRemove = { removeSemester(semester) },
+                        onTitleChange = { editSemester(semester, it) },
+                        onToggleSemester = {
+                            if (isCollapsed) expandSemester(semester) else collapsSemester(
+                                semester
+                            )
                         }
                     )
+                },
+                expandedContent = {
+                    Column {
+                        courses.forEachIndexed { index, course ->
+                            CourseItemEdit(
+                                title = course.title,
+                                onRemove = { removeCourse(course, semester) },
+                                onTitleChange = { title ->
+                                    replaceCourseAt(index, semester, Course(title))
+                                }
+                            )
+                        }
+                        TextButtonV2(
+                            onClick = { newTitleSemester = semester; openDialog = true },
+                            horizontalArrangement = Arrangement.Start
+                        ) {
+                            Text(
+                                text = stringResource(R.string.my_study_plan_add),
+                                color = MaterialTheme.colors.secondaryVariant,
+                                style = MaterialTheme.typography.caption,
+                            )
+                        }
+                    }
                 }
-            }
-            item {
-                TextButtonV2(
-                    onClick = { newTitleSemester = semesterNum; openDialog = true },
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Text(
-                        text = stringResource(R.string.my_study_plan_add),
-                        color = MaterialTheme.colors.secondaryVariant,
-                        style = MaterialTheme.typography.caption,
-                    )
-                }
-            }
+            )
         }
     }
     if (openDialog) InputFieldDialog(
@@ -317,9 +337,11 @@ private fun HeaderEdit(
     ) {
         Text(updatedLast, style = MaterialTheme.typography.overline)
         Text(
-            modifier = Modifier.padding(vertical = 4.dp).clickable { openDialog = true },
             text = title,
-            style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold)
+            style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier
+                .padding(vertical = 4.dp)
+                .clickable { openDialog = true }
         )
         Text(owner, style = MaterialTheme.typography.caption)
 
@@ -393,12 +415,12 @@ private fun ActionBar(
 private fun SemesterItemEdit(
     modifier: Modifier = Modifier,
     title: String,
-    isCollapsed: Boolean = true,
-    isCollapsedIcon: Painter,
+    rotationDegree: Float,
     isExpandedIcon: Painter,
     color: Color,
     onRemove: (String) -> Unit,
-    onTitleChange: (String) -> Unit
+    onTitleChange: (String) -> Unit,
+    onToggleSemester: () -> Unit
 ) {
     var openDialog by rememberSaveable { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
@@ -409,7 +431,7 @@ private fun SemesterItemEdit(
         openDialog = false
     }
 
-    Box(modifier){
+    Box(modifier) {
         Spacer(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -433,9 +455,23 @@ private fun SemesterItemEdit(
             Icon(
                 contentDescription = null,
                 tint = MaterialTheme.colors.error,
-                painter = if (isCollapsed) isCollapsedIcon else isExpandedIcon,
+                painter = rememberVectorPainter(image = Icons.Default.Clear),
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
+                    .background(MaterialTheme.colors.surface)
+            )
+        }
+        IconButton(
+            onClick = onToggleSemester,
+            modifier = Modifier.align(Alignment.CenterStart)
+        ) {
+            Icon(
+                contentDescription = null,
+                tint = color,
+                painter = isExpandedIcon,
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .rotate(rotationDegree)
                     .background(MaterialTheme.colors.surface)
             )
         }
@@ -486,7 +522,7 @@ private fun CourseItemEdit(
         TextButtonV2(
             onClick = { openDialog = true },
             horizontalArrangement = Arrangement.Start,
-            modifier = Modifier.constrainAs(titleRef){
+            modifier = Modifier.constrainAs(titleRef) {
                 start.linkTo(parent.start)
                 top.linkTo(parent.top)
                 bottom.linkTo(parent.bottom)
@@ -506,7 +542,7 @@ private fun CourseItemEdit(
         TextButtonV2(
             onClick = { onRemove(title) },
             horizontalArrangement = Arrangement.End,
-            modifier = Modifier.constrainAs(removeRef){
+            modifier = Modifier.constrainAs(removeRef) {
                 end.linkTo(parent.end)
                 top.linkTo(parent.top)
                 bottom.linkTo(parent.bottom)

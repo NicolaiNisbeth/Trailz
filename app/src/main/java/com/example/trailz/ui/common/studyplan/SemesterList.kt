@@ -1,10 +1,7 @@
 package com.example.trailz.ui.common.studyplan
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,25 +11,20 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.base.domain.Course
-import com.example.trailz.ui.common.compose.EXPAND_ANIMATION_DURATION
-import com.example.trailz.ui.common.themeColor
+import com.example.trailz.ui.common.compose.ExpandableContent
 
+@ExperimentalAnimationApi
 @ExperimentalFoundationApi
 @Composable
 fun SemesterList(
@@ -45,12 +37,12 @@ fun SemesterList(
     expandSemester: (Int) -> Unit,
     collapseSemester: (Int) -> Unit
 ) {
+    val list = semesterToCourses.toSortedMap().toList()
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-
         item {
             Header(
                 Modifier.fillMaxWidth(),
@@ -59,26 +51,30 @@ fun SemesterList(
                 updatedLast = updatedLast
             )
         }
-
-        semesterToCourses.toSortedMap().forEach { (semester, courses) ->
+        items(list.size) { idx ->
+            val (semester, courses) = list[idx]
             val isCollapsed = isSemesterCollapsed(semester)
-            item {
-                SemesterItem(
-                    title = "$semester",
-                    isCollapsed = isCollapsed,
-                    color = MaterialTheme.colors.primary,
-                    isCollapsedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowDown),
-                    isExpandedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowUp),
-                    onClick = {
-                        if (isCollapsed) expandSemester(semester) else collapseSemester(semester)
+            ExpandableContent(
+                isExpanded = isCollapsed.not(),
+                fixedContent = { rotationDegree ->
+                    SemesterItem(
+                        title = "$semester",
+                        color = MaterialTheme.colors.primary,
+                        isExpandedIcon = rememberVectorPainter(image = Icons.Default.KeyboardArrowUp),
+                        rotationDegree = rotationDegree,
+                        onClick = {
+                            if (isCollapsed) expandSemester(semester) else collapseSemester(semester)
+                        }
+                    )
+                },
+                expandedContent = {
+                    Column {
+                        courses.forEach {
+                            CourseItem(it.title)
+                        }
                     }
-                )
-            }
-            if (!isCollapsed) {
-                courses.forEach {
-                    item { CourseItem(title = it.title) }
                 }
-            }
+            )
         }
     }
 }
@@ -111,9 +107,8 @@ fun Header(
 @Composable
 fun SemesterItem(
     title: String,
-    isCollapsed: Boolean = true,
-    isCollapsedIcon: Painter,
     isExpandedIcon: Painter,
+    rotationDegree: Float,
     color: Color,
     onClick: (String) -> Unit
 ) {
@@ -139,9 +134,10 @@ fun SemesterItem(
         Icon(
             contentDescription = null,
             tint = color,
-            painter = if (isCollapsed) isCollapsedIcon else isExpandedIcon,
+            painter = isExpandedIcon,
             modifier = Modifier
                 .background(MaterialTheme.colors.surface)
+                .rotate(rotationDegree)
                 .align(Alignment.CenterEnd)
         )
     }

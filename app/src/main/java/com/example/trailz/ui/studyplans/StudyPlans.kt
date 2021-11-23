@@ -13,7 +13,6 @@ import androidx.compose.ui.res.stringResource
 import com.example.trailz.R
 import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.studyplan.StudyPlanList
-import com.example.trailz.ui.favorites.LoadingScreen
 import com.example.trailz.ui.favorites.StudyPlansUiModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshState
@@ -70,7 +69,7 @@ private fun StudyPlans(
                 onRefresh = { refreshStudyPlans(true) }
             ) {
                 StudyPlanList(
-                    studyPlans = it,
+                    state = it,
                     onUpdateFavorite = onUpdateFavorite,
                     onStudyPlan = onStudyPlan,
                     onExpandClicked = onExpandClicked

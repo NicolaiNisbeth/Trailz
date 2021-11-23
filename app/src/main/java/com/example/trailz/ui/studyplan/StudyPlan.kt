@@ -1,5 +1,6 @@
 package com.example.trailz.ui.studyplan
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
@@ -16,6 +17,7 @@ import com.example.trailz.R
 import com.example.trailz.ui.common.DataState
 import com.example.trailz.ui.common.studyplan.SemesterList
 
+@ExperimentalAnimationApi
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 @Composable
@@ -39,6 +41,7 @@ fun StudyPlan(
     )
 }
 
+@ExperimentalAnimationApi
 @ExperimentalFoundationApi
 @Composable
 private fun StudyPlan(
