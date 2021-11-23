@@ -199,7 +199,6 @@ fun LoggedInView(
     toggleTheme: (Boolean) -> Unit
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
@@ -208,18 +207,24 @@ fun LoggedInView(
             username = user.username,
             likes = likes
         )
-
         ProfileSection(
             email = user.email,
             degree = user.degree
         )
-
+        Spacer(Modifier.height(16.dp))
         GeneralSection(
             rateApp = rateApp,
             settings = settings,
             isDarkTheme = isDarkTheme,
             toggleTheme = toggleTheme,
-            logout = logout
+        )
+        Text(
+            text = stringResource(R.string.profile_logout_cta),
+            color = MaterialTheme.colors.error,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .clickable { logout() }
+                .padding(16.dp)
         )
     }
 }
@@ -270,7 +275,7 @@ private fun ProfileSection(
         modifier = Modifier.padding(start = 16.dp),
         textAlign = TextAlign.Center
     )
-
+    Spacer(Modifier.height(16.dp))
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -317,7 +322,6 @@ private fun GeneralSection(
     settings: () -> Unit,
     isDarkTheme: Boolean,
     toggleTheme: (Boolean) -> Unit,
-    logout: () -> Unit
 ) {
     Text(
         text = stringResource(R.string.profile_field_about),
@@ -325,7 +329,7 @@ private fun GeneralSection(
         modifier = Modifier.padding(start = 16.dp),
         textAlign = TextAlign.Center
     )
-
+    Spacer(Modifier.height(16.dp))
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -346,15 +350,6 @@ private fun GeneralSection(
             endContent = { Switch(isDarkTheme, toggleTheme) }
         )
     }
-
-    Text(
-        text = stringResource(R.string.profile_logout_cta),
-        color = MaterialTheme.colors.error,
-        textAlign = TextAlign.Center,
-        modifier = Modifier
-            .clickable { logout() }
-            .padding(16.dp)
-    )
 }
 
 @Composable
