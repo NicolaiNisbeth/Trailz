@@ -180,7 +180,6 @@ private fun MyStudyPlan(
                     elevation = elevation
                 ) {
                     SemesterList(
-                        modifier = Modifier.padding(vertical = 12.dp, horizontal = 6.dp),
                         title = it.title,
                         username = stringResource(R.string.my_study_plan_creator, formatArgs = arrayOf(it.username)),
                         updatedLast = it.updatedLast,
