@@ -154,7 +154,7 @@ private fun MyStudyPlan(
                         lazyListState = lazyListState,
                         title = it.title,
                         username = stringResource(R.string.my_study_plan_creator, formatArgs = arrayOf(it.username)),
-                        updated = stringResource(R.string.my_study_plan_updated, formatArgs = arrayOf(it.updatedLast)),
+                        updated = it.updatedLast,
                         editStudyPlanTitle = editStudyPlanTitle,
                         semesterToCourses = semesterToCourses,
                         isSemesterCollapsed = isSemesterCollapsed,
@@ -175,7 +175,7 @@ private fun MyStudyPlan(
                         modifier = Modifier.padding(vertical = 12.dp, horizontal = 6.dp),
                         title = it.title,
                         username = stringResource(R.string.my_study_plan_creator, formatArgs = arrayOf(it.username)),
-                        updatedLast = stringResource(R.string.my_study_plan_creator, formatArgs = arrayOf(it.updatedLast)),
+                        updatedLast = it.updatedLast,
                         semesterToCourses = semesterToCourses,
                         isSemesterCollapsed = isSemesterCollapsed,
                         expandSemester = expandSemester,
@@ -315,14 +315,13 @@ private fun HeaderEdit(
         verticalArrangement = verticalArrangement,
         horizontalAlignment = horizontalAlignment
     ) {
+        Text(updatedLast, style = MaterialTheme.typography.overline)
         Text(
-            modifier = Modifier.clickable { openDialog = true },
+            modifier = Modifier.padding(vertical = 4.dp).clickable { openDialog = true },
             text = title,
             style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold)
         )
-
         Text(owner, style = MaterialTheme.typography.caption)
-        Text(updatedLast, style = MaterialTheme.typography.overline)
 
         if (openDialog) InputFieldDialog(
             title = stringResource(R.string.my_study_plan_dialog_plan_title),

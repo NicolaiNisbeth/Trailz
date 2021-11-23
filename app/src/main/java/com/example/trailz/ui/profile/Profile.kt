@@ -86,7 +86,10 @@ fun Profile(
                 backgroundColor = MaterialTheme.colors.background,
                 navigationIcon = {
                     IconButton(onClick = navigateUp) {
-                        Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = null)
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowLeft,
+                            contentDescription = null
+                        )
                     }
                 },
                 actions = {
@@ -98,7 +101,10 @@ fun Profile(
                             )
                         }
                     }) {
-                        Image(painterResource(id = appliedCountry.flagResource), contentDescription = null)
+                        Image(
+                            painterResource(id = appliedCountry.flagResource),
+                            contentDescription = null
+                        )
                     }
                 }
             )
@@ -110,17 +116,18 @@ fun Profile(
             sheetState = modalBottomSheetState,
             sheetContent = {
                 LanguageView(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp), onChangeLanguage, appliedCountry)
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                    onChangeLanguage = onChangeLanguage,
+                    appliedCountry = appliedCountry
+                )
             }
         ) {
-            if (state.isLoading){
+            if (state.isLoading) {
                 LoadingScreen()
             }
 
             val data = state.data
-            if (data != null){
+            if (data != null) {
                 LoggedInView(
                     user = data.user,
                     likes = data.likes,
@@ -144,7 +151,6 @@ fun LanguageView(
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
             text = stringResource(R.string.language_title),
@@ -159,8 +165,12 @@ fun LanguageView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onChangeLanguage(it.code) }
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                Row(horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Image(painterResource(id = it.flagResource), null)
                     Spacer(Modifier.width(18.dp))
                     Text(it.title, textAlign = TextAlign.Center)
@@ -206,7 +216,10 @@ fun LoggedInView(
                 style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.Center
             )
-            Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
                     text = "$likes",
                     style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
@@ -239,8 +252,15 @@ fun LoggedInView(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = stringResource(R.string.profile_field_email), textAlign = TextAlign.Center)
-                Text(text = user.email, color = MaterialTheme.colors.primary, textAlign = TextAlign.Center)
+                Text(
+                    text = stringResource(R.string.profile_field_email),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = user.email,
+                    color = MaterialTheme.colors.primary,
+                    textAlign = TextAlign.Center
+                )
             }
 
             Row(
@@ -250,8 +270,16 @@ fun LoggedInView(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = stringResource(R.string.profile_field_password), textAlign = TextAlign.Center)
-                Text(text = "****", color = MaterialTheme.colors.primary, textAlign = TextAlign.Center, style = MaterialTheme.typography.h5)
+                Text(
+                    text = stringResource(R.string.profile_field_password),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "****",
+                    color = MaterialTheme.colors.primary,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.h5
+                )
             }
 
             Row(
@@ -261,8 +289,15 @@ fun LoggedInView(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = stringResource(R.string.profile_field_degree), textAlign = TextAlign.Center)
-                Text(text = user.degree, color = MaterialTheme.colors.primary, textAlign = TextAlign.Center)
+                Text(
+                    text = stringResource(R.string.profile_field_degree),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = user.degree,
+                    color = MaterialTheme.colors.primary,
+                    textAlign = TextAlign.Center
+                )
             }
         }
 
@@ -293,7 +328,11 @@ fun LoggedInView(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = if (isDarkTheme) stringResource(R.string.profile_theme_light_cta) else stringResource(R.string.profile_theme_dark_cta))
+                Text(
+                    text = if (isDarkTheme) stringResource(R.string.profile_theme_light_cta) else stringResource(
+                        R.string.profile_theme_dark_cta
+                    )
+                )
                 Switch(isDarkTheme, toggleTheme)
             }
         }

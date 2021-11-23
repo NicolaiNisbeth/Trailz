@@ -8,6 +8,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -35,7 +36,7 @@ fun StudyPlanList(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        studyPlans.studyPlans.forEach {
+        studyPlans.studyPlans.sortedBy { it.title }.forEach {
             item {
                 StudyPlanOverView(
                     id = it.userId,
@@ -70,67 +71,127 @@ fun StudyPlanOverView(
     onExpandClicked: () -> Unit,
     onUpdateFavorite: (String, Boolean, Long) -> Unit,
     onStudyPlan: (String) -> Unit
-){
+) {
     ExpandableCard(
         modifier = modifier.clickable { onStudyPlan(id) },
         isExpanded = isExpanded,
         FixedContent = { arrowRotationDegree ->
-            val paddingModifier = Modifier.padding(horizontal = 12.dp)
-            Text(text = stringResource(id = R.string.user_likes_args, formatArgs = arrayOf(likes)), style = MaterialTheme.typography.overline, modifier = paddingModifier.padding(top = 16.dp))
-            Text(text = title, style = MaterialTheme.typography.button.copy(fontWeight = FontWeight.Bold), modifier = paddingModifier)
-            Text(text = username, style = MaterialTheme.typography.body2, modifier = paddingModifier)
-            Text(text = lastUpdated, style = MaterialTheme.typography.caption, modifier = paddingModifier)
-            Row(
-                Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                FavoriteButton(
-                    isChecked = isChecked,
-                    colorOnChecked = MaterialTheme.colors.primary,
-                    colorUnChecked = MaterialTheme.colors.onBackground,
-                    onClick = { onUpdateFavorite(id, it, likes) }
+            Metadata(
+                id = id,
+                username = username,
+                title = title,
+                likes = likes,
+                lastUpdated = lastUpdated,
+                isChecked = isChecked,
+                onExpandClicked = onExpandClicked,
+                onUpdateFavorite = onUpdateFavorite,
+                anySemesters = semesters.any { it.courses.any { it.title.isNotBlank() } },
+                arrowRotationDegree = arrowRotationDegree
+            )
+        },
+        ExpandableContent = {
+            StudyPlan(semesters)
+        }
+    )
+}
+
+@Composable
+private fun Metadata(
+    id: String,
+    username: String,
+    title: String,
+    likes: Long,
+    lastUpdated: String,
+    isChecked: Boolean,
+    onExpandClicked: () -> Unit,
+    onUpdateFavorite: (String, Boolean, Long) -> Unit,
+    anySemesters: Boolean,
+    arrowRotationDegree: Float
+) {
+    val paddingModifier = Modifier.padding(horizontal = 12.dp)
+    val typography = MaterialTheme.typography
+    Text(
+        text = stringResource(id = R.string.user_likes_args, formatArgs = arrayOf(likes)).toUpperCase(),
+        style = typography.overline,
+        modifier = paddingModifier.padding(top = 16.dp, bottom = 4.dp)
+    )
+    Text(
+        text = title,
+        style = typography.h6.copy(fontWeight = FontWeight.Bold),
+        modifier = paddingModifier.padding(bottom = 4.dp)
+    )
+    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+        Row(paddingModifier) {
+            Text(
+                text = stringResource(
+                    id = R.string.study_plan_author_date,
+                    formatArgs = arrayOf(
+                        username.capitalize(),
+                        lastUpdated
+                    )
+                ),
+                style = typography.body2
+            )
+        }
+    }
+    Row(
+        Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        FavoriteButton(
+            isChecked = isChecked,
+            colorOnChecked = MaterialTheme.colors.primary,
+            colorUnChecked = MaterialTheme.colors.onBackground,
+            onClick = { onUpdateFavorite(id, it, likes) }
+        )
+        if (anySemesters) {
+            IconButton(
+                modifier = Modifier.testTag("expandButton"),
+                onClick = onExpandClicked,
+                content = {
+                    Icon(
+                        Icons.Default.KeyboardArrowUp,
+                        contentDescription = "Expandable Arrow",
+                        modifier = Modifier.rotate(arrowRotationDegree),
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun StudyPlan(
+    semesters: List<Semester>
+) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
+            .testTag("semesters")
+    ) {
+        semesters.forEachIndexed { index, semester ->
+            if (semester.courses.isNotEmpty()) {
+                Text(
+                    style = MaterialTheme.typography.button,
+                    text = stringResource(
+                        id = R.string.semester_number,
+                        formatArgs = arrayOf(semester.order)
+                    )
                 )
-                if (semesters.any { it.courses.any { it.title.isNotBlank() } }){
-                    IconButton(
-                        modifier = Modifier.testTag("expandButton"),
-                        onClick = onExpandClicked,
-                        content = {
-                            Icon(
-                                Icons.Default.KeyboardArrowUp,
-                                contentDescription = "Expandable Arrow",
-                                modifier = Modifier.rotate(arrowRotationDegree),
-                            )
-                        }
+                for (course in semester.courses) {
+                    Text(
+                        text = course.title,
+                        style = MaterialTheme.typography.overline,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
                     )
                 }
             }
-        },
-        ExpandableContent = {
-            Column(Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 12.dp).testTag("semesters")) {
-                semesters.forEachIndexed { index, semester ->
-                    if (semester.courses.isNotEmpty()){
-                        Text(
-                            style = MaterialTheme.typography.button,
-                            text = stringResource(
-                                id = R.string.semester_number,
-                                formatArgs = arrayOf(semester.order)
-                            )
-                        )
-                        for (course in semester.courses) {
-                            Text(
-                                text = course.title,
-                                style = MaterialTheme.typography.overline,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                    if (index != semesters.lastIndex){
-                        Spacer(Modifier.heightIn(4.dp))
-                    }
-                }
+            if (index != semesters.lastIndex) {
+                Spacer(Modifier.heightIn(4.dp))
             }
         }
-    )
+    }
 }

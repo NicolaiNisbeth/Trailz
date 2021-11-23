@@ -97,9 +97,13 @@ fun Header(
         verticalArrangement = verticalArrangement,
         horizontalAlignment = horizontalAlignment
     ) {
-        Text(title, style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold))
-        Text(owner, style = MaterialTheme.typography.caption)
         Text(updatedLast, style = MaterialTheme.typography.overline)
+        Text(
+            title,
+            style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
+        Text(owner, style = MaterialTheme.typography.caption)
     }
 }
 
