@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/onboardingFragment"
-        android:name="com.example.trailz.ui.onboarding.OnboardingActivity"
+        android:name="com.dtu.trailz.ui.onboarding.OnboardingActivity"
         >
     </fragment>
 

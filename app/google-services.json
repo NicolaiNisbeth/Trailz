@@ -1,15 +1,16 @@
 {
   "project_info": {
     "project_number": "967673504406",
+    "firebase_url": "https://trailz-4000f-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "trailz-4000f",
     "storage_bucket": "trailz-4000f.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:967673504406:android:81f659a26ae2929f6a18b7",
+        "mobilesdk_app_id": "1:967673504406:android:b12accbcbff7c9956a18b7",
         "android_client_info": {
-          "package_name": "com.example.trailz"
+          "package_name": "com.dtu.trailz"
         }
       },
       "oauth_client": [

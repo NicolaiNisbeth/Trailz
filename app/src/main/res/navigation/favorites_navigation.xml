@@ -10,7 +10,7 @@
 
     <fragment
         android:id="@+id/favoritesFragment"
-        android:name="com.example.trailz.ui.favorites.FavoritesFragment"
+        android:name="com.dtu.trailz.ui.favorites.FavoritesFragment"
         tools:layout="@layout/fragment_favorites">
 
         <action

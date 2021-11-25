@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/signinFragment"
-        android:name="com.example.trailz.ui.login.signin.SigninFragment">
+        android:name="com.dtu.trailz.ui.login.signin.SigninFragment">
 
         <action
             android:id="@+id/action_signin_to_signup"
@@ -21,7 +21,7 @@
 
     <fragment
         android:id="@+id/signupFragment"
-        android:name="com.example.trailz.ui.login.signup.SignupFragment" />
+        android:name="com.dtu.trailz.ui.login.signup.SignupFragment" />
 
 
 </navigation>

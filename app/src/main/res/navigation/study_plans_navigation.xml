@@ -10,7 +10,7 @@
 
     <fragment
         android:id="@+id/studyPlansFragment"
-        android:name="com.example.trailz.ui.studyplans.StudyPlansFragment"
+        android:name="com.dtu.trailz.ui.studyplans.StudyPlansFragment"
         tools:layout="@layout/fragment_study_plans">
         <action
             android:id="@+id/action_study_plans_to_study_plan"
