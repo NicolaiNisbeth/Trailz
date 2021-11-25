@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -39,7 +40,7 @@ fun StudyPlanList(
     ) {
         items(studyPlans.size) { idx ->
             val studyPlan = studyPlans[idx]
-            StudyPlanOverView(
+            StudyPlanSimple(
                 id = studyPlan.userId,
                 username = studyPlan.username,
                 title = studyPlan.title,
@@ -58,7 +59,7 @@ fun StudyPlanList(
 
 @ExperimentalAnimationApi
 @Composable
-fun StudyPlanOverView(
+fun StudyPlanSimple(
     modifier: Modifier = Modifier,
     id: String,
     username: String,
@@ -154,7 +155,7 @@ private fun Metadata(
                 onClick = onExpandClicked,
                 content = {
                     Icon(
-                        Icons.Default.KeyboardArrowDown,
+                        Icons.Default.KeyboardArrowUp,
                         contentDescription = "Expandable Arrow",
                         modifier = Modifier.rotate(arrowRotationDegree),
                     )

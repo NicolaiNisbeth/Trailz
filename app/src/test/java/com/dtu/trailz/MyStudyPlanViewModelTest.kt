@@ -9,7 +9,7 @@ import org.junit.Assert.*
 class MyStudyPlanViewModelTest {
 
     @Test
-    fun collapsed_to_expanded(){
+    fun expanded_semester_to_collapsed(){
         // GIVEN
         val semesterId = 1
         val studyPlanUtil = StudyPlanUtil(
@@ -25,7 +25,7 @@ class MyStudyPlanViewModelTest {
     }
 
     @Test
-    fun expanded_to_collapsed(){
+    fun collapsed_semester_to_expanded(){
         // GIVEN
         val semesterId = 1
         val studyPlanUtil = StudyPlanUtil(

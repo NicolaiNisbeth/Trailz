@@ -28,7 +28,7 @@
     <string name="sign_up_password">password</string>
     <string name="sign_up_loading">Loading…</string>
     <string name="onboarding_problem_title">Trouble tailoring your study plan?</string>
-    <string name="onboarding_problem_description">It is difficult to know when and what courses to take, in what order to best equip yourself for your dream career.</string>
+    <string name="onboarding_problem_description">It is difficult to know when and which courses to take, in what order to best equip yourself for your dream career.</string>
     <string name="onboarding_opportunity_title">You don\'t tailor alone</string>
     <string name="onboarding_opportunity_description">Browse our study plans and find your favorite, so you no longer are in doubt when it matters.</string>
     <string name="onboarding_solution_title">Lay the foundation today</string>

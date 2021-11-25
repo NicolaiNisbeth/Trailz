@@ -8,7 +8,7 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.dtu.base.domain.Course
 import com.dtu.base.domain.Semester
-import com.dtu.trailz.ui.common.studyplan.StudyPlanOverView
+import com.dtu.trailz.ui.common.studyplan.StudyPlanSimple
 import com.google.android.material.composethemeadapter.MdcTheme
 import org.junit.Rule
 import org.junit.Test
@@ -20,12 +20,12 @@ class StudyPlanOverviewViewTest {
 
     @ExperimentalAnimationApi
     @Test
-    fun semester_invisible_to_visible_on_expanded() {
+    fun invisible_semester_is_visible_when_expanded() {
         // GIVEN
         var isExpanded by mutableStateOf(false)
         composeTestRule.setContent {
             MdcTheme {
-                StudyPlanOverView(
+                StudyPlanSimple(
                     id = "1",
                     username = "nicolai",
                     title = "My favorite studyplan",
@@ -56,7 +56,7 @@ class StudyPlanOverviewViewTest {
         var isExpanded by mutableStateOf(true)
         composeTestRule.setContent {
             MdcTheme {
-                StudyPlanOverView(
+                StudyPlanSimple(
                     id = "1",
                     username = "nicolai",
                     title = "My favorite studyplan",
