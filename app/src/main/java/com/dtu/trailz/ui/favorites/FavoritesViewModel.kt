@@ -29,7 +29,7 @@ class FavoritesViewModel @Inject constructor(
     private val _state = MutableStateFlow<DataState<StudyPlansUiModel>>(
         DataState(isLoading = true)
     )
-    val state: MutableStateFlow<DataState<StudyPlansUiModel>> = _state
+    val state: StateFlow<DataState<StudyPlansUiModel>> = _state
 
     init {
         observeFavorites()
