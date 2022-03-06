@@ -32,8 +32,6 @@ Trailz is a study plan sharing platform where you and countless others can eithe
 
 ### Built With
 
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
 * [Jetpack Compose](https://developer.android.com/jetpack/compose)
 * [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)
 * [Lottie](https://lottiefiles.com/)
